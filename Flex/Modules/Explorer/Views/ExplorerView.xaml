@@ -1,0 +1,30 @@
+﻿<UserControl x:Class="Flex.Modules.Explorer.Views.ExplorerView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Flex.Modules.Explorer.ViewModels"
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="300">
+    <Grid>
+        <ScrollViewer Name="TreeScroller" Grid.Row="0" Margin="0" VerticalScrollBarVisibility="Auto">
+            <TreeView ItemsSource="{Binding ActiveInstances}" Name="ActiveInstances" SelectedItemChanged="ActiveInstancesSelectedChanged" PreviewMouseLeftButtonDown="TreeInstancePreviewMouseLeftButtonDown" 
+                              PreviewMouseMove="TreeInstancePreviewMouseMove" DragEnter="TreeInstancesDragEnter" >
+                <TreeView.ItemContainerStyle>
+                    <Style TargetType="{x:Type TreeViewItem}">
+                        <Setter Property="IsExpanded" Value="True"/>
+                    </Style>
+                </TreeView.ItemContainerStyle>
+                <TreeView.ItemTemplate>
+                    <HierarchicalDataTemplate ItemsSource="{Binding ActiveInstances}">
+                        <StackPanel Background="Transparent" Orientation="Horizontal" AllowDrop="True" Drop="TreeInstancesDrop">
+                            <Image Source="{Binding Icon}" Margin="0 0 5 0" MouseDown="ImageTreeViewMouseDown" />
+                            <TextBox Text="{Binding DisplayName}" Focusable="False" MouseDoubleClick="DisplayNameTreeViewMouseDoubleClick" LostFocus="DisplayNameTreeViewLostFocus" FocusableChanged="DisplayNameTreeViewFocusableChanged" 
+                                             Cursor="Arrow" AllowDrop="True" PreviewKeyDown="DisplayNameTreeViewPreviewKeyDown" Background="Transparent" BorderThickness="0" PreviewDragOver="DisplayNameTreeViewPreviewDragOver"/>
+                        </StackPanel>
+                    </HierarchicalDataTemplate>
+                </TreeView.ItemTemplate>
+            </TreeView>
+        </ScrollViewer>
+    </Grid>
+</UserControl>
