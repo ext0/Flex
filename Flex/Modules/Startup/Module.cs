@@ -48,9 +48,7 @@ namespace Flex.Modules.Startup
             //MainWindow.WindowState = WindowState.Maximized;
             MainWindow.Title = "Flex Development Tool";
 
-            Shell.StatusBar.AddItem("Hello world!", new GridLength(1, GridUnitType.Star));
-            Shell.StatusBar.AddItem("Ln 44", new GridLength(100));
-            Shell.StatusBar.AddItem("Col 79", new GridLength(100));
+            Shell.StatusBar.AddItem("Flex - By Patrick Bell", new GridLength(1, GridUnitType.Star));
 
             Shell.OpenDocument(IoC.Get<SceneViewModel>());
 

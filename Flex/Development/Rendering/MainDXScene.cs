@@ -19,6 +19,8 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using System.Windows.Media.Media3D;
 using System.Windows.Threading;
+using Flex.Development.Physics;
+using Jitter.Collision;
 
 namespace Flex.Development.Rendering
 {
@@ -67,6 +69,8 @@ namespace Flex.Development.Rendering
         private DataContext _context;
         private SceneView _sceneView;
 
+        private PhysicsEngine _physics;
+
         private IOutput _output;
 
         public MainDXScene(DataContext context, SceneView sceneView)
@@ -74,6 +78,7 @@ namespace Flex.Development.Rendering
             //Careful with cross threading!
             _sceneView = sceneView;
             _context = context;
+            _physics = new PhysicsEngine();
             _output = IoC.Get<IOutput>();
 
             _visualInstances = new List<VisualInstance>();
@@ -86,65 +91,71 @@ namespace Flex.Development.Rendering
 
             _modelDecorator = _sceneView.ModelDecorator;
 
-            _viewport.DXSceneInitialized += (sender, e) =>
+            _viewport.DXSceneInitialized += DXSceneInitialized;
+        }
+
+        private void DXSceneInitialized(object sender, EventArgs e)
+        {
+            if (_viewport.DXScene == null)
             {
-                if (_viewport.DXScene == null)
-                {
-                    _output.AppendLine("Failed to initialize DX!");
-                    return;
-                }
+                _output.AppendLine("Failed to initialize DX!");
+                return;
+            }
 
-                _eventManager = new EventManager3D(_viewport.Viewport3D);
-                _eventManager.CustomEventsSourceElement = _sceneView.ViewportBorder;
+            _viewport.DXScene.AfterUpdated += DXSceneAfterUpdated;
 
-                _skyboxEventManager = new EventManager3D(_sceneView.SkyboxViewport);
-                _skyboxEventManager.CustomEventsSourceElement = _sceneView.ViewportBorder;
+            _eventManager = new EventManager3D(_viewport.Viewport3D);
+            _eventManager.CustomEventsSourceElement = _sceneView.ViewportBorder;
 
-                _output.AppendLine("Initializing DXScene!");
+            _skyboxEventManager = new EventManager3D(_sceneView.SkyboxViewport);
+            _skyboxEventManager.CustomEventsSourceElement = _sceneView.ViewportBorder;
 
-                _varianceShadowRenderingProvider = new VarianceShadowRenderingProvider();
-                _varianceShadowRenderingProvider.ShadowMapSize = _shadowMapSize;
-                _varianceShadowRenderingProvider.ShadowDepthBluringSize = _shadowDepthBluringSize;
-                _varianceShadowRenderingProvider.ShadowTreshold = _shadowTreshold;
+            _output.AppendLine("Initializing DXScene!");
 
-                _viewport.DXScene.InitializeShadowRendering(_varianceShadowRenderingProvider);
+            _varianceShadowRenderingProvider = new VarianceShadowRenderingProvider();
+            _varianceShadowRenderingProvider.ShadowMapSize = _shadowMapSize;
+            _varianceShadowRenderingProvider.ShadowDepthBluringSize = _shadowDepthBluringSize;
+            _varianceShadowRenderingProvider.ShadowTreshold = _shadowTreshold;
 
-                _lightsModel3DGroup = new Model3DGroup();
+            _viewport.DXScene.InitializeShadowRendering(_varianceShadowRenderingProvider);
 
-                AmbientLight ambientLight = new AmbientLight(System.Windows.Media.Color.FromRgb(25, 25, 25));
+            _lightsModel3DGroup = new Model3DGroup();
 
-                _lightsModel3DGroup.Children.Add(ambientLight);
+            AmbientLight ambientLight = new AmbientLight(System.Windows.Media.Color.FromRgb(25, 25, 25));
 
-                _modelVisual3D = new ModelVisual3D();
+            _lightsModel3DGroup.Children.Add(ambientLight);
 
-                _modelVisual3D.Content = _lightsModel3DGroup;
+            _modelVisual3D = new ModelVisual3D();
 
-                _viewport.Viewport3D.Children.Add(_modelVisual3D);
+            _modelVisual3D.Content = _lightsModel3DGroup;
 
-                VisualEventSource3D visualEventSource3DSkybox = new VisualEventSource3D(_sceneView.Skybox);
-                visualEventSource3DSkybox.MouseClick += VisualEventSource3D_MouseClick;
+            _viewport.Viewport3D.Children.Add(_modelVisual3D);
 
-                /*
-                _modelDecorator.RootModelVisual3D = _modelVisual3D;
+            VisualEventSource3D visualEventSource3DSkybox = new VisualEventSource3D(_sceneView.Skybox);
+            visualEventSource3DSkybox.MouseClick += VisualEventSource3D_MouseClick;
 
-                _eventManager.RegisterExcludedVisual3D(_modelDecorator);
-                */
+            _rootContainer = _sceneView.SceneObjectsContainer;
 
-                _rootContainer = _sceneView.SceneObjectsContainer;
+            VisualEventSource3D visualEventSource3D = new VisualEventSource3D(_rootContainer);
+            visualEventSource3D.MouseMove += VisualEventSource3DOnMouseMove;
+            visualEventSource3D.MouseEnter += VisualEventSource3D_MouseEnter;
+            visualEventSource3D.MouseLeave += VisualEventSource3DOnMouseLeave;
+            visualEventSource3D.MouseClick += VisualEventSource3D_MouseClick;
 
-                VisualEventSource3D visualEventSource3D = new VisualEventSource3D(_rootContainer);
-                visualEventSource3D.MouseMove += VisualEventSource3DOnMouseMove;
-                visualEventSource3D.MouseEnter += VisualEventSource3D_MouseEnter;
-                visualEventSource3D.MouseLeave += VisualEventSource3DOnMouseLeave;
-                visualEventSource3D.MouseClick += VisualEventSource3D_MouseClick;
+            _eventManager.RegisterEventSource3D(visualEventSource3D);
+            _skyboxEventManager.RegisterEventSource3D(visualEventSource3DSkybox);
 
-                _eventManager.RegisterEventSource3D(visualEventSource3D);
-                _skyboxEventManager.RegisterEventSource3D(visualEventSource3DSkybox);
+            InitializeLights();
 
-                InitializeLights();
+            _output.AppendLine("Successfully initialized DXScene!");
+        }
 
-                _output.AppendLine("Successfully initialized DXScene!");
-            };
+        private void DXSceneAfterUpdated(object sender, UpdateStatusEventArgs e)
+        {
+            if (ActiveScene.Running)
+            {
+                //_physics.Step();
+            }
         }
 
         private void SetupModelMover()
@@ -400,7 +411,10 @@ namespace Flex.Development.Rendering
 
                 part.Material = partInstance.Material;
 
-                _visualInstances.Add(new VisualInstance(part, partInstance));
+                VisualInstance visualInstance = new VisualInstance(part, partInstance);
+                _visualInstances.Add(visualInstance);
+
+                _physics.AddVisualInstance(visualInstance);
 
                 _rootContainer.Children.Add(part);
             }

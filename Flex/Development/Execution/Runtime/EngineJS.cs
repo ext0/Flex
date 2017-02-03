@@ -85,8 +85,7 @@ namespace Flex.Development.Execution.Runtime
                 _engine.Context.DefineVariable("script").Assign(new DynamicJS(script));
                 _engine.Context.DefineVariable("world").Assign(new DynamicJS(ActiveWorld.Active.World));
                 _engine.Context.DefineVariable("sky").Assign(new DynamicJS(ActiveWorld.Active.Sky));
-                _engine.Context.DefineVariable("math").Assign(new DynamicJS(new MathJS()));
-                _engine.Context.DefineVariable("instance").Assign(new DynamicJS(new InstanceJS()));
+                _engine.Context.DefineVariable("Instance").Assign(new DynamicJS(new InstanceJS()));
 
                 _engine.Context.Eval(script.Source);
             }

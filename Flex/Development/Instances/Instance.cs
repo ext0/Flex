@@ -127,7 +127,7 @@ namespace Flex.Development.Instances
             }
 
             Instance parent = instance.Parent;
-            while (parent != null && parent._isRoot)
+            while (parent != null && !parent._isRoot)
             {
                 if (parent.Equals(this))
                 {

@@ -68,6 +68,10 @@
       <HintPath>..\packages\AvalonEdit.5.0.2\lib\Net40\ICSharpCode.AvalonEdit.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="Jitter, Version=0.2.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\JitterPhysics.0.2.0.20\lib\net4\Jitter.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="MahApps.Metro, Version=1.0.0.0, Culture=neutral, PublicKeyToken=f4fb5a3c4d1e5b4f, processorArchitecture=MSIL">
       <HintPath>..\packages\MahApps.Metro.1.0.0.0\lib\net45\MahApps.Metro.dll</HintPath>
       <Private>True</Private>
@@ -156,7 +160,6 @@
     <Compile Include="Development\Execution\Runtime\DynamicJS.cs" />
     <Compile Include="Development\Execution\Runtime\EngineJS.cs" />
     <Compile Include="Development\Execution\Runtime\InstanceJS.cs" />
-    <Compile Include="Development\Execution\Runtime\MathJS.cs" />
     <Compile Include="Development\Instances\Instance.cs" />
     <Compile Include="Development\Instances\Part.cs" />
     <Compile Include="Development\Instances\PositionedInstance.cs" />
@@ -165,6 +168,8 @@
     <Compile Include="Development\Instances\Script.cs" />
     <Compile Include="Development\Instances\Sky.cs" />
     <Compile Include="Development\Instances\World.cs" />
+    <Compile Include="Development\Physics\PhysicsEngine.cs" />
+    <Compile Include="Development\Physics\PhysicsInstance.cs" />
     <Compile Include="Development\Rendering\MainDXScene.cs" />
     <Compile Include="Development\Rendering\PhysicalInstance.cs" />
     <Compile Include="Development\Rendering\VisualInstance.cs" />
