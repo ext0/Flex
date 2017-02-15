@@ -1,4 +1,5 @@
 ﻿using Flex.Development.Instances;
+using Flex.Misc.Utility;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -11,7 +12,7 @@ namespace Flex.Development.Execution.Data
     [Serializable]
     public class ActiveWorld
     {
-        private ObservableCollection<Instance> _instances;
+        private UISafeObservableCollection<Instance> _instances;
 
         private World _world;
 
@@ -26,7 +27,7 @@ namespace Flex.Development.Execution.Data
                 throw new Exception("Multiple active worlds initialized! Only one active world object should exist!");
             }
             _activeWorld = this;
-            _instances = new ObservableCollection<Instance>();
+            _instances = new UISafeObservableCollection<Instance>();
             _world = new World();
             _instances.Add(_world);
             _sky = new Sky();
@@ -41,7 +42,7 @@ namespace Flex.Development.Execution.Data
             }
         }
 
-        public ObservableCollection<Instance> Instances
+        public UISafeObservableCollection<Instance> Children
         {
             get
             {

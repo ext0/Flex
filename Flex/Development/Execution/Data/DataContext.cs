@@ -1,4 +1,5 @@
 ﻿using Flex.Development.Instances;
+using Flex.Misc.Utility;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -45,11 +46,11 @@ namespace Flex.Development.Execution.Data
             }
         }
 
-        public ObservableCollection<Instance> ActiveInstances
+        public IEnumerable<Instance> Children
         {
             get
             {
-                return _activeWorld.Instances;
+                return _activeWorld.Children;
             }
         }
     }

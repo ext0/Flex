@@ -59,14 +59,14 @@ namespace Flex.Development.Execution.Data
                 if (typeof(T).Equals(typeof(Part)))
                 {
                     Part part = new Part(0, 0, 0, 8, 4, 4, Colors.Green);
-                    part.Parent = _context.ActiveWorld.World;
+                    part.parent = _context.ActiveWorld.World;
                     GetSceneViewModel().AddInstance(part);
                     ret = part;
                 }
                 else if (typeof(T).Equals(typeof(Script)))
                 {
                     Script script = new Script();
-                    script.Parent = _context.ActiveWorld.World;
+                    script.parent = _context.ActiveWorld.World;
                     ret = script;
                 }
             }, System.Windows.Threading.DispatcherPriority.Normal, false);
@@ -86,7 +86,7 @@ namespace Flex.Development.Execution.Data
             //Output.Out.AddLine("Saved cached copy of current state: " + _savedState.Length);
             _currentEngine = new EngineJS();
             List<Task> scriptExecution = new List<Task>();
-            foreach (Script script in _context.ActiveWorld.World.GetChildren(true).Where((x) =>
+            foreach (Script script in _context.ActiveWorld.World.getChildren(true).Where((x) =>
             {
                 return x.GetType().Equals(typeof(Script));
             }))
@@ -139,9 +139,9 @@ namespace Flex.Development.Execution.Data
         {
             ObjectSave save = new ObjectSave(old, current, old.GetType());
             save.Reset();
-            foreach (Instance oldChild in old.GetChildren())
+            foreach (Instance oldChild in old.getChildren())
             {
-                foreach (Instance currentChild in current.GetChildren())
+                foreach (Instance currentChild in current.getChildren())
                 {
                     if (oldChild.Equals(currentChild))
                     {

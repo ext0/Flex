@@ -1,5 +1,4 @@
-﻿using Flex.Development.Execution.Runtime.Attributes;
-using Flex.Misc.Tracker;
+﻿using Flex.Misc.Tracker;
 using Flex.Misc.Utility;
 using System;
 using System.Collections.Generic;
@@ -19,7 +18,7 @@ namespace Flex.Development.Instances
         private int _sunLightDistance = 500;
         private bool _sunShadows = false;
 
-        public Sky() : base()
+        internal Sky() : base()
         {
             _displayName = "Sky";
             _icon = "Legacy/weather_cloudy.png";
@@ -28,20 +27,11 @@ namespace Flex.Development.Instances
             _isRoot = true;
         }
 
-        public override IEnumerable<Instance> ActiveInstances
-        {
-            get
-            {
-                return _instances;
-            }
-        }
-
         [Category("Lighting")]
         [DisplayName("Sun Horizontal Angle")]
         [Description("The angle of the directional light from the sun around the X axis")]
         [TrackMember]
-        [DynamicExposedProperty(false, "sunHorizontalAngle")]
-        public int SunHorizontalAngle
+        public int sunHorizontalAngle
         {
             get
             {
@@ -59,8 +49,7 @@ namespace Flex.Development.Instances
         [DisplayName("Sun Vertical Angle")]
         [Description("The angle of the directional light from the sun around the Y axis")]
         [TrackMember]
-        [DynamicExposedProperty(false, "sunVerticalAngle")]
-        public int SunVerticalAngle
+        public int sunVerticalAngle
         {
             get
             {
@@ -78,8 +67,7 @@ namespace Flex.Development.Instances
         [DisplayName("Sun Distance")]
         [Description("The distance of the sun from the origin of the world")]
         [TrackMember]
-        [DynamicExposedProperty(false, "sunDistance")]
-        public int SunDistance
+        public int sunDistance
         {
             get
             {
@@ -97,8 +85,7 @@ namespace Flex.Development.Instances
         [DisplayName("Cast Shadows")]
         [Description("Whether or not to cast shadows from the sun")]
         [TrackMember]
-        [DynamicExposedProperty(false, "castShadows")]
-        public bool CastShadows
+        public bool castShadows
         {
             get
             {
@@ -113,8 +100,7 @@ namespace Flex.Development.Instances
         }
 
         [TrackMember]
-        [DynamicExposedProperty(false, "name")]
-        public override string DisplayName
+        public override string name
         {
             get
             {
@@ -136,8 +122,7 @@ namespace Flex.Development.Instances
             }
         }
 
-        [DynamicExposedProperty(true, "parent")]
-        public override Instance Parent
+        public override Instance parent
         {
             get
             {
@@ -149,7 +134,7 @@ namespace Flex.Development.Instances
             }
         }
 
-        public override IEnumerable<Type> AllowedChildren
+        internal override IEnumerable<Type> AllowedChildren
         {
             get
             {

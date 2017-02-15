@@ -228,7 +228,7 @@ namespace Flex.Development.Rendering
                 _currentTranslateTransform3D.OffsetZ = movement.Z;
                 */
 
-                (_selectedPhysicalInstance.Instance as PositionedInstance).Position.SetTo(newCenterPosition.X, newCenterPosition.Y, newCenterPosition.Z);
+                (_selectedPhysicalInstance.Instance as PositionedInstance).position.setTo(newCenterPosition.X, newCenterPosition.Y, newCenterPosition.Z);
 
                 _modelMover.Position = newCenterPosition;
             };
@@ -367,7 +367,7 @@ namespace Flex.Development.Rendering
                 Part partInstance = instance as Part;
                 BoxVisual3D part = new BoxVisual3D();
 
-                TranslateTransform3D translateTransform = new TranslateTransform3D(partInstance.Position.Vector3D);
+                TranslateTransform3D translateTransform = new TranslateTransform3D(partInstance.position.Vector3D);
                 RotateTransform3D rotateTransform = new RotateTransform3D(new QuaternionRotation3D());
 
                 partInstance.OnChanged += (sender, e) =>
@@ -387,15 +387,15 @@ namespace Flex.Development.Rendering
                         */
                         if (_selectedPhysicalInstance != null)
                         {
-                            _modelMover.Position = partInstance.Position.Point3D;
+                            _modelMover.Position = partInstance.position.Point3D;
                         }
 
-                        System.Windows.Media.Media3D.Quaternion rotation = FlexUtility.FromYawPitchRoll((float)partInstance.Rotation.X, (float)partInstance.Rotation.Y, (float)partInstance.Rotation.Z);
+                        System.Windows.Media.Media3D.Quaternion rotation = FlexUtility.FromYawPitchRoll((float)partInstance.rotation.x, (float)partInstance.rotation.y, (float)partInstance.rotation.z);
 
-                        (part.Transform as Transform3DGroup).Children[1] = new TranslateTransform3D(partInstance.Position.Vector3D);
+                        (part.Transform as Transform3DGroup).Children[1] = new TranslateTransform3D(partInstance.position.Vector3D);
                         (part.Transform as Transform3DGroup).Children[0] = new RotateTransform3D(new QuaternionRotation3D(rotation));
 
-                        part.Size = partInstance.Size.Size3D;
+                        part.Size = partInstance.size.Size3D;
                         part.Material = partInstance.Material;
                     }, DispatcherPriority.Render);
 
@@ -407,7 +407,7 @@ namespace Flex.Development.Rendering
 
                 part.Transform = group;
 
-                part.Size = partInstance.Size.Size3D;
+                part.Size = partInstance.size.Size3D;
 
                 part.Material = partInstance.Material;
 
@@ -447,18 +447,18 @@ namespace Flex.Development.Rendering
         {
             _context.ActiveWorld.Sky.OnChanged += (sender, e) =>
             {
-                _lightHorizontalAngle = _context.ActiveWorld.Sky.SunHorizontalAngle;
-                _lightVerticalAngle = _context.ActiveWorld.Sky.SunVerticalAngle;
-                _lightDistance = _context.ActiveWorld.Sky.SunDistance;
+                _lightHorizontalAngle = _context.ActiveWorld.Sky.sunHorizontalAngle;
+                _lightVerticalAngle = _context.ActiveWorld.Sky.sunVerticalAngle;
+                _lightDistance = _context.ActiveWorld.Sky.sunDistance;
 
                 _directionalLight.Direction = GetSunDirection();
-                _directionalLight.SetDXAttribute(DXAttributeType.IsCastingShadow, _context.ActiveWorld.Sky.CastShadows);
+                _directionalLight.SetDXAttribute(DXAttributeType.IsCastingShadow, _context.ActiveWorld.Sky.castShadows);
             };
 
-            _lightHorizontalAngle = _context.ActiveWorld.Sky.SunHorizontalAngle;
-            _lightVerticalAngle = _context.ActiveWorld.Sky.SunVerticalAngle;
+            _lightHorizontalAngle = _context.ActiveWorld.Sky.sunHorizontalAngle;
+            _lightVerticalAngle = _context.ActiveWorld.Sky.sunVerticalAngle;
 
-            _lightDistance = _context.ActiveWorld.Sky.SunDistance;
+            _lightDistance = _context.ActiveWorld.Sky.sunDistance;
 
             _directionalLight = new DirectionalLight();
 

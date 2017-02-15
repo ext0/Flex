@@ -48,6 +48,10 @@
       <HintPath>..\packages\Caliburn.Micro.2.0.2\lib\net45\Caliburn.Micro.Platform.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="ClearScript, Version=5.4.7.0, Culture=neutral, PublicKeyToken=935d0c957da47c73, processorArchitecture=MSIL">
+      <HintPath>..\packages\ClearScript.V8.5.4.7\lib\net40\ClearScript.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Gemini, Version=0.6.2.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\GeminiWpf.0.6.2\lib\net45\Gemini.dll</HintPath>
       <Private>True</Private>
@@ -74,10 +78,6 @@
     </Reference>
     <Reference Include="MahApps.Metro, Version=1.0.0.0, Culture=neutral, PublicKeyToken=f4fb5a3c4d1e5b4f, processorArchitecture=MSIL">
       <HintPath>..\packages\MahApps.Metro.1.0.0.0\lib\net45\MahApps.Metro.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="NiL.JS, Version=2.4.1011.0, Culture=neutral, PublicKeyToken=f1426dd7ad77fce3, processorArchitecture=MSIL">
-      <HintPath>..\packages\NiL.JS.2.4.1011.0\lib\net45\NiL.JS.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="SharpDX, Version=3.1.0.0, Culture=neutral, PublicKeyToken=b4dcf0f35e5521f1, processorArchitecture=MSIL" />
@@ -150,16 +150,18 @@
     <Compile Include="Commands\Global\StopSceneCommandHandler.cs" />
     <Compile Include="Commands\Scene\AddScriptCommandDefinition.cs" />
     <Compile Include="Commands\Scene\AddPartCommandDefinition.cs" />
+    <Compile Include="CustomTreeView\ItemMonitor.cs" />
+    <Compile Include="CustomTreeView\RoutedTreeItemEventArgs.cs" />
+    <Compile Include="CustomTreeView\TreeLayout.cs" />
+    <Compile Include="CustomTreeView\TreeUtil.cs" />
+    <Compile Include="CustomTreeView\TreeViewBase.cs" />
+    <Compile Include="CustomTreeView\TreeViewBase.Declarations.cs" />
     <Compile Include="Development\Execution\Data\ActiveScene.cs" />
     <Compile Include="Development\Execution\Data\ActiveWorld.cs" />
     <Compile Include="Development\Execution\Data\DataContext.cs" />
     <Compile Include="Development\Execution\Data\States\ObjectSave.cs" />
-    <Compile Include="Development\Execution\Runtime\Attributes\DynamicExposedClassAttribute.cs" />
-    <Compile Include="Development\Execution\Runtime\Attributes\DynamicExposedMethodAttribute.cs" />
-    <Compile Include="Development\Execution\Runtime\Attributes\DynamicExposedPropertyAttribute.cs" />
-    <Compile Include="Development\Execution\Runtime\DynamicJS.cs" />
     <Compile Include="Development\Execution\Runtime\EngineJS.cs" />
-    <Compile Include="Development\Execution\Runtime\InstanceJS.cs" />
+    <Compile Include="Development\Execution\Runtime\OutputJS.cs" />
     <Compile Include="Development\Instances\Instance.cs" />
     <Compile Include="Development\Instances\Part.cs" />
     <Compile Include="Development\Instances\PositionedInstance.cs" />
@@ -173,6 +175,7 @@
     <Compile Include="Development\Rendering\MainDXScene.cs" />
     <Compile Include="Development\Rendering\PhysicalInstance.cs" />
     <Compile Include="Development\Rendering\VisualInstance.cs" />
+    <Compile Include="Misc\Runtime\InstanceTree.cs" />
     <Compile Include="Misc\Tracker\NotifyPropertyChangedObject.cs" />
     <Compile Include="Misc\Tracker\TrackClassAttribute.cs" />
     <Compile Include="Misc\Tracker\Tracker.cs" />
@@ -186,7 +189,7 @@
       <DependentUpon>ExplorerView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Modules\Explorer\ViewModels\ExplorerViewModel.cs" />
-    <Compile Include="Modules\External\Commands\ViewPropertGridCommandDefinition.cs" />
+    <Compile Include="Modules\External\Commands\ViewPropertyGridCommandDefinition.cs" />
     <Compile Include="Modules\Explorer\Commands\ViewPropertyGridCommandDefinition.cs" />
     <Compile Include="Modules\External\Commands\ViewPropertyGridCommandHandler.cs" />
     <Compile Include="Modules\Explorer\Commands\ViewExplorerCommandHandler.cs" />
@@ -221,6 +224,11 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <None Include="Licenses\ClearScript.main.license" />
+    <None Include="Licenses\v8.main.license" />
+    <None Include="Licenses\v8.strongtalk.license" />
+    <None Include="Licenses\v8.v8.license" />
+    <None Include="Licenses\v8.valgrind.license" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -3420,6 +3428,13 @@ foreach (var item in filesToCleanup)
   <Target Name="CleanReferenceCopyLocalPaths" AfterTargets="AfterBuild;NonWinFodyTarget">
     <CosturaCleanup Config="FodyWeavers.xml" Files="@(ReferenceCopyLocalPaths->'$(OutDir)%(DestinationSubDirectory)%(Filename)%(Extension)')" />
   </Target>
+  <PropertyGroup>
+    <PostBuildEvent>
+if not exist "$(TargetDir)" md "$(TargetDir)"
+xcopy /s /y "$(SolutionDir)packages\ClearScript.V8.5.4.7\tools\native\x86\*.*" "$(TargetDir)"
+if not exist "$(TargetDir)" md "$(TargetDir)"
+xcopy /s /y "$(SolutionDir)packages\ClearScript.V8.5.4.7\tools\native\amd64\*.*" "$(TargetDir)"</PostBuildEvent>
+  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

@@ -1,5 +1,4 @@
-﻿using Flex.Development.Execution.Runtime.Attributes;
-using Flex.Misc.Tracker;
+﻿using Flex.Misc.Tracker;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -10,7 +9,6 @@ using System.Windows.Media.Media3D;
 
 namespace Flex.Development.Instances.Properties
 {
-    [DynamicExposedClass]
     [TrackClass]
     [Serializable]
     public class Vector3Property : NotifyPropertyChangedObject
@@ -19,21 +17,21 @@ namespace Flex.Development.Instances.Properties
         private double _y;
         private double _z;
 
-        public Vector3Property(Size3D size)
+        internal Vector3Property(Size3D size)
         {
             _x = size.X;
             _y = size.Y;
             _z = size.Z;
         }
 
-        public Vector3Property(Point3D point)
+        internal Vector3Property(Point3D point)
         {
             _x = point.X;
             _y = point.Y;
             _z = point.Z;
         }
 
-        public Vector3Property(double x, double y, double z)
+        internal Vector3Property(double x, double y, double z)
         {
             _x = x;
             _y = y;
@@ -43,8 +41,7 @@ namespace Flex.Development.Instances.Properties
         [DisplayName("X")]
         [Description("The X axis value")]
         [TrackMember]
-        [DynamicExposedProperty(true, "x")]
-        public double X
+        public double x
         {
             get
             {
@@ -61,8 +58,7 @@ namespace Flex.Development.Instances.Properties
         [DisplayName("Y")]
         [Description("The Y axis value")]
         [TrackMember]
-        [DynamicExposedProperty(true, "y")]
-        public double Y
+        public double y
         {
             get
             {
@@ -79,8 +75,7 @@ namespace Flex.Development.Instances.Properties
         [DisplayName("Z")]
         [Description("The Z axis value")]
         [TrackMember]
-        [DynamicExposedProperty(true, "z")]
-        public double Z
+        public double z
         {
             get
             {
@@ -95,7 +90,7 @@ namespace Flex.Development.Instances.Properties
         }
 
         [Browsable(false)]
-        public Size3D Size3D
+        internal Size3D Size3D
         {
             get
             {
@@ -104,7 +99,7 @@ namespace Flex.Development.Instances.Properties
         }
 
         [Browsable(false)]
-        public Point3D Point3D
+        internal Point3D Point3D
         {
             get
             {
@@ -113,7 +108,7 @@ namespace Flex.Development.Instances.Properties
         }
 
         [Browsable(false)]
-        public Vector3D Vector3D
+        internal Vector3D Vector3D
         {
             get
             {
@@ -121,10 +116,7 @@ namespace Flex.Development.Instances.Properties
             }
         }
 
-        private delegate void SetToDelegate(double x, double y, double z);
-
-        [DynamicExposedMethod(typeof(SetToDelegate), "setTo")]
-        public void SetTo(double x, double y, double z)
+        public void setTo(double x, double y, double z)
         {
             _x = x;
             _y = y;

@@ -1,5 +1,4 @@
 ﻿using Flex.Development.Execution.Runtime;
-using Flex.Development.Execution.Runtime.Attributes;
 using Flex.Development.Instances.Properties;
 using Flex.Misc.Tracker;
 using Flex.Misc.Utility;
@@ -23,7 +22,7 @@ namespace Flex.Development.Instances
 
         private ColorProperty _color;
 
-        public Part(double posx, double posy, double posz, double sizex, double sizey, double sizez, Color color) : base()
+        internal Part(double posx, double posy, double posz, double sizex, double sizey, double sizez, Color color) : base()
         {
             _position = new Vector3Property(posx, posy, posz);
             _rotation = new Vector3Property(0, 0, 0);
@@ -42,8 +41,7 @@ namespace Flex.Development.Instances
         [Description("The size of this instance")]
         [ExpandableObject]
         [TrackMember]
-        [DynamicExposedProperty(true, "size")]
-        public Vector3Property Size
+        public Vector3Property size
         {
             get
             {
@@ -55,41 +53,31 @@ namespace Flex.Development.Instances
         [DisplayName("Color")]
         [Description("The color of this instance")]
         [TrackMember]
-        [DynamicExposedProperty(true, "color")]
-        public Color Color
+        public Color color
         {
             get
             {
-                return _color.Color;
+                return _color.color;
             }
             set
             {
-                if (_color.Color == value) return;
-                _color.ChangeColor(value);
+                if (_color.color == value) return;
+                _color.changeColor(value);
                 NotifyPropertyChanged("Color");
             }
         }
 
         [Browsable(false)]
-        public Material Material
+        internal Material Material
         {
             get
             {
-                return new DiffuseMaterial(new SolidColorBrush(_color.Color));
-            }
-        }
-
-        public override IEnumerable<Instance> ActiveInstances
-        {
-            get
-            {
-                return _instances;
+                return new DiffuseMaterial(new SolidColorBrush(_color.color));
             }
         }
 
         [TrackMember]
-        [DynamicExposedProperty(false, "name")]
-        public override string DisplayName
+        public override string name
         {
             get
             {
@@ -112,8 +100,7 @@ namespace Flex.Development.Instances
         }
 
         [TrackMember]
-        [DynamicExposedProperty(false, "parent")]
-        public override Instance Parent
+        public override Instance parent
         {
             get
             {
@@ -128,7 +115,7 @@ namespace Flex.Development.Instances
             }
         }
 
-        public override IEnumerable<Type> AllowedChildren
+        internal override IEnumerable<Type> AllowedChildren
         {
             get
             {

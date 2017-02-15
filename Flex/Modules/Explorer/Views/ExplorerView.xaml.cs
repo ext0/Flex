@@ -1,4 +1,6 @@
 ﻿using Caliburn.Micro;
+using Flex.CustomTreeView;
+using Flex.Development.Execution.Data;
 using Flex.Development.Instances;
 using Flex.Misc.Utility;
 using Flex.Modules.ScriptEditor.ViewModels;
@@ -35,24 +37,6 @@ namespace Flex.Modules.Explorer.Views
         {
             InitializeComponent();
             _propertyGrid = IoC.Get<IPropertyGrid>();
-        }
-
-        private void ActiveInstancesSelectedChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
-        {
-            _propertyGrid.SelectedObject = e.NewValue;
-            /*
-            foreach (PropertyItem prop in _propertyGrid)
-            {
-                if (prop.IsExpandable)
-                {
-                    prop.IsExpanded = true;
-                    prop.IsExpandable = false;
-                }
-            }
-            */
-            /*
-            (_propertyGrid.SelectedObject as Instance).OnChanged += Tracker_Changed;
-            */
         }
 
         private void TreeInstancePreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -107,9 +91,9 @@ namespace Flex.Modules.Explorer.Views
                 if (dropTarget == null || dragging == null)
                     return;
 
-                dragging.Parent = dropTarget;
+                dragging.parent = dropTarget;
 
-                ActiveInstances.Items.Refresh();
+                ChildrenElements.Refresh();
             }
         }
 
@@ -180,6 +164,11 @@ namespace Flex.Modules.Explorer.Views
                     shell.OpenDocument(new ScriptViewModel(context as Script));
                 }
             }
+        }
+
+        private void Children_SelectedItemChanged(object sender, RoutedTreeItemEventArgs<Instance> e)
+        {
+            _propertyGrid.SelectedObject = e.NewItem;
         }
     }
 }

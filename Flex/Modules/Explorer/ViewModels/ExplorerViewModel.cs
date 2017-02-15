@@ -1,4 +1,6 @@
 ﻿using Flex.Development.Execution.Data;
+using Flex.Development.Instances;
+using Flex.Misc.Utility;
 using Flex.Modules.Explorer.ViewModels;
 using Flex.Modules.Explorer.Views;
 using Gemini.Framework;
@@ -32,8 +34,19 @@ namespace Flex.Modules.Explorer.ViewModels
 
         protected override void OnViewLoaded(object view)
         {
-            _view =  view as ExplorerView;
+            _view = view as ExplorerView;
             _view.DataContext = ActiveScene.Context;
+
+            //(_view.ActiveInstances.ItemsSource as UISafeObservableCollection<Instance>).ListChanged += ExplorerView_ListChanged;
+        }
+
+        private void ExplorerView_ListChanged(object sender, System.ComponentModel.ListChangedEventArgs e)
+        {
+            /*
+            FlexUtility.RunWindowAction(() =>
+                _view.ActiveInstances.Items.Refresh(), System.Windows.Threading.DispatcherPriority.Normal, true);
+            */
+
         }
 
         public void Update()

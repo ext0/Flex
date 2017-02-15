@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using Gemini.Modules.MainWindow.ViewModels;
+using System.Windows.Controls;
 
 namespace Flex
 {
@@ -14,5 +15,6 @@ namespace Flex
     /// </summary>
     public partial class App : Application
     {
+
     }
 }

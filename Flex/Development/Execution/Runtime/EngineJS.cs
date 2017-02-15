@@ -2,11 +2,11 @@
 using Flex.Development.Execution.Data;
 using Flex.Development.Instances;
 using Gemini.Modules.Output;
-using NiL.JS;
-using NiL.JS.BaseLibrary;
-using NiL.JS.Core;
+using Microsoft.ClearScript;
+using Microsoft.ClearScript.V8;
 using System;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -16,7 +16,7 @@ namespace Flex.Development.Execution.Runtime
 {
     public class EngineJS
     {
-        private Module _engine;
+        private V8ScriptEngine _engine;
 
         private IOutput _output;
 
@@ -25,8 +25,9 @@ namespace Flex.Development.Execution.Runtime
         public EngineJS()
         {
             _output = IoC.Get<IOutput>();
-            _engine = new Module();
+            _engine = new V8ScriptEngine(V8ScriptEngineFlags.None);
             _childrenThreads = new List<CancellationTokenSource>();
+            /*
             _engine.Context.DefineVariable("print").Assign(JSValue.Marshal(new Action<Object>(text =>
             {
                 JSValue val = (JSValue)text;
@@ -76,18 +77,34 @@ namespace Flex.Development.Execution.Runtime
                     thread.Start();
                 }
             })));
+            */
         }
 
         public void Execute(Script script)
         {
             try
             {
+                /*
                 _engine.Context.DefineVariable("script").Assign(new DynamicJS(script));
                 _engine.Context.DefineVariable("world").Assign(new DynamicJS(ActiveWorld.Active.World));
                 _engine.Context.DefineVariable("sky").Assign(new DynamicJS(ActiveWorld.Active.Sky));
                 _engine.Context.DefineVariable("Instance").Assign(new DynamicJS(new InstanceJS()));
+                */
 
-                _engine.Context.Eval(script.Source);
+                _engine.AddHostObject("output", new OutputJS());
+                _engine.AddHostObject("script", script);
+                _engine.AddHostObject("world", ActiveWorld.Active.World);
+                _engine.AddHostObject("sky", ActiveWorld.Active.Sky);
+
+                _engine.AddHostType(HostItemFlags.DirectAccess, typeof(Instance));
+                _engine.AddHostType(HostItemFlags.DirectAccess, typeof(Part));
+                _engine.AddHostType(HostItemFlags.DirectAccess, typeof(Script));
+                _engine.AddHostType(HostItemFlags.DirectAccess, typeof(Sky));
+                _engine.AddHostType(HostItemFlags.DirectAccess, typeof(World));
+
+                V8Script v8Script = _engine.Compile(script.source);
+
+                _engine.Execute(v8Script);
             }
             catch (Exception e)
             {

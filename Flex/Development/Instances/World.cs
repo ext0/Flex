@@ -1,5 +1,4 @@
-﻿using Flex.Development.Execution.Runtime.Attributes;
-using Flex.Misc.Tracker;
+﻿using Flex.Misc.Tracker;
 using Flex.Misc.Utility;
 using System;
 using System.Collections.Generic;
@@ -12,7 +11,7 @@ namespace Flex.Development.Instances
     [Serializable]
     public class World : Instance
     {
-        public World() : base()
+        internal World() : base()
         {
             _displayName = "World";
             _icon = "16/world.png";
@@ -22,17 +21,8 @@ namespace Flex.Development.Instances
             _isRoot = true;
         }
 
-        public override IEnumerable<Instance> ActiveInstances
-        {
-            get
-            {
-                return _instances;
-            }
-        }
-
         [TrackMember]
-        [DynamicExposedProperty(false, "name")]
-        public override string DisplayName
+        public override string name
         {
             get
             {
@@ -54,8 +44,7 @@ namespace Flex.Development.Instances
             }
         }
 
-        [DynamicExposedProperty(true, "parent")]
-        public override Instance Parent
+        public override Instance parent
         {
             get
             {
@@ -67,7 +56,7 @@ namespace Flex.Development.Instances
             }
         }
 
-        public override IEnumerable<Type> AllowedChildren
+        internal override IEnumerable<Type> AllowedChildren
         {
             get
             {

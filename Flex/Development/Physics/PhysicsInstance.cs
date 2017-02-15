@@ -23,12 +23,12 @@ namespace Flex.Development.Physics
             if (_instance is Part)
             {
                 Part part = _instance as Part;
-                _shape = new BoxShape((float)part.Size.X, (float)part.Size.Y, (float)part.Size.Z);
+                _shape = new BoxShape((float)part.size.x, (float)part.size.y, (float)part.size.z);
                 _rigidBody = new RigidBody(_shape);
                 part.OnChanged += (sender, e) =>
                 {
-                    _shape = new BoxShape((float)part.Size.X, (float)part.Size.Y, (float)part.Size.Z);
-                    _rigidBody.Position = new Jitter.LinearMath.JVector((float)part.Position.X, (float)part.Position.Y, (float)part.Position.Z);
+                    _shape = new BoxShape((float)part.size.x, (float)part.size.y, (float)part.size.z);
+                    _rigidBody.Position = new Jitter.LinearMath.JVector((float)part.position.x, (float)part.position.y, (float)part.position.z);
                 };
             }
             else

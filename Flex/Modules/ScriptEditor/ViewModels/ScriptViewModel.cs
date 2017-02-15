@@ -20,7 +20,7 @@ namespace Flex.Modules.ScriptEditor.ViewModels
 
         public ScriptViewModel(Script script)
         {
-            DisplayName = script.DisplayName;
+            DisplayName = script.name;
             _script = script;
         }
 
@@ -40,13 +40,13 @@ namespace Flex.Modules.ScriptEditor.ViewModels
         protected override void OnViewLoaded(object view)
         {
             _scriptView = view as ScriptView;
-            _scriptView.CodeEditor.Text = _script.Source;
+            _scriptView.CodeEditor.Text = _script.source;
             _scriptView.CodeEditor.TextChanged += CodeEditorTextChanged;
         }
 
         private void CodeEditorTextChanged(object sender, EventArgs e)
         {
-            _script.Source = _scriptView.CodeEditor.Text;
+            _script.source = _scriptView.CodeEditor.Text;
         }
     }
 }

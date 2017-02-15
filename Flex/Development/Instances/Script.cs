@@ -1,5 +1,4 @@
-﻿using Flex.Development.Execution.Runtime.Attributes;
-using Flex.Misc.Tracker;
+﻿using Flex.Misc.Tracker;
 using Flex.Misc.Utility;
 using System;
 using System.Collections.Generic;
@@ -16,7 +15,7 @@ namespace Flex.Development.Instances
     {
         private String _source;
 
-        public Script() : base()
+        internal Script() : base()
         {
             _displayName = "Script";
             _icon = "16/script.png";
@@ -24,24 +23,15 @@ namespace Flex.Development.Instances
             _allowedChildren = new List<Type>();
         }
 
-        public void AddInstance(Instance instance)
+        internal void AddInstance(Instance instance)
         {
-            instance.Parent = this;
+            instance.parent = this;
             _instances.Add(instance);
             NotifyPropertyChanged("Instances");
         }
 
-        public override IEnumerable<Instance> ActiveInstances
-        {
-            get
-            {
-                return _instances;
-            }
-        }
-
         [TrackMember]
-        [DynamicExposedProperty(false, "name")]
-        public override string DisplayName
+        public override string name
         {
             get
             {
@@ -56,7 +46,7 @@ namespace Flex.Development.Instances
         }
 
         [Browsable(false)]
-        public String Source
+        public String source
         {
             get
             {
@@ -78,8 +68,7 @@ namespace Flex.Development.Instances
         }
 
         [TrackMember]
-        [DynamicExposedProperty(false, "parent")]
-        public override Instance Parent
+        public override Instance parent
         {
             get
             {
@@ -93,7 +82,7 @@ namespace Flex.Development.Instances
             }
         }
 
-        public override IEnumerable<Type> AllowedChildren
+        internal override IEnumerable<Type> AllowedChildren
         {
             get
             {

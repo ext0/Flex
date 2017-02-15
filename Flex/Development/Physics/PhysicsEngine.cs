@@ -44,7 +44,7 @@ namespace Flex.Development.Physics
             }
             foreach (PhysicsInstance physicsInstance in _physicsInstances)
             {
-                (physicsInstance.Instance as PositionedInstance).Position.SetTo(physicsInstance.Position.X, physicsInstance.Position.Y, physicsInstance.Position.Z);
+                (physicsInstance.Instance as PositionedInstance).position.setTo(physicsInstance.Position.X, physicsInstance.Position.Y, physicsInstance.Position.Z);
             }
         }
     }

@@ -1,5 +1,4 @@
-﻿using Flex.Development.Execution.Runtime.Attributes;
-using Flex.Development.Instances.Properties;
+﻿using Flex.Development.Instances.Properties;
 using Flex.Misc.Tracker;
 using System;
 using System.Collections.Generic;
@@ -17,7 +16,7 @@ namespace Flex.Development.Instances
         protected Vector3Property _position;
         protected Vector3Property _rotation;
 
-        protected PositionedInstance() : base()
+        internal PositionedInstance() : base()
         {
 
         }
@@ -27,8 +26,7 @@ namespace Flex.Development.Instances
         [Description("The 3D coordinates of this instance")]
         [ExpandableObject]
         [TrackMember]
-        [DynamicExposedProperty(true, "position")]
-        public Vector3Property Position
+        public Vector3Property position
         {
             get
             {
@@ -47,8 +45,7 @@ namespace Flex.Development.Instances
         [Description("The rotation of this instance")]
         [ExpandableObject]
         [TrackMember]
-        [DynamicExposedProperty(true, "rotation")]
-        public Vector3Property Rotation
+        public Vector3Property rotation
         {
             get
             {
