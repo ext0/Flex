@@ -21,6 +21,8 @@ using System.Windows.Media.Media3D;
 using System.Windows.Threading;
 using Flex.Development.Physics;
 using Jitter.Collision;
+using Gemini.Modules.PropertyGrid;
+using System.ComponentModel;
 
 namespace Flex.Development.Rendering
 {
@@ -48,8 +50,6 @@ namespace Flex.Development.Rendering
 
         private FirstPersonCamera _camera;
 
-        private ModelDecoratorVisual3D _modelDecorator;
-
         private ModelVisual3D _modelVisual3D;
         private ContainerUIElement3D _rootContainer;
 
@@ -71,6 +71,9 @@ namespace Flex.Development.Rendering
 
         private PhysicsEngine _physics;
 
+        private PolyLineVisual3D _boundingBoxSelected;
+        private PolyLineVisual3D _boundingBoxHover;
+
         private IOutput _output;
 
         public MainDXScene(DataContext context, SceneView sceneView)
@@ -89,7 +92,17 @@ namespace Flex.Development.Rendering
             _shadowDepthBluringSize = 4;
             _shadowTreshold = 0.2f;
 
-            _modelDecorator = _sceneView.ModelDecorator;
+            _boundingBoxSelected = new PolyLineVisual3D();
+            _boundingBoxSelected.LineThickness = 5.0;
+            _boundingBoxSelected.LineColor = System.Windows.Media.Color.FromRgb(0, 0, 255);
+
+            _boundingBoxSelected.Positions = new Point3DCollection();
+
+            _boundingBoxHover = new PolyLineVisual3D();
+            _boundingBoxHover.LineThickness = 5.0;
+            _boundingBoxHover.LineColor = System.Windows.Media.Color.FromArgb(128, 0, 0, 255);
+
+            _boundingBoxHover.Positions = new Point3DCollection();
 
             _viewport.DXSceneInitialized += DXSceneInitialized;
         }
@@ -102,7 +115,7 @@ namespace Flex.Development.Rendering
                 return;
             }
 
-            _viewport.DXScene.AfterUpdated += DXSceneAfterUpdated;
+            //_viewport.DXScene.AfterUpdated += DXSceneAfterUpdated;
 
             _eventManager = new EventManager3D(_viewport.Viewport3D);
             _eventManager.CustomEventsSourceElement = _sceneView.ViewportBorder;
@@ -150,11 +163,11 @@ namespace Flex.Development.Rendering
             _output.AppendLine("Successfully initialized DXScene!");
         }
 
-        private void DXSceneAfterUpdated(object sender, UpdateStatusEventArgs e)
+        public void PhysicsStep()
         {
             if (ActiveScene.Running)
             {
-                //_physics.Step();
+                _physics.Step();
             }
         }
 
@@ -170,8 +183,8 @@ namespace Flex.Development.Rendering
 
             _modelMover.AxisLength = axisLength;
 
-            _modelMover.AxisRadius = axisLength / 30;
-            _modelMover.AxisArrowRadius = _modelMover.AxisRadius * 3;
+            _modelMover.AxisRadius = 0.3;
+            _modelMover.AxisArrowRadius = 0.7;
 
             // Setup event handlers
             _modelMover.ModelMoveStarted += delegate (object o, EventArgs eventArgs)
@@ -241,7 +254,7 @@ namespace Flex.Development.Rendering
             _viewport.Viewport3D.Children.Insert(0, _modelMover);
         }
 
-        private Instance GetInstanceFromVisual(Visual3D visual)
+        private PositionedInstance GetInstanceFromVisual(Visual3D visual)
         {
             foreach (VisualInstance visualInstance in _visualInstances)
             {
@@ -277,7 +290,15 @@ namespace Flex.Development.Rendering
                 {
                     return;
                 }
+                IoC.Get<IPropertyGrid>().SelectedObject = null;
+                if (_selectedPhysicalInstance != null)
+                {
+                    _selectedPhysicalInstance.Instance.PropertyChanged -= SelectPolylineBox;
+                }
                 _selectedPhysicalInstance = null;
+
+                _boundingBoxSelected.Positions.Clear();
+
                 _viewport.Viewport3D.Children.Remove(_modelMover);
                 _modelMover = null;
                 return;
@@ -307,6 +328,8 @@ namespace Flex.Development.Rendering
                     return;
                 }
 
+                IoC.Get<IPropertyGrid>().SelectedObject = _selectedPhysicalInstance.Instance;
+
                 _eventManager.RegisterExcludedVisual3D(_selectedPhysicalInstance.Visual3D);
                 _eventManager.RemoveExcludedVisual3D(_selectedPhysicalInstance.Visual3D);
 
@@ -325,19 +348,79 @@ namespace Flex.Development.Rendering
                     */
                 }, DispatcherPriority.Normal);
 
+                if (_selectedPhysicalInstance != null && _selectedPhysicalInstance.Instance != null)
+                {
+                    _selectedPhysicalInstance.Instance.PropertyChanged += SelectPolylineBox;
+                }
+                PolyLineBoundingBox(_boundingBoxSelected, _selectedPhysicalInstance.Instance.position.Vector3D, _selectedPhysicalInstance.Model3D.Bounds);
                 // Tell ModelDecoratorVisual3D which Model3D to show
-
-                _modelDecorator.TargetModel3D = _selectedPhysicalInstance.Model3D;
-
             }
+        }
+
+        private void SelectPolylineBox(object sender, PropertyChangedEventArgs e)
+        {
+            PolyLineBoundingBox(_boundingBoxSelected, _selectedPhysicalInstance.Instance.position.Vector3D, _selectedPhysicalInstance.Model3D.Bounds);
+        }
+
+        public void PolyLineBoundingBox(PolyLineVisual3D polyLine, Vector3D position, Rect3D bounds)
+        {
+            if (!_rootContainer.Children.Contains(polyLine))
+            {
+                _rootContainer.Children.Add(polyLine);
+            }
+
+            polyLine.Positions.Clear();
+
+            double[] xValues = new double[2];
+            double[] yValues = new double[2];
+            double[] zValues = new double[2];
+
+            xValues[0] = bounds.Location.X + position.X;
+            xValues[1] = bounds.Location.X + bounds.SizeX + position.X;
+
+            yValues[0] = bounds.Location.Y + position.Y;
+            yValues[1] = bounds.Location.Y + bounds.SizeY + position.Y;
+
+            zValues[0] = bounds.Location.Z + position.Z;
+            zValues[1] = bounds.Location.Z + bounds.SizeZ + position.Z;
+
+            polyLine.Positions.Add(new Point3D(xValues[0], yValues[0], zValues[0]));
+            polyLine.Positions.Add(new Point3D(xValues[1], yValues[0], zValues[0]));
+            polyLine.Positions.Add(new Point3D(xValues[1], yValues[0], zValues[1]));
+            polyLine.Positions.Add(new Point3D(xValues[0], yValues[0], zValues[1]));
+            polyLine.Positions.Add(new Point3D(xValues[0], yValues[0], zValues[0]));
+            polyLine.Positions.Add(new Point3D(xValues[0], yValues[1], zValues[0]));
+            polyLine.Positions.Add(new Point3D(xValues[1], yValues[1], zValues[0]));
+            polyLine.Positions.Add(new Point3D(xValues[1], yValues[1], zValues[1]));
+            polyLine.Positions.Add(new Point3D(xValues[0], yValues[1], zValues[1]));
+            polyLine.Positions.Add(new Point3D(xValues[0], yValues[1], zValues[0]));
+            polyLine.Positions.Add(new Point3D(xValues[0], yValues[1], zValues[1]));
+            polyLine.Positions.Add(new Point3D(xValues[0], yValues[0], zValues[1]));
+            polyLine.Positions.Add(new Point3D(xValues[0], yValues[1], zValues[1]));
+            polyLine.Positions.Add(new Point3D(xValues[1], yValues[1], zValues[1]));
+            polyLine.Positions.Add(new Point3D(xValues[1], yValues[0], zValues[1]));
+            polyLine.Positions.Add(new Point3D(xValues[1], yValues[1], zValues[1]));
+            polyLine.Positions.Add(new Point3D(xValues[1], yValues[1], zValues[0]));
+            polyLine.Positions.Add(new Point3D(xValues[1], yValues[0], zValues[0]));
         }
 
         private void VisualEventSource3DOnMouseMove(object sender, Mouse3DEventArgs mouse3DEventArgs)
         {
             Model3D hitModel = mouse3DEventArgs.RayHitResult.ModelHit;
 
-            if (_modelDecorator.TargetModel3D != hitModel /*&& _selectedPhysicalInstance != null && !mouse3DEventArgs.RayHitResult.VisualHit.Equals(_selectedPhysicalInstance.Visual3D) */)
+            if ((_selectedPhysicalInstance == null) || (_selectedPhysicalInstance != null && !mouse3DEventArgs.RayHitResult.VisualHit.Equals(_selectedPhysicalInstance.Visual3D) && mouse3DEventArgs.RayHitResult.VisualHit is BoxVisual3D))
             {
+                PositionedInstance instance = _visualInstances.Where((x) =>
+                {
+                    return x.Visual3D.Equals(mouse3DEventArgs.RayHitResult.VisualHit);
+                }).Select((x) =>
+                {
+                    return x.Instance;
+                }).FirstOrDefault();
+                if (instance != null)
+                {
+                    PolyLineBoundingBox(_boundingBoxHover, instance.position.Vector3D, hitModel.Bounds);
+                }
                 //_modelDecorator.TargetModel3D = hitModel;
             }
         }
@@ -351,13 +434,17 @@ namespace Flex.Development.Rendering
         private void VisualEventSource3DOnMouseLeave(object sender, Mouse3DEventArgs mouse3DEventArgs)
         {
             _sceneView.Cursor = Cursors.Arrow;
-            if (_modelDecorator.TargetModel3D != null && _selectedPhysicalInstance != null && _modelDecorator.TargetModel3D.Equals(_selectedPhysicalInstance.Model3D))
+
+            _boundingBoxHover.Positions.Clear();
+
+            if (_selectedPhysicalInstance != null)
             {
-                //Stop here, because the user is dragging and we'd like them to still see the bounding box
                 return;
             }
-
-            //_modelDecorator.TargetModel3D = null;
+            else
+            {
+                _boundingBoxHover.Positions.Clear();
+            }
         }
 
         public void AddInstance(Instance instance)

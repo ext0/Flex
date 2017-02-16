@@ -21,6 +21,7 @@ namespace Flex.Development.Execution.Data
         private static DataContext _context;
         private static List<CancellationTokenSource> _activeTasks;
         private static EngineJS _currentEngine;
+        private static SceneViewModel _viewModel;
 
         private static byte[] _savedState;
 
@@ -29,15 +30,21 @@ namespace Flex.Development.Execution.Data
             _currentEngine = null;
             _context = new DataContext();
             _activeTasks = new List<CancellationTokenSource>();
+            _viewModel = null;
         }
 
         private static SceneViewModel GetSceneViewModel()
         {
+            if (_viewModel != null)
+            {
+                return _viewModel;
+            }
             foreach (IDocument document in IoC.Get<IShell>().Documents)
             {
                 if (document is SceneViewModel)
                 {
-                    return document as SceneViewModel;
+                    _viewModel = document as SceneViewModel;
+                    return _viewModel;
                 }
             }
             throw new Exception("Could not find SceneViewModel!");
@@ -73,6 +80,24 @@ namespace Flex.Development.Execution.Data
             return ret;
         }
 
+        public static void AddInstance<T>(T built, T parent) where T : Instance
+        {
+            FlexUtility.RunWindowAction(() =>
+            {
+                if (typeof(T).Equals(typeof(Part)))
+                {
+                    Part part = built as Part;
+                    part.parent = parent;
+                    GetSceneViewModel().AddInstance(part);
+                }
+                else if (typeof(T).Equals(typeof(Script)))
+                {
+                    Script script = built as Script;
+                    script.parent = parent;
+                }
+            }, System.Windows.Threading.DispatcherPriority.Normal, false);
+        }
+
         public static bool RemoveInstance(Instance instance)
         {
             return GetSceneViewModel().RemoveInstance(instance);
@@ -106,7 +131,21 @@ namespace Flex.Development.Execution.Data
             {
                 execution.Start();
             }
+            Thread physicsThread = new Thread(PhysicsLoop);
+            physicsThread.Start();
+
             //Output.Out.AddLine("Reloaded cached copy of current state: " + _savedState.Length);
+        }
+
+        public static void PhysicsLoop()
+        {
+            /*
+            while (_context.IsRunning)
+            {
+                GetSceneViewModel().PhysicsStep();
+                Thread.Sleep(60 / 1000);
+            }
+            */
         }
 
         public static void Stop()

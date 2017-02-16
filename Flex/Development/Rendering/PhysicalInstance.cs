@@ -12,7 +12,7 @@ namespace Flex.Development.Rendering
     {
         private Model3D _model;
 
-        public PhysicalInstance(Visual3D visual, Model3D model, Instance instance) : base(visual, instance)
+        public PhysicalInstance(Visual3D visual, Model3D model, PositionedInstance instance) : base(visual, instance)
         {
             _model = model;
         }

@@ -13,7 +13,7 @@
             </ResourceDictionary.MergedDictionaries>
             <DataTemplate x:Key="CategoryTemplate" DataType="{x:Type ui:Instance}">
                 <StackPanel x:Name="GroupPanel" Orientation="Horizontal" Margin="0,2,0,2">
-                    <Image x:Name="Folder" Source="{Binding Path=Icon}" />
+                    <Image x:Name="Folder" Source="{Binding Path=Icon}" MouseDown="Folder_MouseDown"/>
                     <TextBlock x:Name="CategoryName"  Margin="2,0,0,0" Text="{Binding Path=name}" />
                 </StackPanel>
 

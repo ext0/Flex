@@ -11,9 +11,9 @@ namespace Flex.Development.Rendering
     public class VisualInstance
     {
         protected Visual3D _visual;
-        protected Instance _instance;
+        protected PositionedInstance _instance;
 
-        public VisualInstance(Visual3D visual, Instance instance)
+        public VisualInstance(Visual3D visual, PositionedInstance instance)
         {
             _visual = visual;
             _instance = instance;
@@ -27,7 +27,7 @@ namespace Flex.Development.Rendering
             }
         }
 
-        public Instance Instance
+        public PositionedInstance Instance
         {
             get
             {

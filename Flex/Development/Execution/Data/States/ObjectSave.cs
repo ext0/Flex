@@ -33,7 +33,7 @@ namespace Flex.Development.Execution.Data.States
             {
                 foreach (PropertyInfo property in _type.GetProperties(BindingFlags.Public | BindingFlags.Instance))
                 {
-                    System.Diagnostics.Debug.WriteLine(property.Name + " " + property.PropertyType.Name);
+                    //System.Diagnostics.Debug.WriteLine(property.Name + " " + property.PropertyType.Name);
                     if (property.PropertyType.Equals(typeof(UISafeObservableCollection<Instance>))) //For parent checks, special case! We'll assume the parent is Instance here
                     {
                         if (property.CanWrite)
@@ -45,7 +45,7 @@ namespace Flex.Development.Execution.Data.States
 
                                 List<Instance> list = newInstances.Where(x => !oldInstances.Any(y => x.Equals(y))).ToList();
 
-                                System.Diagnostics.Debug.WriteLine("New items = " + list.Count);
+                                //System.Diagnostics.Debug.WriteLine("New items = " + list.Count);
                                 foreach (Instance instance in list)
                                 {
                                     instance.RemoveFromParent();

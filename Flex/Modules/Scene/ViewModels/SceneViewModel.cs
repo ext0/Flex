@@ -159,6 +159,11 @@ namespace Flex.Modules.Scene.ViewModels
             return _scene.RemoveInstance(instance);
         }
 
+        public void PhysicsStep()
+        {
+            _scene.PhysicsStep();
+        }
+
         void ICommandHandler<AddPartCommandDefinition>.Update(Command command)
         {
             command.Enabled = !ActiveScene.Running;

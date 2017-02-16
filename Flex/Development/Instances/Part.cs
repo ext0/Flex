@@ -25,10 +25,29 @@ namespace Flex.Development.Instances
         internal Part(double posx, double posy, double posz, double sizex, double sizey, double sizez, Color color) : base()
         {
             _position = new Vector3Property(posx, posy, posz);
-            _rotation = new Vector3Property(0, 0, 0);
-            _size = new Vector3Property(sizex, sizey, sizez);
-            _color = new ColorProperty(color);
+            _position.PropertyChanged += (sender, e) => NotifyPropertyChanged("Position");
 
+            _rotation = new Vector3Property(0, 0, 0);
+            _rotation.PropertyChanged += (sender, e) => NotifyPropertyChanged("Rotation");
+
+            _size = new Vector3Property(sizex, sizey, sizez);
+            _size.PropertyChanged += (sender, e) => NotifyPropertyChanged("Size");
+
+            _color = new ColorProperty(color);
+            _color.PropertyChanged += (sender, e) => NotifyPropertyChanged("Color");
+
+            _displayName = "Part";
+            _icon = "16/brick.png";
+            _instances = new UISafeObservableCollection<Instance>();
+            _allowedChildren = new List<Type>();
+            _allowedChildren.Add(typeof(Instance));
+
+            _anchored = true;
+            _collisions = true;
+        }
+
+        public Part()
+        {
             _displayName = "Part";
             _icon = "16/brick.png";
             _instances = new UISafeObservableCollection<Instance>();

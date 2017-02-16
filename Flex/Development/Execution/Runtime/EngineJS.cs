@@ -97,6 +97,7 @@ namespace Flex.Development.Execution.Runtime
                 _engine.AddHostObject("sky", ActiveWorld.Active.Sky);
 
                 _engine.AddHostType(HostItemFlags.DirectAccess, typeof(Instance));
+                _engine.AddHostType(HostItemFlags.DirectAccess, typeof(PositionedInstance));
                 _engine.AddHostType(HostItemFlags.DirectAccess, typeof(Part));
                 _engine.AddHostType(HostItemFlags.DirectAccess, typeof(Script));
                 _engine.AddHostType(HostItemFlags.DirectAccess, typeof(Sky));

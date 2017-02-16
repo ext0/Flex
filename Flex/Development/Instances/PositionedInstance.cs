@@ -15,6 +15,8 @@ namespace Flex.Development.Instances
     {
         protected Vector3Property _position;
         protected Vector3Property _rotation;
+        protected bool _collisions;
+        protected bool _anchored;
 
         internal PositionedInstance() : base()
         {
@@ -56,6 +58,43 @@ namespace Flex.Development.Instances
                 if (value == _rotation) return;
                 _rotation = value;
                 NotifyPropertyChanged("Rotation");
+            }
+        }
+
+        [Category("3D")]
+        [DisplayName("Collidable")]
+        [Description("Whether or not this object can be collided with by other objects")]
+        [TrackMember]
+        public bool collidable
+        {
+            get
+            {
+                return _collisions;
+            }
+            set
+            {
+                if (value == _collisions) return;
+                _collisions = value;
+                NotifyPropertyChanged("Collidable");
+            }
+        }
+
+
+        [Category("3D")]
+        [DisplayName("Anchored")]
+        [Description("Whether or not this object is affected by physics")]
+        [TrackMember]
+        public bool anchored
+        {
+            get
+            {
+                return _anchored;
+            }
+            set
+            {
+                if (value == _anchored) return;
+                _anchored = value;
+                NotifyPropertyChanged("Anchored");
             }
         }
     }

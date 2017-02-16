@@ -25,10 +25,12 @@ namespace Flex.Development.Physics
                 Part part = _instance as Part;
                 _shape = new BoxShape((float)part.size.x, (float)part.size.y, (float)part.size.z);
                 _rigidBody = new RigidBody(_shape);
+                _rigidBody.IsActive = !part.anchored;
                 part.OnChanged += (sender, e) =>
                 {
                     _shape = new BoxShape((float)part.size.x, (float)part.size.y, (float)part.size.z);
                     _rigidBody.Position = new Jitter.LinearMath.JVector((float)part.position.x, (float)part.position.y, (float)part.position.z);
+                    _rigidBody.IsActive = !part.anchored;
                 };
             }
             else
