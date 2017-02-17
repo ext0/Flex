@@ -23,6 +23,8 @@ namespace Flex.Development.Execution.Data
         private static EngineJS _currentEngine;
         private static SceneViewModel _viewModel;
 
+        private static List<Instance> _memoryHold;
+
         private static byte[] _savedState;
 
         static ActiveScene()
@@ -30,6 +32,7 @@ namespace Flex.Development.Execution.Data
             _currentEngine = null;
             _context = new DataContext();
             _activeTasks = new List<CancellationTokenSource>();
+            _memoryHold = new List<Instance>();
             _viewModel = null;
         }
 
@@ -67,7 +70,6 @@ namespace Flex.Development.Execution.Data
                 {
                     Part part = new Part(0, 0, 0, 8, 4, 4, Colors.Green);
                     part.parent = _context.ActiveWorld.World;
-                    GetSceneViewModel().AddInstance(part);
                     ret = part;
                 }
                 else if (typeof(T).Equals(typeof(Script)))
@@ -78,29 +80,6 @@ namespace Flex.Development.Execution.Data
                 }
             }, System.Windows.Threading.DispatcherPriority.Normal, false);
             return ret;
-        }
-
-        public static void AddInstance<T>(T built, T parent) where T : Instance
-        {
-            FlexUtility.RunWindowAction(() =>
-            {
-                if (typeof(T).Equals(typeof(Part)))
-                {
-                    Part part = built as Part;
-                    part.parent = parent;
-                    GetSceneViewModel().AddInstance(part);
-                }
-                else if (typeof(T).Equals(typeof(Script)))
-                {
-                    Script script = built as Script;
-                    script.parent = parent;
-                }
-            }, System.Windows.Threading.DispatcherPriority.Normal, false);
-        }
-
-        public static bool RemoveInstance(Instance instance)
-        {
-            return GetSceneViewModel().RemoveInstance(instance);
         }
 
         public static void Run()

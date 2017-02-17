@@ -1,0 +1,87 @@
+﻿using Flex.Development.Physics;
+using Flex.Misc.Tracker;
+using Jitter.Collision.Shapes;
+using Jitter.Dynamics;
+using Microsoft.ClearScript;
+using SharpDX;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Flex.Development.Instances
+{
+    public abstract class PhysicsInstance : SizedInstance
+    {
+        protected Shape _shape;
+        protected RigidBody _rigidBody;
+        protected bool _anchored;
+        protected bool _collisions;
+
+        protected PhysicsInstance() : base()
+        {
+
+        }
+
+        protected void LoadPhysicsInstance()
+        {
+            _shape = new BoxShape((float)_size.x, (float)_size.y, (float)_size.z);
+            _rigidBody = new RigidBody(_shape);
+            _rigidBody.IsActive = _anchored;
+            PhysicsEngine.AddVisualInstance(this);
+        }
+
+        ~PhysicsInstance()
+        {
+            PhysicsEngine.RemoveVisualInstance(this);
+        }
+
+        [ScriptMember(ScriptAccess.None)]
+        public RigidBody RigidBody
+        {
+            get
+            {
+                return _rigidBody;
+            }
+        }
+
+        [Category("3D")]
+        [DisplayName("Collidable")]
+        [Description("Whether or not this object can be collided with by other objects")]
+        [TrackMember]
+        public bool collidable
+        {
+            get
+            {
+                return _collisions;
+            }
+            set
+            {
+                if (value == _collisions) return;
+                _collisions = value;
+                NotifyPropertyChanged("Collidable");
+            }
+        }
+
+
+        [Category("3D")]
+        [DisplayName("Anchored")]
+        [Description("Whether or not this object is affected by physics")]
+        [TrackMember]
+        public bool anchored
+        {
+            get
+            {
+                return _anchored;
+            }
+            set
+            {
+                if (value == _anchored) return;
+                _anchored = value;
+                NotifyPropertyChanged("Anchored");
+            }
+        }
+    }
+}

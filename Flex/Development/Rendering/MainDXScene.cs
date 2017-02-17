@@ -31,7 +31,8 @@ namespace Flex.Development.Rendering
         private static readonly TimeSpan EventUnselectCooldown = new TimeSpan(0, 0, 0, 0, 50);
         private static readonly TimeSpan ModelMoveUnselectCooldown = new TimeSpan(0, 0, 0, 0, 50);
 
-        private List<VisualInstance> _visualInstances;
+        public static MainDXScene Scene = null;
+        public List<Instance> VisualInstances;
 
         private VarianceShadowRenderingProvider _varianceShadowRenderingProvider;
         private Model3DGroup _lightsModel3DGroup;
@@ -51,14 +52,15 @@ namespace Flex.Development.Rendering
         private FirstPersonCamera _camera;
 
         private ModelVisual3D _modelVisual3D;
-        private ContainerUIElement3D _rootContainer;
+        public ContainerUIElement3D RootContainer;
 
-        private PhysicalInstance _selectedPhysicalInstance;
+        private PositionedInstance _selectedPhysicalInstance;
+
         private DateTime _selectedPhysicalInstanceTime;
 
         private Point3D _startModelMoverPosition;
 
-        private ModelMoverVisual3D _modelMover;
+        public ModelMoverVisual3D ModelMover;
         private DateTime _modelMoveEndTime;
 
         private EventManager3D _eventManager;
@@ -69,8 +71,6 @@ namespace Flex.Development.Rendering
         private DataContext _context;
         private SceneView _sceneView;
 
-        private PhysicsEngine _physics;
-
         private PolyLineVisual3D _boundingBoxSelected;
         private PolyLineVisual3D _boundingBoxHover;
 
@@ -78,13 +78,20 @@ namespace Flex.Development.Rendering
 
         public MainDXScene(DataContext context, SceneView sceneView)
         {
+            if (Scene == null)
+            {
+                Scene = this;
+            }
+            else
+            {
+                throw new Exception("Cannot create multiple DXScenes!");
+            }
             //Careful with cross threading!
             _sceneView = sceneView;
             _context = context;
-            _physics = new PhysicsEngine();
             _output = IoC.Get<IOutput>();
 
-            _visualInstances = new List<VisualInstance>();
+            VisualInstances = new List<Instance>();
             _viewport = _sceneView.MainDXViewportView;
             _camera = _sceneView.Camera;
 
@@ -147,9 +154,9 @@ namespace Flex.Development.Rendering
             VisualEventSource3D visualEventSource3DSkybox = new VisualEventSource3D(_sceneView.Skybox);
             visualEventSource3DSkybox.MouseClick += VisualEventSource3D_MouseClick;
 
-            _rootContainer = _sceneView.SceneObjectsContainer;
+            RootContainer = _sceneView.SceneObjectsContainer;
 
-            VisualEventSource3D visualEventSource3D = new VisualEventSource3D(_rootContainer);
+            VisualEventSource3D visualEventSource3D = new VisualEventSource3D(RootContainer);
             visualEventSource3D.MouseMove += VisualEventSource3DOnMouseMove;
             visualEventSource3D.MouseEnter += VisualEventSource3D_MouseEnter;
             visualEventSource3D.MouseLeave += VisualEventSource3DOnMouseLeave;
@@ -167,27 +174,27 @@ namespace Flex.Development.Rendering
         {
             if (ActiveScene.Running)
             {
-                _physics.Step();
+                PhysicsEngine.Step();
             }
         }
 
         private void SetupModelMover()
         {
-            _modelMover = new ModelMoverVisual3D();
+            ModelMover = new ModelMoverVisual3D();
 
-            _modelMover.SubscribeWithEventManager3D(_eventManager);
+            ModelMover.SubscribeWithEventManager3D(_eventManager);
 
-            _modelMover.Position = GetVisualCenter(_selectedPhysicalInstance.Visual3D, _selectedPhysicalInstance.Model3D);
-            Rect3D modelBounds = _selectedPhysicalInstance.Model3D.Bounds;
+            ModelMover.Position = GetVisualCenter(_selectedPhysicalInstance.Visual3D, _selectedPhysicalInstance.Model);
+            Rect3D modelBounds = _selectedPhysicalInstance.Model.Bounds;
             double axisLength = Math.Max(modelBounds.Size.X, Math.Max(modelBounds.Size.Y, modelBounds.Size.Z));
 
-            _modelMover.AxisLength = axisLength;
+            ModelMover.AxisLength = axisLength;
 
-            _modelMover.AxisRadius = 0.3;
-            _modelMover.AxisArrowRadius = 0.7;
+            ModelMover.AxisRadius = 0.3;
+            ModelMover.AxisArrowRadius = 0.7;
 
             // Setup event handlers
-            _modelMover.ModelMoveStarted += delegate (object o, EventArgs eventArgs)
+            ModelMover.ModelMoveStarted += delegate (object o, EventArgs eventArgs)
             {
                 if (_selectedPhysicalInstance == null)
                 {
@@ -213,11 +220,11 @@ namespace Flex.Development.Rendering
                     */
                 }
 
-                _startModelMoverPosition = GetVisualCenter(_selectedPhysicalInstance.Visual3D, _selectedPhysicalInstance.Model3D);
-                _modelMover.Position = _startModelMoverPosition;
+                _startModelMoverPosition = GetVisualCenter(_selectedPhysicalInstance.Visual3D, _selectedPhysicalInstance.Model);
+                ModelMover.Position = _startModelMoverPosition;
             };
 
-            _modelMover.ModelMoved += delegate (object o, Ab3d.Common.ModelMovedEventArgs e)
+            ModelMover.ModelMoved += delegate (object o, Ab3d.Common.ModelMovedEventArgs e)
             {
                 if (_selectedPhysicalInstance == null)
                     return;
@@ -241,26 +248,26 @@ namespace Flex.Development.Rendering
                 _currentTranslateTransform3D.OffsetZ = movement.Z;
                 */
 
-                (_selectedPhysicalInstance.Instance as PositionedInstance).position.setTo(newCenterPosition.X, newCenterPosition.Y, newCenterPosition.Z);
+                _selectedPhysicalInstance.position.setTo(newCenterPosition.X, newCenterPosition.Y, newCenterPosition.Z);
 
-                _modelMover.Position = newCenterPosition;
+                ModelMover.Position = newCenterPosition;
             };
 
-            _modelMover.ModelMoveEnded += delegate (object o, EventArgs e)
+            ModelMover.ModelMoveEnded += delegate (object o, EventArgs e)
             {
                 _modelMoveEndTime = DateTime.Now;
             };
 
-            _viewport.Viewport3D.Children.Insert(0, _modelMover);
+            _viewport.Viewport3D.Children.Insert(0, ModelMover);
         }
 
         private PositionedInstance GetInstanceFromVisual(Visual3D visual)
         {
-            foreach (VisualInstance visualInstance in _visualInstances)
+            foreach (PositionedInstance positionedInstance in VisualInstances)
             {
-                if (visualInstance.Visual3D.Equals(visual))
+                if (positionedInstance.Visual3D.Equals(visual))
                 {
-                    return visualInstance.Instance;
+                    return positionedInstance;
                 }
             }
             return null;
@@ -293,14 +300,14 @@ namespace Flex.Development.Rendering
                 IoC.Get<IPropertyGrid>().SelectedObject = null;
                 if (_selectedPhysicalInstance != null)
                 {
-                    _selectedPhysicalInstance.Instance.PropertyChanged -= SelectPolylineBox;
+                    _selectedPhysicalInstance.PropertyChanged -= SelectPolylineBox;
                 }
                 _selectedPhysicalInstance = null;
 
                 _boundingBoxSelected.Positions.Clear();
 
-                _viewport.Viewport3D.Children.Remove(_modelMover);
-                _modelMover = null;
+                _viewport.Viewport3D.Children.Remove(ModelMover);
+                ModelMover = null;
                 return;
             }
             if (hitModel != null)
@@ -321,23 +328,23 @@ namespace Flex.Development.Rendering
 
                 if (_selectedPhysicalInstance == null || !_selectedPhysicalInstance.Visual3D.Equals(e.RayHitResult.VisualHit))
                 {
-                    _selectedPhysicalInstance = new PhysicalInstance(foundVisual, foundModel, GetInstanceFromVisual(e.RayHitResult.VisualHit));
+                    _selectedPhysicalInstance = GetInstanceFromVisual(e.RayHitResult.VisualHit);
                 }
                 else
                 {
                     return;
                 }
 
-                IoC.Get<IPropertyGrid>().SelectedObject = _selectedPhysicalInstance.Instance;
+                IoC.Get<IPropertyGrid>().SelectedObject = _selectedPhysicalInstance;
 
                 _eventManager.RegisterExcludedVisual3D(_selectedPhysicalInstance.Visual3D);
                 _eventManager.RemoveExcludedVisual3D(_selectedPhysicalInstance.Visual3D);
 
-                if (_modelMover == null)
+                if (ModelMover == null)
                     SetupModelMover();
 
-                _startModelMoverPosition = GetVisualCenter(_selectedPhysicalInstance.Visual3D, _selectedPhysicalInstance.Model3D);
-                _modelMover.Position = _startModelMoverPosition;
+                _startModelMoverPosition = GetVisualCenter(_selectedPhysicalInstance.Visual3D, _selectedPhysicalInstance.Model);
+                ModelMover.Position = _startModelMoverPosition;
 
                 _selectedPhysicalInstanceTime = DateTime.Now;
 
@@ -348,25 +355,25 @@ namespace Flex.Development.Rendering
                     */
                 }, DispatcherPriority.Normal);
 
-                if (_selectedPhysicalInstance != null && _selectedPhysicalInstance.Instance != null)
+                if (_selectedPhysicalInstance != null)
                 {
-                    _selectedPhysicalInstance.Instance.PropertyChanged += SelectPolylineBox;
+                    _selectedPhysicalInstance.PropertyChanged += SelectPolylineBox;
+                    PolyLineBoundingBox(_boundingBoxSelected, _selectedPhysicalInstance.position.Vector3D, _selectedPhysicalInstance.Model.Bounds);
                 }
-                PolyLineBoundingBox(_boundingBoxSelected, _selectedPhysicalInstance.Instance.position.Vector3D, _selectedPhysicalInstance.Model3D.Bounds);
                 // Tell ModelDecoratorVisual3D which Model3D to show
             }
         }
 
         private void SelectPolylineBox(object sender, PropertyChangedEventArgs e)
         {
-            PolyLineBoundingBox(_boundingBoxSelected, _selectedPhysicalInstance.Instance.position.Vector3D, _selectedPhysicalInstance.Model3D.Bounds);
+            PolyLineBoundingBox(_boundingBoxSelected, _selectedPhysicalInstance.position.Vector3D, _selectedPhysicalInstance.Model.Bounds);
         }
 
         public void PolyLineBoundingBox(PolyLineVisual3D polyLine, Vector3D position, Rect3D bounds)
         {
-            if (!_rootContainer.Children.Contains(polyLine))
+            if (!RootContainer.Children.Contains(polyLine))
             {
-                _rootContainer.Children.Add(polyLine);
+                RootContainer.Children.Add(polyLine);
             }
 
             polyLine.Positions.Clear();
@@ -410,13 +417,7 @@ namespace Flex.Development.Rendering
 
             if ((_selectedPhysicalInstance == null) || (_selectedPhysicalInstance != null && !mouse3DEventArgs.RayHitResult.VisualHit.Equals(_selectedPhysicalInstance.Visual3D) && mouse3DEventArgs.RayHitResult.VisualHit is BoxVisual3D))
             {
-                PositionedInstance instance = _visualInstances.Where((x) =>
-                {
-                    return x.Visual3D.Equals(mouse3DEventArgs.RayHitResult.VisualHit);
-                }).Select((x) =>
-                {
-                    return x.Instance;
-                }).FirstOrDefault();
+                PositionedInstance instance = GetInstanceFromVisual(mouse3DEventArgs.RayHitResult.VisualHit);
                 if (instance != null)
                 {
                     PolyLineBoundingBox(_boundingBoxHover, instance.position.Vector3D, hitModel.Bounds);
@@ -444,89 +445,6 @@ namespace Flex.Development.Rendering
             else
             {
                 _boundingBoxHover.Positions.Clear();
-            }
-        }
-
-        public void AddInstance(Instance instance)
-        {
-            if (instance is Part)
-            {
-                Part partInstance = instance as Part;
-                BoxVisual3D part = new BoxVisual3D();
-
-                TranslateTransform3D translateTransform = new TranslateTransform3D(partInstance.position.Vector3D);
-                RotateTransform3D rotateTransform = new RotateTransform3D(new QuaternionRotation3D());
-
-                partInstance.OnChanged += (sender, e) =>
-                {
-                    FlexUtility.RunWindowAction(() =>
-                    {
-                        /*
-                        if (_selectedPhysicalInstance != null && !_selectedPhysicalInstance.Instance.Equals(partInstance))
-                        {
-                            //Glitches occur if you modify the Vector3 values for position while dragging.
-                            part.CenterPosition = partInstance.Position.Point3D;
-                        }
-                        else if (_selectedPhysicalInstance == null)
-                        {
-                            part.CenterPosition = partInstance.Position.Point3D;
-                        }
-                        */
-                        if (_selectedPhysicalInstance != null)
-                        {
-                            _modelMover.Position = partInstance.position.Point3D;
-                        }
-
-                        System.Windows.Media.Media3D.Quaternion rotation = FlexUtility.FromYawPitchRoll((float)partInstance.rotation.x, (float)partInstance.rotation.y, (float)partInstance.rotation.z);
-
-                        (part.Transform as Transform3DGroup).Children[1] = new TranslateTransform3D(partInstance.position.Vector3D);
-                        (part.Transform as Transform3DGroup).Children[0] = new RotateTransform3D(new QuaternionRotation3D(rotation));
-
-                        part.Size = partInstance.size.Size3D;
-                        part.Material = partInstance.Material;
-                    }, DispatcherPriority.Render);
-
-                };
-
-                Transform3DGroup group = new Transform3DGroup();
-                group.Children.Add(rotateTransform);
-                group.Children.Add(translateTransform);
-
-                part.Transform = group;
-
-                part.Size = partInstance.size.Size3D;
-
-                part.Material = partInstance.Material;
-
-                VisualInstance visualInstance = new VisualInstance(part, partInstance);
-                _visualInstances.Add(visualInstance);
-
-                _physics.AddVisualInstance(visualInstance);
-
-                _rootContainer.Children.Add(part);
-            }
-        }
-
-        public bool RemoveInstance(Instance instance)
-        {
-            if (instance is Part)
-            {
-                Part partInstance = instance as Part;
-
-                foreach (VisualInstance visualInstance in _visualInstances)
-                {
-                    if (visualInstance.Instance.Equals(instance))
-                    {
-                        _rootContainer.Children.Remove(visualInstance.Visual3D);
-                        return true;
-                    }
-                }
-
-                return false;
-            }
-            else
-            {
-                return false;
             }
         }
 

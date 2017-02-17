@@ -9,14 +9,14 @@ using System.Threading.Tasks;
 
 namespace Flex.Development.Physics
 {
-    public class PhysicsEngine
+    public static class PhysicsEngine
     {
-        private CollisionSystem _collisionSystem;
-        private Jitter.World _physicsWorld;
-        private DateTime _lastStep;
-        private List<PhysicsInstance> _physicsInstances;
+        private static CollisionSystem _collisionSystem;
+        private static Jitter.World _physicsWorld;
+        private static DateTime _lastStep;
+        private static List<PhysicsInstance> _physicsInstances;
 
-        public PhysicsEngine()
+        static PhysicsEngine()
         {
             _lastStep = DateTime.MinValue;
             _collisionSystem = new CollisionSystemSAP();
@@ -24,14 +24,19 @@ namespace Flex.Development.Physics
             _physicsInstances = new List<PhysicsInstance>();
         }
 
-        public void AddVisualInstance(VisualInstance visualInstance)
+        internal static void AddVisualInstance(PhysicsInstance physicsInstance)
         {
-            PhysicsInstance physicsInstance = new PhysicsInstance(visualInstance.Instance as PositionedInstance);
             _physicsInstances.Add(physicsInstance);
             _physicsWorld.AddBody(physicsInstance.RigidBody);
         }
 
-        public void Step()
+        internal static void RemoveVisualInstance(PhysicsInstance physicsInstance)
+        {
+            _physicsInstances.Remove(physicsInstance);
+            //_physicsWorld.RemoveBody(physicsInstance.RigidBody);
+        }
+
+        public static void Step()
         {
             if (_lastStep == DateTime.MinValue)
             {
@@ -44,7 +49,7 @@ namespace Flex.Development.Physics
             }
             foreach (PhysicsInstance physicsInstance in _physicsInstances)
             {
-                (physicsInstance.Instance as PositionedInstance).position.setTo(physicsInstance.Position.X, physicsInstance.Position.Y, physicsInstance.Position.Z);
+                physicsInstance.position.setTo(physicsInstance.RigidBody.Position.X, physicsInstance.RigidBody.Position.Y, physicsInstance.RigidBody.Position.Z);
             }
         }
     }

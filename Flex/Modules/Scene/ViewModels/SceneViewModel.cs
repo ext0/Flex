@@ -28,7 +28,7 @@ namespace Flex.Modules.Scene.ViewModels
     [Export]
     public class SceneViewModel : Document, ICommandHandler<AddPartCommandDefinition>, ICommandHandler<AddScriptCommandDefinition>
     {
-        private static readonly int KeyboardInputPollingFrequency = 16;
+        private static readonly int KeyboardInputPollingFrequency = 32;
 
         private CancellationToken _keyboardPollCancelToken;
 
@@ -147,16 +147,6 @@ namespace Flex.Modules.Scene.ViewModels
         public override bool ShouldReopenOnStart
         {
             get { return true; }
-        }
-
-        public void AddInstance(Instance instance)
-        {
-            _scene.AddInstance(instance);
-        }
-
-        public bool RemoveInstance(Instance instance)
-        {
-            return _scene.RemoveInstance(instance);
         }
 
         public void PhysicsStep()

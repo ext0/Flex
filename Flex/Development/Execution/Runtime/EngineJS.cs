@@ -84,17 +84,10 @@ namespace Flex.Development.Execution.Runtime
         {
             try
             {
-                /*
-                _engine.Context.DefineVariable("script").Assign(new DynamicJS(script));
-                _engine.Context.DefineVariable("world").Assign(new DynamicJS(ActiveWorld.Active.World));
-                _engine.Context.DefineVariable("sky").Assign(new DynamicJS(ActiveWorld.Active.Sky));
-                _engine.Context.DefineVariable("Instance").Assign(new DynamicJS(new InstanceJS()));
-                */
-
-                _engine.AddHostObject("output", new OutputJS());
                 _engine.AddHostObject("script", script);
                 _engine.AddHostObject("world", ActiveWorld.Active.World);
                 _engine.AddHostObject("sky", ActiveWorld.Active.Sky);
+                _engine.AddHostObject("output", new OutputJS());
 
                 _engine.AddHostType(HostItemFlags.DirectAccess, typeof(Instance));
                 _engine.AddHostType(HostItemFlags.DirectAccess, typeof(PositionedInstance));

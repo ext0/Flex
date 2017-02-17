@@ -6,6 +6,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Media.Media3D;
 using Xceed.Wpf.Toolkit.PropertyGrid.Attributes;
 
 namespace Flex.Development.Instances
@@ -15,12 +16,39 @@ namespace Flex.Development.Instances
     {
         protected Vector3Property _position;
         protected Vector3Property _rotation;
-        protected bool _collisions;
-        protected bool _anchored;
+
+        protected bool _visuallyInitialized = false;
+
+        protected Visual3D _visual3D;
+        protected TranslateTransform3D _translateTransform;
+        protected RotateTransform3D _rotateTransform;
+        protected Transform3DGroup _transformGroup;
+
+        protected Model3D _model;
+
+        protected abstract void InitializeVisual();
 
         internal PositionedInstance() : base()
         {
 
+        }
+
+        [Browsable(false)]
+        public Visual3D Visual3D
+        {
+            get
+            {
+                return _visual3D;
+            }
+        }
+
+        [Browsable(false)]
+        public Model3D Model
+        {
+            get
+            {
+                return _model;
+            }
         }
 
         [Category("3D")]
@@ -58,43 +86,6 @@ namespace Flex.Development.Instances
                 if (value == _rotation) return;
                 _rotation = value;
                 NotifyPropertyChanged("Rotation");
-            }
-        }
-
-        [Category("3D")]
-        [DisplayName("Collidable")]
-        [Description("Whether or not this object can be collided with by other objects")]
-        [TrackMember]
-        public bool collidable
-        {
-            get
-            {
-                return _collisions;
-            }
-            set
-            {
-                if (value == _collisions) return;
-                _collisions = value;
-                NotifyPropertyChanged("Collidable");
-            }
-        }
-
-
-        [Category("3D")]
-        [DisplayName("Anchored")]
-        [Description("Whether or not this object is affected by physics")]
-        [TrackMember]
-        public bool anchored
-        {
-            get
-            {
-                return _anchored;
-            }
-            set
-            {
-                if (value == _anchored) return;
-                _anchored = value;
-                NotifyPropertyChanged("Anchored");
             }
         }
     }

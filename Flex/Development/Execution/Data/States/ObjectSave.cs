@@ -49,7 +49,6 @@ namespace Flex.Development.Execution.Data.States
                                 foreach (Instance instance in list)
                                 {
                                     instance.RemoveFromParent();
-                                    ActiveScene.RemoveInstance(instance);
                                 }
                             }
                             else if (_parent != null)
@@ -65,7 +64,6 @@ namespace Flex.Development.Execution.Data.States
                                     foreach (Instance instance in newElements)
                                     {
                                         instance.RemoveFromParent();
-                                        ActiveScene.RemoveInstance(instance);
                                     }
                                 }
                             }

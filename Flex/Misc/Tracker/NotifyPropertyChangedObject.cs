@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.ClearScript;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -11,6 +12,7 @@ namespace Flex.Misc.Tracker
     [Serializable]
     public class NotifyPropertyChangedObject : INotifyPropertyChanged
     {
+        [ScriptMember(ScriptAccess.None)]
         [field: NonSerialized]
         public event PropertyChangedEventHandler PropertyChanged;
 
