@@ -23,6 +23,8 @@ using Flex.Development.Physics;
 using Jitter.Collision;
 using Gemini.Modules.PropertyGrid;
 using System.ComponentModel;
+using System.Threading;
+using System.Windows;
 
 namespace Flex.Development.Rendering
 {
@@ -130,8 +132,6 @@ namespace Flex.Development.Rendering
             _skyboxEventManager = new EventManager3D(_sceneView.SkyboxViewport);
             _skyboxEventManager.CustomEventsSourceElement = _sceneView.ViewportBorder;
 
-            _output.AppendLine("Initializing DXScene!");
-
             _varianceShadowRenderingProvider = new VarianceShadowRenderingProvider();
             _varianceShadowRenderingProvider.ShadowMapSize = _shadowMapSize;
             _varianceShadowRenderingProvider.ShadowDepthBluringSize = _shadowDepthBluringSize;
@@ -167,7 +167,7 @@ namespace Flex.Development.Rendering
 
             InitializeLights();
 
-            _output.AppendLine("Successfully initialized DXScene!");
+            _output.AppendLine("Welcome to Flex!");
         }
 
         public void PhysicsStep()
@@ -176,6 +176,44 @@ namespace Flex.Development.Rendering
             {
                 PhysicsEngine.Step();
             }
+        }
+
+        public void AddChildVisual(Visual3D visual)
+        {
+            if (IsOnDispatcher())
+            {
+                Scene.RootContainer.Children.Add(visual);
+            } else
+            {
+                RunOnUIThread(() =>
+                {
+                    Scene.RootContainer.Children.Add(visual);
+                });
+            }
+        }
+
+        public void RemoveChildVisual(Visual3D visual)
+        {
+            if (IsOnDispatcher())
+            {
+                Scene.RootContainer.Children.Remove(visual);
+            } else
+            {
+                RunOnUIThread(() =>
+                {
+                    Scene.RootContainer.Children.Remove(visual);
+                });
+            }
+        }
+
+        public void RunOnUIThread(System.Action action)
+        {
+            Scene.RootContainer.Dispatcher.Invoke(action);
+        }
+
+        public bool IsOnDispatcher()
+        {
+            return Thread.CurrentThread == Scene.RootContainer.Dispatcher.Thread;
         }
 
         private void SetupModelMover()
@@ -313,18 +351,6 @@ namespace Flex.Development.Rendering
             if (hitModel != null)
             {
                 ContainerUIElement3D hit = e.HitObject as ContainerUIElement3D;
-                ModelVisual3D foundVisual = null;
-                Model3D foundModel = null;
-
-                foreach (ModelVisual3D visual in hit.Children)
-                {
-                    if (visual.Equals(e.RayHitResult.VisualHit))
-                    {
-                        foundVisual = visual;
-                        foundModel = visual.Content;
-                        break;
-                    }
-                }
 
                 if (_selectedPhysicalInstance == null || !_selectedPhysicalInstance.Visual3D.Equals(e.RayHitResult.VisualHit))
                 {

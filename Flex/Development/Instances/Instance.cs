@@ -8,6 +8,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Dynamic;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -30,13 +31,15 @@ namespace Flex.Development.Instances
 
         protected bool _isRoot = false;
 
+        protected bool _initialized = false;
+
         [NonSerialized()]
         protected Tracker _tracker;
 
         [field: NonSerialized]
         protected event EventHandler<PropertyChangedEventArgs> _changed;
 
-        internal Instance() : base()
+        protected Instance() : base()
         {
             _UUID = Guid.NewGuid().ToString();
             _tracker = new Tracker(this);
@@ -160,6 +163,12 @@ namespace Flex.Development.Instances
             }
             return _instances;
         }
+
+        [ScriptMember(ScriptAccess.None)]
+        public abstract void Initialize();
+
+        [ScriptMember(ScriptAccess.None)]
+        public abstract void Cleanup();
 
         public Instance getChild(String name, bool recursive = false)
         {

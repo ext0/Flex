@@ -18,13 +18,25 @@ namespace Flex.Development.Instances
         private int _sunLightDistance = 500;
         private bool _sunShadows = false;
 
-        internal Sky() : base()
+        internal Sky(bool flag) : base()
         {
             _displayName = "Sky";
             _icon = "Legacy/weather_cloudy.png";
             _instances = new UISafeObservableCollection<Instance>();
             _allowedChildren = new List<Type>();
             _isRoot = true;
+
+            Initialize();
+        }
+
+        public override void Initialize()
+        {
+            _initialized = true;
+        }
+
+        public override void Cleanup()
+        {
+
         }
 
         [Category("Lighting")]

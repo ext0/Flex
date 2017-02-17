@@ -1,6 +1,8 @@
 ﻿using Caliburn.Micro;
 using Flex.Development.Execution.Data;
 using Flex.Development.Instances;
+using Flex.Development.Rendering;
+using Flex.Misc.Utility;
 using Gemini.Modules.Output;
 using Microsoft.ClearScript;
 using Microsoft.ClearScript.V8;
@@ -82,28 +84,36 @@ namespace Flex.Development.Execution.Runtime
 
         public void Execute(Script script)
         {
-            try
+            _output.AppendLine("Running...");
+
+            _engine.AddHostObject("script", script);
+            _engine.AddHostObject("world", ActiveWorld.Active.World);
+            _engine.AddHostObject("sky", ActiveWorld.Active.Sky);
+            _engine.AddHostObject("output", new OutputJS());
+
+            _engine.AddHostType(HostItemFlags.DirectAccess, typeof(Instance));
+            _engine.AddHostType(HostItemFlags.DirectAccess, typeof(PositionedInstance));
+            _engine.AddHostType(HostItemFlags.DirectAccess, typeof(Part));
+            _engine.AddHostType(HostItemFlags.DirectAccess, typeof(Script));
+            _engine.AddHostType(HostItemFlags.DirectAccess, typeof(Sky));
+            _engine.AddHostType(HostItemFlags.DirectAccess, typeof(World));
+
+            FlexUtility.RunWindowAction(() =>
             {
-                _engine.AddHostObject("script", script);
-                _engine.AddHostObject("world", ActiveWorld.Active.World);
-                _engine.AddHostObject("sky", ActiveWorld.Active.Sky);
-                _engine.AddHostObject("output", new OutputJS());
-
-                _engine.AddHostType(HostItemFlags.DirectAccess, typeof(Instance));
-                _engine.AddHostType(HostItemFlags.DirectAccess, typeof(PositionedInstance));
-                _engine.AddHostType(HostItemFlags.DirectAccess, typeof(Part));
-                _engine.AddHostType(HostItemFlags.DirectAccess, typeof(Script));
-                _engine.AddHostType(HostItemFlags.DirectAccess, typeof(Sky));
-                _engine.AddHostType(HostItemFlags.DirectAccess, typeof(World));
-
-                V8Script v8Script = _engine.Compile(script.source);
-
-                _engine.Execute(v8Script);
-            }
-            catch (Exception e)
-            {
-                _output.AppendLine(e.Message);
-            }
+                if (script.source == null)
+                {
+                    script.source = String.Empty;
+                }
+                try
+                {
+                    V8Script v8Script = _engine.Compile(script.source);
+                    _engine.Execute(v8Script);
+                }
+                catch(ScriptEngineException e)
+                {
+                    _output.AppendLine(e.ErrorDetails);
+                }
+            }, System.Windows.Threading.DispatcherPriority.Background, false);
         }
 
         public void KillChildrenThreads()

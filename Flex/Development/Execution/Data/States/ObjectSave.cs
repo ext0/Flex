@@ -48,6 +48,7 @@ namespace Flex.Development.Execution.Data.States
                                 //System.Diagnostics.Debug.WriteLine("New items = " + list.Count);
                                 foreach (Instance instance in list)
                                 {
+                                    instance.Cleanup();
                                     instance.RemoveFromParent();
                                 }
                             }
@@ -63,6 +64,7 @@ namespace Flex.Development.Execution.Data.States
 
                                     foreach (Instance instance in newElements)
                                     {
+                                        instance.Cleanup();
                                         instance.RemoveFromParent();
                                     }
                                 }
@@ -93,10 +95,14 @@ namespace Flex.Development.Execution.Data.States
                     }
                     else
                     {
-                        if (property.GetCustomAttribute<NonSerializedAttribute>() != null)
+                        if (_old == null)
                         {
                             continue;
                         }
+                        if (property.GetCustomAttribute<NonSerializedAttribute>() != null)
+                        {
+                            continue;
+                        } 
                         ScriptMemberAttribute scriptMemberAttribute = property.GetCustomAttribute<ScriptMemberAttribute>();
                         if (scriptMemberAttribute != null && scriptMemberAttribute.Access.HasFlag(ScriptAccess.None))
                         {

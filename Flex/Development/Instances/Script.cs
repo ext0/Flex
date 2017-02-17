@@ -1,4 +1,5 @@
-﻿using Flex.Misc.Tracker;
+﻿using Flex.Development.Execution.Data;
+using Flex.Misc.Tracker;
 using Flex.Misc.Utility;
 using System;
 using System.Collections.Generic;
@@ -15,12 +16,24 @@ namespace Flex.Development.Instances
     {
         private String _source;
 
-        internal Script() : base()
+        public Script() : base()
         {
             _displayName = "Script";
             _icon = "16/script.png";
             _instances = new UISafeObservableCollection<Instance>();
             _allowedChildren = new List<Type>();
+            parent = ActiveScene.Context.ActiveWorld.World;
+
+            Initialize();
+        }
+        internal Script(bool flag) : base()
+        {
+            _displayName = "Script";
+            _icon = "16/script.png";
+            _instances = new UISafeObservableCollection<Instance>();
+            _allowedChildren = new List<Type>();
+
+            Initialize();
         }
 
         internal void AddInstance(Instance instance)
@@ -28,6 +41,16 @@ namespace Flex.Development.Instances
             instance.parent = this;
             _instances.Add(instance);
             NotifyPropertyChanged("Instances");
+        }
+
+        public override void Initialize()
+        {
+            _initialized = true;
+        }
+
+        public override void Cleanup()
+        {
+
         }
 
         [TrackMember]

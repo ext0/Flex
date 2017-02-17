@@ -1,19 +1,23 @@
 ﻿using Ab3d.Visuals;
+using Flex.Development.Execution.Data;
 using Flex.Development.Execution.Runtime;
 using Flex.Development.Instances.Properties;
 using Flex.Development.Rendering;
 using Flex.Misc.Tracker;
 using Flex.Misc.Utility;
 using Jitter.Collision.Shapes;
+using Microsoft.ClearScript;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Media;
 using System.Windows.Media.Media3D;
+using System.Windows.Threading;
 using Xceed.Wpf.Toolkit.PropertyGrid.Attributes;
 
 namespace Flex.Development.Instances
@@ -23,49 +27,22 @@ namespace Flex.Development.Instances
     {
         private ColorProperty _color;
 
-        internal Part(double posx, double posy, double posz, double sizex, double sizey, double sizez, Color color) : base()
+        public Part() : base()
         {
-            _position = new Vector3Property(posx, posy, posz);
-            _position.PropertyChanged += (sender, e) =>
-            {
-                if (_visuallyInitialized)
-                {
-                    _transformGroup.Children[1] = new TranslateTransform3D(position.Vector3D);
-                    _rigidBody.Position = new Jitter.LinearMath.JVector((float)position.x, (float)position.y, (float)position.z);
-                }
-                NotifyPropertyChanged("Position");
-            };
+            _displayName = "Part";
+            _icon = "16/brick.png";
+            _instances = new UISafeObservableCollection<Instance>();
+            _allowedChildren = new List<Type>();
+            _allowedChildren.Add(typeof(Instance));
 
-            _rotation = new Vector3Property(0, 0, 0);
-            _rotation.PropertyChanged += (sender, e) =>
-            {
-                if (_visuallyInitialized)
-                {
-                    _transformGroup.Children[0] = new RotateTransform3D(new QuaternionRotation3D(FlexUtility.FromYawPitchRoll((float)rotation.x, (float)rotation.y, (float)rotation.z)));
-                }
-                NotifyPropertyChanged("Rotation");
-            };
+            _anchored = true;
+            _collisions = true;
+            parent = ActiveScene.Context.ActiveWorld.World;
 
-            _size = new Vector3Property(sizex, sizey, sizez);
-            _size.PropertyChanged += (sender, e) =>
-            {
-                if (_visuallyInitialized)
-                {
-                    (_visual3D as BoxVisual3D).Size = _size.Size3D;
-                    _shape = new BoxShape((float)_size.x, (float)_size.y, (float)_size.z);
-                }
-                NotifyPropertyChanged("Size");
-            };
-
-            _color = new ColorProperty(color);
-            _color.PropertyChanged += (sender, e) =>
-            {
-                if (_visuallyInitialized)
-                {
-                    (_visual3D as BoxVisual3D).Material = Material;
-                }
-                NotifyPropertyChanged("Color");
-            };
+            Initialize();
+        }
+        internal Part(bool flag) : base()
+        {
 
             _displayName = "Part";
             _icon = "16/brick.png";
@@ -76,26 +53,66 @@ namespace Flex.Development.Instances
             _anchored = true;
             _collisions = true;
 
+            Initialize();
+        }
+
+        public override void Initialize()
+        {
+            _position = new Vector3Property(0, 0, 0);
+            _position.PropertyChanged += (sender, e) =>
+            {
+                if (_initialized)
+                {
+                    _transformGroup.Children[1] = new TranslateTransform3D(position.Vector3D);
+                    _rigidBody.Position = new Jitter.LinearMath.JVector((float)position.x, (float)position.y, (float)position.z);
+                }
+                NotifyPropertyChanged("Position");
+            };
+
+            _rotation = new Vector3Property(0, 0, 0);
+            _rotation.PropertyChanged += (sender, e) =>
+            {
+                if (_initialized)
+                {
+                    _transformGroup.Children[0] = new RotateTransform3D(new QuaternionRotation3D(FlexUtility.FromYawPitchRoll((float)rotation.x, (float)rotation.y, (float)rotation.z)));
+                }
+                NotifyPropertyChanged("Rotation");
+            };
+
+            _size = new Vector3Property(8, 4, 4);
+            _size.PropertyChanged += (sender, e) =>
+            {
+                if (_initialized)
+                {
+                    (_visual3D as BoxVisual3D).Size = _size.Size3D;
+                    _shape = new BoxShape((float)_size.x, (float)_size.y, (float)_size.z);
+                }
+                NotifyPropertyChanged("Size");
+            };
+
+            _color = new ColorProperty(Colors.Green);
+            _color.PropertyChanged += (sender, e) =>
+            {
+                if (_initialized)
+                {
+                    (_visual3D as BoxVisual3D).Material = Material;
+                }
+                NotifyPropertyChanged("Color");
+            };
             LoadPhysicsInstance();
             InitializeVisual();
+
+            _initialized = true;
         }
 
-        public Part()
+        [ScriptMember(ScriptAccess.None)]
+        public override void Cleanup()
         {
-            _displayName = "Part";
-            _icon = "16/brick.png";
-            _instances = new UISafeObservableCollection<Instance>();
-            _allowedChildren = new List<Type>();
-            _allowedChildren.Add(typeof(Instance));
-        }
-
-        ~Part()
-        {
-            System.Diagnostics.Debug.WriteLine("Decomposing...");
-            if (_visuallyInitialized)
+            if (_initialized)
             {
                 MainDXScene.Scene.VisualInstances.Remove(this);
-                MainDXScene.Scene.RootContainer.Children.Remove(_visual3D);
+
+                MainDXScene.Scene.RemoveChildVisual(_visual3D);
             }
         }
 
@@ -187,9 +204,7 @@ namespace Flex.Development.Instances
             (_visual3D as BoxVisual3D).Material = Material;
 
             MainDXScene.Scene.VisualInstances.Add(this);
-            MainDXScene.Scene.RootContainer.Children.Add(_visual3D);
-
-            _visuallyInitialized = true;
+            MainDXScene.Scene.AddChildVisual(_visual3D);
         }
     }
 }
