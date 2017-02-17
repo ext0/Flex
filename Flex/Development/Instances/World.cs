@@ -11,14 +11,26 @@ namespace Flex.Development.Instances
     [Serializable]
     public class World : Instance
     {
-        internal World() : base()
+        internal World(bool flag) : base()
         {
             _displayName = "World";
-            _icon = "16/world.png";
             _instances = new UISafeObservableCollection<Instance>();
+            _icon = "16/world.png";
             _allowedChildren = new List<Type>();
             _allowedChildren.Add(typeof(Instance));
             _isRoot = true;
+
+            Initialize();
+        }
+
+        public override void Initialize()
+        {
+            _initialized = true;
+        }
+
+        public override void Cleanup()
+        {
+
         }
 
         [TrackMember]

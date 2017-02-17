@@ -144,6 +144,7 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Commands\Global\SaveFileCommandHandler.cs" />
     <Compile Include="Commands\Global\RunSceneCommandHandler.cs" />
     <Compile Include="Commands\Global\RunSceneCommandDefinition.cs" />
     <Compile Include="Commands\Global\StopSceneCommandDefinition.cs" />

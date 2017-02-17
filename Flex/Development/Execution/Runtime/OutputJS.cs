@@ -26,15 +26,7 @@ namespace Flex.Development.Execution.Runtime
 
         public void print(Object obj)
         {
-            try
-            {
-                dynamic dynamicResult = obj;
-                _output.AppendLine(dynamicResult.toString());
-            }
-            catch
-            {
-                _output.AppendLine(obj.ToString());
-            }
+            _output.AppendLine(obj.ToString());
         }
     }
 }

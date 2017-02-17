@@ -17,8 +17,6 @@ namespace Flex.Development.Instances
         protected Vector3Property _position;
         protected Vector3Property _rotation;
 
-        protected bool _visuallyInitialized = false;
-
         [NonSerialized()]
         protected Visual3D _visual3D;
 
@@ -36,7 +34,7 @@ namespace Flex.Development.Instances
 
         protected abstract void InitializeVisual();
 
-        internal PositionedInstance() : base()
+        protected PositionedInstance() : base()
         {
 
         }

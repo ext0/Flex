@@ -65,13 +65,13 @@ namespace Flex.Development.Execution.Data
             {
                 if (typeof(T).Equals(typeof(Part)))
                 {
-                    Part part = new Part(0, 0, 0, 8, 4, 4, Colors.Green);
+                    Part part = new Part(true);
                     part.parent = _context.ActiveWorld.World;
                     ret = part;
                 }
                 else if (typeof(T).Equals(typeof(Script)))
                 {
-                    Script script = new Script();
+                    Script script = new Script(true);
                     script.parent = _context.ActiveWorld.World;
                     ret = script;
                 }
@@ -90,8 +90,7 @@ namespace Flex.Development.Execution.Data
             foreach (Script script in _context.ActiveWorld.World.getChildren(true).Where((x) =>
             {
                 return x.GetType().Equals(typeof(Script));
-            }))
-            {
+            })) {
                 CancellationTokenSource token = new CancellationTokenSource();
                 scriptExecution.Add(new Task((x) =>
                 {
@@ -103,6 +102,7 @@ namespace Flex.Development.Execution.Data
                 }, script, token.Token));
                 _activeTasks.Add(token);
             }
+
             foreach (Task execution in scriptExecution)
             {
                 execution.Start();
@@ -140,7 +140,12 @@ namespace Flex.Development.Execution.Data
 
         public static void Save()
         {
-            _savedState = FlexUtility.SerializeToBinary(_context.ActiveWorld);
+            _savedState = SerializedContext();
+        }
+
+        public static byte[] SerializedContext()
+        {
+            return FlexUtility.SerializeToBinary(_context.ActiveWorld);
         }
 
         private static void Reset()
@@ -153,7 +158,9 @@ namespace Flex.Development.Execution.Data
         private static void ResetInstance(Instance old, Instance current)
         {
             ObjectSave save = new ObjectSave(old, current, old.GetType());
+
             save.Reset();
+
             foreach (Instance oldChild in old.getChildren())
             {
                 foreach (Instance currentChild in current.getChildren())

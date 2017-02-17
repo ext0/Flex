@@ -28,9 +28,9 @@ namespace Flex.Development.Execution.Data
             }
             _activeWorld = this;
             _instances = new UISafeObservableCollection<Instance>();
-            _world = new World();
+            _world = new World(true);
             _instances.Add(_world);
-            _sky = new Sky();
+            _sky = new Sky(true);
             _instances.Add(_sky);
         }
 
