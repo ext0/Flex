@@ -13,9 +13,13 @@ using System.Threading.Tasks;
 
 namespace Flex.Development.Instances
 {
+    [Serializable]
     public abstract class PhysicsInstance : SizedInstance
     {
+        [NonSerialized()]
         protected Shape _shape;
+
+        [NonSerialized()]
         protected RigidBody _rigidBody;
         protected bool _anchored;
         protected bool _collisions;
@@ -38,8 +42,9 @@ namespace Flex.Development.Instances
             PhysicsEngine.RemoveVisualInstance(this);
         }
 
+        [Browsable(false)]
         [ScriptMember(ScriptAccess.None)]
-        public RigidBody RigidBody
+        internal RigidBody RigidBody
         {
             get
             {

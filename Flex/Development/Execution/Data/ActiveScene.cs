@@ -23,8 +23,6 @@ namespace Flex.Development.Execution.Data
         private static EngineJS _currentEngine;
         private static SceneViewModel _viewModel;
 
-        private static List<Instance> _memoryHold;
-
         private static byte[] _savedState;
 
         static ActiveScene()
@@ -32,7 +30,6 @@ namespace Flex.Development.Execution.Data
             _currentEngine = null;
             _context = new DataContext();
             _activeTasks = new List<CancellationTokenSource>();
-            _memoryHold = new List<Instance>();
             _viewModel = null;
         }
 
