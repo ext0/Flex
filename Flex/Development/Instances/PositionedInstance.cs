@@ -19,11 +19,19 @@ namespace Flex.Development.Instances
 
         protected bool _visuallyInitialized = false;
 
+        [NonSerialized()]
         protected Visual3D _visual3D;
+
+        [NonSerialized()]
         protected TranslateTransform3D _translateTransform;
+
+        [NonSerialized()]
         protected RotateTransform3D _rotateTransform;
+
+        [NonSerialized()]
         protected Transform3DGroup _transformGroup;
 
+        [NonSerialized()]
         protected Model3D _model;
 
         protected abstract void InitializeVisual();

@@ -10,6 +10,7 @@ using Xceed.Wpf.Toolkit.PropertyGrid.Attributes;
 
 namespace Flex.Development.Instances
 {
+    [Serializable]
     public abstract class SizedInstance : PositionedInstance
     {
         protected Vector3Property _size;
