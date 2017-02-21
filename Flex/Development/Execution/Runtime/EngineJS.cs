@@ -84,12 +84,14 @@ namespace Flex.Development.Execution.Runtime
 
         public void Execute(Script script)
         {
-            _output.AppendLine("Running...");
-
             _engine.AddHostObject("script", script);
             _engine.AddHostObject("world", ActiveWorld.Active.World);
             _engine.AddHostObject("sky", ActiveWorld.Active.Sky);
             _engine.AddHostObject("output", new OutputJS());
+
+            _engine.AddHostType(HostItemFlags.DirectAccess, typeof(Math));
+            _engine.AddHostType(HostItemFlags.DirectAccess, typeof(Noise));
+            _engine.AddHostType(HostItemFlags.DirectAccess, typeof(Random));
 
             _engine.AddHostType(HostItemFlags.DirectAccess, typeof(Instance));
             _engine.AddHostType(HostItemFlags.DirectAccess, typeof(PositionedInstance));
@@ -98,22 +100,25 @@ namespace Flex.Development.Execution.Runtime
             _engine.AddHostType(HostItemFlags.DirectAccess, typeof(Sky));
             _engine.AddHostType(HostItemFlags.DirectAccess, typeof(World));
 
-            FlexUtility.RunWindowAction(() =>
+            MainDXScene.Scene.RunOnUIThread(() =>
             {
                 if (script.source == null)
                 {
                     script.source = String.Empty;
                 }
-                try
-                {
-                    V8Script v8Script = _engine.Compile(script.source);
-                    _engine.Execute(v8Script);
-                }
-                catch(ScriptEngineException e)
+            });
+            try
+            {
+                V8Script v8Script = _engine.Compile(script.source);
+                _engine.Execute(v8Script);
+            }
+            catch (ScriptEngineException e)
+            {
+                MainDXScene.Scene.RunOnUIThread(() =>
                 {
                     _output.AppendLine(e.ErrorDetails);
-                }
-            }, System.Windows.Threading.DispatcherPriority.Background, false);
+                });
+            }
         }
 
         public void KillChildrenThreads()

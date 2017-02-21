@@ -1,4 +1,5 @@
-﻿using SharpDX;
+﻿using Jitter.LinearMath;
+using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.IO;

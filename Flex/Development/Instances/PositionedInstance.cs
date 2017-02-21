@@ -15,16 +15,10 @@ namespace Flex.Development.Instances
     public abstract class PositionedInstance : Instance
     {
         protected Vector3Property _position;
-        protected Vector3Property _rotation;
+        protected RotationProperty _rotation;
 
         [NonSerialized()]
         protected Visual3D _visual3D;
-
-        [NonSerialized()]
-        protected TranslateTransform3D _translateTransform;
-
-        [NonSerialized()]
-        protected RotateTransform3D _rotateTransform;
 
         [NonSerialized()]
         protected Transform3DGroup _transformGroup;
@@ -68,12 +62,6 @@ namespace Flex.Development.Instances
             {
                 return _position;
             }
-            set
-            {
-                if (value == _position) return;
-                _position = value;
-                NotifyPropertyChanged("Position");
-            }
         }
 
         [Category("3D")]
@@ -81,17 +69,11 @@ namespace Flex.Development.Instances
         [Description("The rotation of this instance")]
         [ExpandableObject]
         [TrackMember]
-        public Vector3Property rotation
+        public RotationProperty rotation
         {
             get
             {
                 return _rotation;
-            }
-            set
-            {
-                if (value == _rotation) return;
-                _rotation = value;
-                NotifyPropertyChanged("Rotation");
             }
         }
     }

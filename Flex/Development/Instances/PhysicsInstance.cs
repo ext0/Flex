@@ -22,6 +22,7 @@ namespace Flex.Development.Instances
 
         [NonSerialized()]
         protected RigidBody _rigidBody;
+
         protected bool _anchored;
         protected bool _collisions;
 
@@ -34,11 +35,23 @@ namespace Flex.Development.Instances
         {
             _shape = new BoxShape((float)_size.x, (float)_size.y, (float)_size.z);
             _rigidBody = new RigidBody(_shape);
-            _rigidBody.IsActive = _anchored;
+            _rigidBody.Position = new Jitter.LinearMath.JVector(_position.x, _position.y, _position.z);
+            _rigidBody.IsActive = !_anchored;
+            _rigidBody.IsStatic = anchored;
             PhysicsEngine.AddVisualInstance(this);
         }
 
-        ~PhysicsInstance()
+        protected void ReloadPhysicsInstance()
+        {
+            _shape = new BoxShape((float)_size.x, (float)_size.y, (float)_size.z);
+            _rigidBody = new RigidBody(_shape);
+            _rigidBody.Position = new Jitter.LinearMath.JVector(_position.x, _position.y, _position.z);
+            _rigidBody.IsActive = !_anchored;
+            _rigidBody.IsStatic = anchored;
+            PhysicsEngine.ReloadVisualInstance(this);
+        }
+
+        protected void UnloadPhysicsInstance()
         {
             PhysicsEngine.RemoveVisualInstance(this);
         }
@@ -86,6 +99,8 @@ namespace Flex.Development.Instances
             {
                 if (value == _anchored) return;
                 _anchored = value;
+                _rigidBody.IsActive = !_anchored;
+                _rigidBody.IsStatic = anchored;
                 NotifyPropertyChanged("Anchored");
             }
         }

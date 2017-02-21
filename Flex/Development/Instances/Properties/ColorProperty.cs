@@ -33,6 +33,58 @@ namespace Flex.Development.Instances.Properties
             _a = color.A;
         }
 
+        public byte r
+        {
+            get
+            {
+                return _r;
+            }
+            set
+            {
+                _r = value;
+                NotifyPropertyChanged("R");
+            }
+        }
+
+        public byte g
+        {
+            get
+            {
+                return _g;
+            }
+            set
+            {
+                _r = value;
+                NotifyPropertyChanged("G");
+            }
+        }
+
+        public byte b
+        {
+            get
+            {
+                return _b;
+            }
+            set
+            {
+                _b = value;
+                NotifyPropertyChanged("B");
+            }
+        }
+
+        public byte transparency
+        {
+            get
+            {
+                return _a;
+            }
+            set
+            {
+                _a = value;
+                NotifyPropertyChanged("A");
+            }
+        }
+
         public void changeColor(byte r, byte g, byte b, byte alpha)
         {
             _r = r;

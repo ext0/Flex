@@ -33,6 +33,11 @@ namespace Flex.Development.Instances
 
         }
 
+        public override void Reload()
+        {
+
+        }
+
         [TrackMember]
         public override string name
         {

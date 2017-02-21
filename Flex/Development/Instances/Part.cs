@@ -2,6 +2,7 @@
 using Flex.Development.Execution.Data;
 using Flex.Development.Execution.Runtime;
 using Flex.Development.Instances.Properties;
+using Flex.Development.Physics;
 using Flex.Development.Rendering;
 using Flex.Misc.Tracker;
 using Flex.Misc.Utility;
@@ -61,48 +62,73 @@ namespace Flex.Development.Instances
             _position = new Vector3Property(0, 0, 0);
             _position.PropertyChanged += (sender, e) =>
             {
-                if (_initialized)
+                MainDXScene.Scene.RunOnUIThread(() =>
                 {
-                    _transformGroup.Children[1] = new TranslateTransform3D(position.Vector3D);
-                    _rigidBody.Position = new Jitter.LinearMath.JVector((float)position.x, (float)position.y, (float)position.z);
-                }
+                    if (_initialized)
+                    {
+                        _transformGroup.Children[1] = new TranslateTransform3D(position.Vector3D);
+                        _rigidBody.Position = new Jitter.LinearMath.JVector(position.x, position.y, position.z);
+                    }
+                });
                 NotifyPropertyChanged("Position");
             };
 
-            _rotation = new Vector3Property(0, 0, 0);
+            _rotation = new RotationProperty();
             _rotation.PropertyChanged += (sender, e) =>
             {
-                if (_initialized)
+                MainDXScene.Scene.RunOnUIThread(() =>
                 {
-                    _transformGroup.Children[0] = new RotateTransform3D(new QuaternionRotation3D(FlexUtility.FromYawPitchRoll((float)rotation.x, (float)rotation.y, (float)rotation.z)));
-                }
+                    if (_initialized)
+                    {
+                        _transformGroup.Children[0] = new MatrixTransform3D(rotation.Matrix);
+                        _rigidBody.Orientation = rotation.JMatrix;
+                    }
+                });
                 NotifyPropertyChanged("Rotation");
             };
 
             _size = new Vector3Property(8, 4, 4);
             _size.PropertyChanged += (sender, e) =>
             {
-                if (_initialized)
+                MainDXScene.Scene.RunOnUIThread(() =>
                 {
-                    (_visual3D as BoxVisual3D).Size = _size.Size3D;
-                    _shape = new BoxShape((float)_size.x, (float)_size.y, (float)_size.z);
-                }
+                    if (_initialized)
+                    {
+                        (_visual3D as BoxVisual3D).Size = _size.Size3D;
+                        _shape = new BoxShape(_size.x, _size.y, _size.z);
+                        _rigidBody.Shape = _shape;
+                    }
+                });
                 NotifyPropertyChanged("Size");
             };
 
             _color = new ColorProperty(Colors.Green);
             _color.PropertyChanged += (sender, e) =>
             {
-                if (_initialized)
+                MainDXScene.Scene.RunOnUIThread(() =>
                 {
-                    (_visual3D as BoxVisual3D).Material = Material;
-                }
+                    if (_initialized)
+                    {
+                        (_visual3D as BoxVisual3D).Material = Material;
+                    }
+                });
                 NotifyPropertyChanged("Color");
             };
-            LoadPhysicsInstance();
-            InitializeVisual();
+
+            MainDXScene.Scene.RunOnUIThread(() =>
+            {
+                LoadPhysicsInstance();
+                InitializeVisual();
+            });
 
             _initialized = true;
+        }
+
+        [ScriptMember(ScriptAccess.None)]
+        public override void Reload()
+        {
+            _rigidBody.IsActive = false;
+            _rigidBody.IsActive = true;
         }
 
         [ScriptMember(ScriptAccess.None)]
@@ -110,9 +136,12 @@ namespace Flex.Development.Instances
         {
             if (_initialized)
             {
-                MainDXScene.Scene.VisualInstances.Remove(this);
-
-                MainDXScene.Scene.RemoveChildVisual(_visual3D);
+                MainDXScene.Scene.RunOnUIThread(() =>
+                {
+                    UnloadPhysicsInstance();
+                    MainDXScene.Scene.VisualInstances.Remove(this);
+                    MainDXScene.Scene.RemoveChildVisual(_visual3D);
+                });
             }
         }
 
@@ -194,10 +223,8 @@ namespace Flex.Development.Instances
         {
             _visual3D = new BoxVisual3D();
             _transformGroup = new Transform3DGroup();
-            _translateTransform = new TranslateTransform3D(position.Vector3D);
-            _rotateTransform = new RotateTransform3D(new QuaternionRotation3D());
-            _transformGroup.Children.Add(_rotateTransform);
-            _transformGroup.Children.Add(_translateTransform);
+            _transformGroup.Children.Add(new MatrixTransform3D(rotation.Matrix));
+            _transformGroup.Children.Add(new TranslateTransform3D(position.Vector3D));
             _visual3D.Transform = _transformGroup;
             _model = (_visual3D as BoxVisual3D).Content;
             (_visual3D as BoxVisual3D).Size = size.Size3D;

@@ -13,25 +13,25 @@ namespace Flex.Development.Instances.Properties
     [Serializable]
     public class Vector3Property : NotifyPropertyChangedObject
     {
-        private double _x;
-        private double _y;
-        private double _z;
+        private float _x;
+        private float _y;
+        private float _z;
 
         internal Vector3Property(Size3D size)
         {
-            _x = size.X;
-            _y = size.Y;
-            _z = size.Z;
+            _x = (float)size.X;
+            _y = (float)size.Y;
+            _z = (float)size.Z;
         }
 
         internal Vector3Property(Point3D point)
         {
-            _x = point.X;
-            _y = point.Y;
-            _z = point.Z;
+            _x = (float)point.X;
+            _y = (float)point.Y;
+            _z = (float)point.Z;
         }
 
-        internal Vector3Property(double x, double y, double z)
+        internal Vector3Property(float x, float y, float z)
         {
             _x = x;
             _y = y;
@@ -41,7 +41,7 @@ namespace Flex.Development.Instances.Properties
         [DisplayName("X")]
         [Description("The X axis value")]
         [TrackMember]
-        public double x
+        public float x
         {
             get
             {
@@ -58,7 +58,7 @@ namespace Flex.Development.Instances.Properties
         [DisplayName("Y")]
         [Description("The Y axis value")]
         [TrackMember]
-        public double y
+        public float y
         {
             get
             {
@@ -75,7 +75,7 @@ namespace Flex.Development.Instances.Properties
         [DisplayName("Z")]
         [Description("The Z axis value")]
         [TrackMember]
-        public double z
+        public float z
         {
             get
             {
@@ -116,7 +116,7 @@ namespace Flex.Development.Instances.Properties
             }
         }
 
-        public void setTo(double x, double y, double z)
+        public void setTo(float x, float y, float z)
         {
             _x = x;
             _y = y;

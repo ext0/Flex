@@ -39,6 +39,11 @@ namespace Flex.Development.Instances
 
         }
 
+        public override void Reload()
+        {
+
+        }
+
         [Category("Lighting")]
         [DisplayName("Sun Horizontal Angle")]
         [Description("The angle of the directional light from the sun around the X axis")]

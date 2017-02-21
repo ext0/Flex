@@ -162,12 +162,16 @@
     <Compile Include="Development\Execution\Data\DataContext.cs" />
     <Compile Include="Development\Execution\Data\States\ObjectSave.cs" />
     <Compile Include="Development\Execution\Runtime\EngineJS.cs" />
+    <Compile Include="Development\Execution\Runtime\MathJS.cs" />
+    <Compile Include="Development\Execution\Runtime\NoiseJS.cs" />
     <Compile Include="Development\Execution\Runtime\OutputJS.cs" />
+    <Compile Include="Development\Execution\Runtime\RandomJS.cs" />
     <Compile Include="Development\Instances\Instance.cs" />
     <Compile Include="Development\Instances\Part.cs" />
     <Compile Include="Development\Instances\PhysicsInstance.cs" />
     <Compile Include="Development\Instances\PositionedInstance.cs" />
     <Compile Include="Development\Instances\Properties\ColorProperty.cs" />
+    <Compile Include="Development\Instances\Properties\RotationProperty.cs" />
     <Compile Include="Development\Instances\Properties\Vector3Property.cs" />
     <Compile Include="Development\Instances\Script.cs" />
     <Compile Include="Development\Instances\SizedInstance.cs" />
@@ -235,6 +239,7 @@
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
     <AppDesigner Include="Properties\" />
+    <EmbeddedResource Include="Resources\FlexJS.xshd" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -3390,6 +3395,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Actions\" />
+    <Folder Include="Development\ValueTypes\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <UsingTask TaskName="CosturaCleanup" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.v4.0.dll" TaskFactory="CodeTaskFactory">
