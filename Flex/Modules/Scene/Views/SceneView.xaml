@@ -38,7 +38,7 @@
                                       Bank="{Binding ElementName=Camera, Path=Bank}"
                                       Distance="200" TargetPosition="0 0 0" 
                                       ShowCameraLight="Never"
-                                      FieldOfView="50"
+                                      FieldOfView="40"
                                       TargetViewport3D="{Binding ElementName=SkyboxViewport}"/>
 
         <Border Name="ViewportBorder" Background="Transparent">
@@ -60,6 +60,7 @@
                                       Heading="-110" Attitude="-22" Bank="0" 
                                       FieldOfView="110"
                                       ShowCameraLight="Never"
+                                      NearPlaneDistance="0.1"
                                       TargetViewport3D="{Binding ElementName=MainViewport}"/>
 
         <ab3d:MouseCameraController Name="MouseCameraController"

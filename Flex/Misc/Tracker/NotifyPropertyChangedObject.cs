@@ -1,4 +1,5 @@
-﻿using Microsoft.ClearScript;
+﻿using Flex.Development.Rendering;
+using Microsoft.ClearScript;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -20,7 +21,10 @@ namespace Flex.Misc.Tracker
         {
             if (PropertyChanged != null)
             {
-                PropertyChanged(this, new PropertyChangedEventArgs(info));
+                MainDXScene.Scene.RunOnUIThread(() =>
+                {
+                    PropertyChanged(this, new PropertyChangedEventArgs(info));
+                });
             }
         }
     }

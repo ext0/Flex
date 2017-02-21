@@ -26,6 +26,7 @@ namespace Flex.Development.Instances
 
             Initialize();
         }
+
         internal Script(bool flag) : base()
         {
             _displayName = "Script";
@@ -49,6 +50,11 @@ namespace Flex.Development.Instances
         }
 
         public override void Cleanup()
+        {
+
+        }
+
+        public override void Reload()
         {
 
         }

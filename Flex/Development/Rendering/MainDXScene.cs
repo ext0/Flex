@@ -43,9 +43,7 @@ namespace Flex.Development.Rendering
         private int _shadowDepthBluringSize;
         private float _shadowTreshold;
 
-        private float _lightHorizontalAngle;
-        private float _lightVerticalAngle;
-        private float _lightDistance;
+        private SplitScreenVirtualRealityProvider _virtualRealityProvider;
 
         private DirectionalLight _directionalLight;
 
@@ -65,7 +63,7 @@ namespace Flex.Development.Rendering
         public ModelMoverVisual3D ModelMover;
         private DateTime _modelMoveEndTime;
 
-        private EventManager3D _eventManager;
+        public EventManager3D EventManager;
         private EventManager3D _skyboxEventManager;
 
         private TranslateTransform3D _currentTranslateTransform3D;
@@ -104,7 +102,6 @@ namespace Flex.Development.Rendering
             _boundingBoxSelected = new PolyLineVisual3D();
             _boundingBoxSelected.LineThickness = 5.0;
             _boundingBoxSelected.LineColor = System.Windows.Media.Color.FromRgb(0, 0, 255);
-
             _boundingBoxSelected.Positions = new Point3DCollection();
 
             _boundingBoxHover = new PolyLineVisual3D();
@@ -112,7 +109,6 @@ namespace Flex.Development.Rendering
             _boundingBoxHover.LineColor = System.Windows.Media.Color.FromArgb(128, 0, 0, 255);
 
             _boundingBoxHover.Positions = new Point3DCollection();
-
             _viewport.DXSceneInitialized += DXSceneInitialized;
         }
 
@@ -124,10 +120,19 @@ namespace Flex.Development.Rendering
                 return;
             }
 
-            //_viewport.DXScene.AfterUpdated += DXSceneAfterUpdated;
+            /*
+            _virtualRealityProvider = new SplitScreenVirtualRealityProvider(
+                eyeSeparation: 0.07f,
+                parallax: 0.6f,
+                splitScreen: SplitScreenVirtualRealityProvider.SplitScreenType.SideBySide
+            );
 
-            _eventManager = new EventManager3D(_viewport.Viewport3D);
-            _eventManager.CustomEventsSourceElement = _sceneView.ViewportBorder;
+            _virtualRealityProvider.ImagesSeparationDistance = 0;
+            _viewport.DXScene.InitializeVirtualRealityRendering(_virtualRealityProvider);
+            */
+
+            EventManager = new EventManager3D(_viewport.Viewport3D);
+            EventManager.CustomEventsSourceElement = _sceneView.ViewportBorder;
 
             _skyboxEventManager = new EventManager3D(_sceneView.SkyboxViewport);
             _skyboxEventManager.CustomEventsSourceElement = _sceneView.ViewportBorder;
@@ -162,8 +167,12 @@ namespace Flex.Development.Rendering
             visualEventSource3D.MouseLeave += VisualEventSource3DOnMouseLeave;
             visualEventSource3D.MouseClick += VisualEventSource3D_MouseClick;
 
-            _eventManager.RegisterEventSource3D(visualEventSource3D);
+            EventManager.RegisterEventSource3D(visualEventSource3D);
+
             _skyboxEventManager.RegisterEventSource3D(visualEventSource3DSkybox);
+
+            EventManager.RegisterExcludedVisual3D(_boundingBoxHover);
+            EventManager.RegisterExcludedVisual3D(_boundingBoxSelected);
 
             InitializeLights();
 
@@ -180,47 +189,36 @@ namespace Flex.Development.Rendering
 
         public void AddChildVisual(Visual3D visual)
         {
-            if (IsOnDispatcher())
+            RunOnUIThread(() =>
             {
                 Scene.RootContainer.Children.Add(visual);
-            } else
-            {
-                RunOnUIThread(() =>
-                {
-                    Scene.RootContainer.Children.Add(visual);
-                });
-            }
+            });
         }
 
         public void RemoveChildVisual(Visual3D visual)
         {
-            if (IsOnDispatcher())
+            RunOnUIThread(() =>
             {
                 Scene.RootContainer.Children.Remove(visual);
-            } else
-            {
-                RunOnUIThread(() =>
-                {
-                    Scene.RootContainer.Children.Remove(visual);
-                });
-            }
+            });
         }
 
         public void RunOnUIThread(System.Action action)
         {
-            Scene.RootContainer.Dispatcher.Invoke(action);
-        }
-
-        public bool IsOnDispatcher()
-        {
-            return Thread.CurrentThread == Scene.RootContainer.Dispatcher.Thread;
+            if (Scene.RootContainer.Dispatcher.CheckAccess())
+            {
+                action();
+            }
+            else {
+                Scene.RootContainer.Dispatcher.Invoke(action);
+            }
         }
 
         private void SetupModelMover()
         {
             ModelMover = new ModelMoverVisual3D();
 
-            ModelMover.SubscribeWithEventManager3D(_eventManager);
+            ModelMover.SubscribeWithEventManager3D(EventManager);
 
             ModelMover.Position = GetVisualCenter(_selectedPhysicalInstance.Visual3D, _selectedPhysicalInstance.Model);
             Rect3D modelBounds = _selectedPhysicalInstance.Model.Bounds;
@@ -228,8 +226,8 @@ namespace Flex.Development.Rendering
 
             ModelMover.AxisLength = axisLength;
 
-            ModelMover.AxisRadius = 0.3;
-            ModelMover.AxisArrowRadius = 0.7;
+            ModelMover.AxisRadius = Math.Max(axisLength / 32, 0.3);
+            ModelMover.AxisArrowRadius = Math.Max(axisLength / 48, 0.6);
 
             // Setup event handlers
             ModelMover.ModelMoveStarted += delegate (object o, EventArgs eventArgs)
@@ -286,7 +284,7 @@ namespace Flex.Development.Rendering
                 _currentTranslateTransform3D.OffsetZ = movement.Z;
                 */
 
-                _selectedPhysicalInstance.position.setTo(newCenterPosition.X, newCenterPosition.Y, newCenterPosition.Z);
+                _selectedPhysicalInstance.position.setTo((float)newCenterPosition.X, (float)newCenterPosition.Y, (float)newCenterPosition.Z);
 
                 ModelMover.Position = newCenterPosition;
             };
@@ -331,15 +329,15 @@ namespace Flex.Development.Rendering
 
             if (hitModel.GetType().Equals(typeof(MultiMaterialBoxVisual3D)))
             {
-                if (_selectedPhysicalInstanceTime == null || ((DateTime.Now - _selectedPhysicalInstanceTime) < EventUnselectCooldown) || (_modelMoveEndTime != null && ((DateTime.Now - _modelMoveEndTime) < ModelMoveUnselectCooldown)))
+                if (((DateTime.Now - _selectedPhysicalInstanceTime) < EventUnselectCooldown) || (_modelMoveEndTime != null && ((DateTime.Now - _modelMoveEndTime) < ModelMoveUnselectCooldown)) || _selectedPhysicalInstance == null)
                 {
                     return;
                 }
+
+                _selectedPhysicalInstance.PropertyChanged -= SelectPolylineBox;
+
                 IoC.Get<IPropertyGrid>().SelectedObject = null;
-                if (_selectedPhysicalInstance != null)
-                {
-                    _selectedPhysicalInstance.PropertyChanged -= SelectPolylineBox;
-                }
+
                 _selectedPhysicalInstance = null;
 
                 _boundingBoxSelected.Positions.Clear();
@@ -363,8 +361,8 @@ namespace Flex.Development.Rendering
 
                 IoC.Get<IPropertyGrid>().SelectedObject = _selectedPhysicalInstance;
 
-                _eventManager.RegisterExcludedVisual3D(_selectedPhysicalInstance.Visual3D);
-                _eventManager.RemoveExcludedVisual3D(_selectedPhysicalInstance.Visual3D);
+                EventManager.RegisterExcludedVisual3D(_selectedPhysicalInstance.Visual3D);
+                EventManager.RemoveExcludedVisual3D(_selectedPhysicalInstance.Visual3D);
 
                 if (ModelMover == null)
                     SetupModelMover();
@@ -392,7 +390,13 @@ namespace Flex.Development.Rendering
 
         private void SelectPolylineBox(object sender, PropertyChangedEventArgs e)
         {
-            PolyLineBoundingBox(_boundingBoxSelected, _selectedPhysicalInstance.position.Vector3D, _selectedPhysicalInstance.Model.Bounds);
+            if (e.PropertyName.Equals("Position"))
+            {
+                if (_selectedPhysicalInstance != null)
+                {
+                    PolyLineBoundingBox(_boundingBoxSelected, _selectedPhysicalInstance.position.Vector3D, _selectedPhysicalInstance.Model.Bounds);
+                }
+            }
         }
 
         public void PolyLineBoundingBox(PolyLineVisual3D polyLine, Vector3D position, Rect3D bounds)
@@ -478,18 +482,9 @@ namespace Flex.Development.Rendering
         {
             _context.ActiveWorld.Sky.OnChanged += (sender, e) =>
             {
-                _lightHorizontalAngle = _context.ActiveWorld.Sky.sunHorizontalAngle;
-                _lightVerticalAngle = _context.ActiveWorld.Sky.sunVerticalAngle;
-                _lightDistance = _context.ActiveWorld.Sky.sunDistance;
-
                 _directionalLight.Direction = GetSunDirection();
                 _directionalLight.SetDXAttribute(DXAttributeType.IsCastingShadow, _context.ActiveWorld.Sky.castShadows);
             };
-
-            _lightHorizontalAngle = _context.ActiveWorld.Sky.sunHorizontalAngle;
-            _lightVerticalAngle = _context.ActiveWorld.Sky.sunVerticalAngle;
-
-            _lightDistance = _context.ActiveWorld.Sky.sunDistance;
 
             _directionalLight = new DirectionalLight();
 
@@ -513,12 +508,12 @@ namespace Flex.Development.Rendering
 
         private Point3D CalculateLightPosition()
         {
-            float xRad = MathUtil.DegreesToRadians(_lightHorizontalAngle);
-            float yRad = MathUtil.DegreesToRadians(_lightVerticalAngle);
+            float xRad = MathUtil.DegreesToRadians(_context.ActiveWorld.Sky.sunHorizontalAngle);
+            float yRad = MathUtil.DegreesToRadians(_context.ActiveWorld.Sky.sunVerticalAngle);
 
-            float x = (float)Math.Sin(xRad) * _lightDistance;
-            float y = (float)Math.Sin(yRad) * _lightDistance;
-            float z = (float)(Math.Cos(xRad) * Math.Cos(yRad)) * _lightDistance;
+            float x = (float)Math.Sin(xRad) * _context.ActiveWorld.Sky.sunDistance;
+            float y = (float)Math.Sin(yRad) * _context.ActiveWorld.Sky.sunDistance;
+            float z = (float)(Math.Cos(xRad) * Math.Cos(yRad)) * _context.ActiveWorld.Sky.sunDistance;
 
             return new Point3D(x, y, z);
         }

@@ -28,7 +28,7 @@ namespace Flex.Modules.Scene.ViewModels
     [Export]
     public class SceneViewModel : Document, ICommandHandler<AddPartCommandDefinition>, ICommandHandler<AddScriptCommandDefinition>
     {
-        private static readonly int KeyboardInputPollingFrequency = 32;
+        private static readonly int KeyboardInputPollingFrequency = 16;
 
         private CancellationToken _keyboardPollCancelToken;
 

@@ -12,6 +12,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Media;
 
 namespace Flex.Development.Execution.Data
@@ -22,6 +23,8 @@ namespace Flex.Development.Execution.Data
         private static List<CancellationTokenSource> _activeTasks;
         private static EngineJS _currentEngine;
         private static SceneViewModel _viewModel;
+
+        public static event EventHandler RunningChanged;
 
         private static byte[] _savedState;
 
@@ -83,6 +86,7 @@ namespace Flex.Development.Execution.Data
         {
             _activeTasks.Clear();
             _context.IsRunning = true;
+            RunningChanged(null, new EventArgs());
             Save();
             //Output.Out.AddLine("Saved cached copy of current state: " + _savedState.Length);
             _currentEngine = new EngineJS();
@@ -90,7 +94,8 @@ namespace Flex.Development.Execution.Data
             foreach (Script script in _context.ActiveWorld.World.getChildren(true).Where((x) =>
             {
                 return x.GetType().Equals(typeof(Script));
-            })) {
+            }))
+            {
                 CancellationTokenSource token = new CancellationTokenSource();
                 scriptExecution.Add(new Task((x) =>
                 {
@@ -115,13 +120,11 @@ namespace Flex.Development.Execution.Data
 
         public static void PhysicsLoop()
         {
-            /*
             while (_context.IsRunning)
             {
                 GetSceneViewModel().PhysicsStep();
-                Thread.Sleep(60 / 1000);
+                Thread.Sleep(1000 / 60);
             }
-            */
         }
 
         public static void Stop()
@@ -136,6 +139,7 @@ namespace Flex.Development.Execution.Data
             }
             Reset();
             _context.IsRunning = false;
+            RunningChanged(null, new EventArgs());
         }
 
         public static void Save()
@@ -172,6 +176,8 @@ namespace Flex.Development.Execution.Data
                     }
                 }
             }
+
+            current.Reload();
         }
 
         public static DataContext Context
