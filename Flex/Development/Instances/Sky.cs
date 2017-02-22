@@ -36,7 +36,7 @@ namespace Flex.Development.Instances
 
         public override void Cleanup()
         {
-            RemoveFromParent();
+            throw new InvalidOperationException("Cannot remove Sky instance!");
         }
 
         public override void Reload()

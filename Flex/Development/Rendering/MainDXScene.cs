@@ -120,6 +120,7 @@ namespace Flex.Development.Rendering
                 return;
             }
 
+            _camera.CameraChanged += _camera_CameraChanged;
             /*
             _virtualRealityProvider = new SplitScreenVirtualRealityProvider(
                 eyeSeparation: 0.07f,
@@ -177,6 +178,12 @@ namespace Flex.Development.Rendering
             InitializeLights();
 
             _output.AppendLine("Welcome to Flex!");
+        }
+
+        private void _camera_CameraChanged(object sender, Ab3d.Common.Cameras.CameraChangedRoutedEventArgs e)
+        {
+            Point3D point = e.ChangedCamera.GetCameraPosition();
+            ActiveWorld.Active.Camera.position.setTo((float)point.X, (float)point.Y, (float)point.Z);
         }
 
         public void PhysicsStep()

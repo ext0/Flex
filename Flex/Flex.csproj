@@ -159,6 +159,7 @@
     <Compile Include="Development\Execution\Runtime\MathJS.cs" />
     <Compile Include="Development\Execution\Runtime\NoiseJS.cs" />
     <Compile Include="Development\Execution\Runtime\RandomJS.cs" />
+    <Compile Include="Development\Instances\Camera.cs" />
     <Compile Include="Development\Instances\Instance.cs" />
     <Compile Include="Development\Instances\Part.cs" />
     <Compile Include="Development\Instances\PhysicsInstance.cs" />

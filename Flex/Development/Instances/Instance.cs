@@ -173,6 +173,11 @@ namespace Flex.Development.Instances
         [ScriptMember(ScriptAccess.None)]
         public abstract void Reload();
 
+        public void remove()
+        {
+            Cleanup();
+        }
+
         public Instance getChild(String name, bool recursive = false)
         {
             IEnumerable<Instance> instances = getChildren(recursive);

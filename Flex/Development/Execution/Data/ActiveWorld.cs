@@ -18,6 +18,8 @@ namespace Flex.Development.Execution.Data
 
         private Sky _sky;
 
+        private Camera _camera;
+
         private static ActiveWorld _activeWorld;
 
         public ActiveWorld()
@@ -32,6 +34,7 @@ namespace Flex.Development.Execution.Data
             _instances.Add(_world);
             _sky = new Sky(true);
             _instances.Add(_sky);
+            _camera = new Camera(true);
         }
 
         public static ActiveWorld Active
@@ -55,6 +58,14 @@ namespace Flex.Development.Execution.Data
             get
             {
                 return _world;
+            }
+        }
+
+        public Camera Camera
+        {
+            get
+            {
+                return _camera;
             }
         }
 
