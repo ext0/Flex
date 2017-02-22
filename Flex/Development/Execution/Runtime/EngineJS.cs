@@ -29,57 +29,114 @@ namespace Flex.Development.Execution.Runtime
             _output = IoC.Get<IOutput>();
             _engine = new V8ScriptEngine(V8ScriptEngineFlags.None);
             _childrenThreads = new List<CancellationTokenSource>();
-            /*
-            _engine.Context.DefineVariable("print").Assign(JSValue.Marshal(new Action<Object>(text =>
+        }
+
+        private void print(dynamic obj)
+        {
+            MainDXScene.Scene.RunOnUIThread(() =>
             {
-                JSValue val = (JSValue)text;
-                if (val != null && val.Value is DynamicJS)
+                if (obj != null)
                 {
-                    _output.AppendLine((val.Value as DynamicJS).ToString());
-                }
-                else if (val != null)
-                {
-                    _output.AppendLine(val.ToString());
+                    _output.AppendLine(obj.ToString());
                 }
                 else
                 {
                     _output.AppendLine("null");
                 }
-            })));
-            _engine.Context.DefineVariable("wait").Assign(JSValue.Marshal(new Action<double>(time =>
+            });
+        }
+
+        private void wait(double time)
+        {
+            _engine.GetType().GetMethod("ScriptInvoke", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic, null, new Type[] { typeof(System.Action) }, null)
+                .Invoke(_engine, new object[] {
+                    new System.Action(() => {
+                        Thread.Sleep((int)(time * 1000d));
+                    })
+                });
+        }
+
+        private void delay(dynamic obj, double time)
+        {
+            CancellationTokenSource token = new CancellationTokenSource();
+            _childrenThreads.Add(token);
+            Thread thread = new Thread(new ThreadStart(() =>
             {
-                Thread.Sleep((int)(time * 1000));
-            })));
-            _engine.Context.DefineVariable("spawn").Assign(JSValue.Marshal(new Action<Object>(obj =>
-            {
-                JSValue val = (JSValue)obj;
-                if (val.ValueType == JSValueType.Function)
+                Thread currentThread = Thread.CurrentThread;
+                using (token.Token.Register(currentThread.Abort))
                 {
-                    CancellationTokenSource token = new CancellationTokenSource();
-                    _childrenThreads.Add(token);
-                    Thread thread = new Thread(new ThreadStart(() =>
+                    try
                     {
-                        Thread currentThread = Thread.CurrentThread;
-                        using (token.Token.Register(currentThread.Abort))
-                        {
-                            try
-                            {
-                                (val.Value as Function).Call(null);
-                            }
-                            catch (ThreadAbortException)
-                            {
-                                //Ignore
-                            }
-                            catch (Exception e)
-                            {
-                                _output.AppendLine(e.Message);
-                            }
-                        }
-                    }));
-                    thread.Start();
+                        Thread.Sleep((int)(time * 1000d));
+                        obj();
+                    }
+                    catch (ThreadAbortException)
+                    {
+                        //Ignore
+                    }
+                    catch (ScriptEngineException e)
+                    {
+                        _output.AppendLine(e.ErrorDetails);
+                    }
                 }
-            })));
-            */
+            }));
+            thread.Start();
+        }
+
+        private void spawn(dynamic obj)
+        {
+            CancellationTokenSource token = new CancellationTokenSource();
+            _childrenThreads.Add(token);
+            Thread thread = new Thread(new ThreadStart(() =>
+            {
+                Thread currentThread = Thread.CurrentThread;
+                using (token.Token.Register(currentThread.Abort))
+                {
+                    try
+                    {
+                        obj();
+                    }
+                    catch (ThreadAbortException)
+                    {
+                        //Ignore
+                    }
+                    catch (ScriptEngineException e)
+                    {
+                        _output.AppendLine(e.ErrorDetails);
+                    }
+                }
+            }));
+            thread.Start();
+        }
+
+        private void loop(dynamic obj, double interval)
+        {
+            CancellationTokenSource token = new CancellationTokenSource();
+            _childrenThreads.Add(token);
+            Thread thread = new Thread(new ThreadStart(() =>
+            {
+                Thread currentThread = Thread.CurrentThread;
+                using (token.Token.Register(currentThread.Abort))
+                {
+                    try
+                    {
+                        while (true)
+                        {
+                            obj();
+                            Thread.Sleep((int)(interval * 1000d));
+                        }
+                    }
+                    catch (ThreadAbortException)
+                    {
+                        //Ignore
+                    }
+                    catch (ScriptEngineException e)
+                    {
+                        _output.AppendLine(e.ErrorDetails);
+                    }
+                }
+            }));
+            thread.Start();
         }
 
         public void Execute(Script script)
@@ -87,7 +144,11 @@ namespace Flex.Development.Execution.Runtime
             _engine.AddHostObject("script", script);
             _engine.AddHostObject("world", ActiveWorld.Active.World);
             _engine.AddHostObject("sky", ActiveWorld.Active.Sky);
-            _engine.AddHostObject("output", new OutputJS());
+
+            _engine.Script.print = new Action<Object>(print);
+            _engine.Script.spawn = new Action<Object>(spawn);
+            _engine.Script.delay = new Action<Object, double>(delay);
+            _engine.Script.loop = new Action<Object, double>(loop);
 
             _engine.AddHostType(HostItemFlags.DirectAccess, typeof(Math));
             _engine.AddHostType(HostItemFlags.DirectAccess, typeof(Noise));

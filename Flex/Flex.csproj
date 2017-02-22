@@ -151,12 +151,6 @@
     <Compile Include="Commands\Global\StopSceneCommandHandler.cs" />
     <Compile Include="Commands\Scene\AddScriptCommandDefinition.cs" />
     <Compile Include="Commands\Scene\AddPartCommandDefinition.cs" />
-    <Compile Include="CustomTreeView\ItemMonitor.cs" />
-    <Compile Include="CustomTreeView\RoutedTreeItemEventArgs.cs" />
-    <Compile Include="CustomTreeView\TreeLayout.cs" />
-    <Compile Include="CustomTreeView\TreeUtil.cs" />
-    <Compile Include="CustomTreeView\TreeViewBase.cs" />
-    <Compile Include="CustomTreeView\TreeViewBase.Declarations.cs" />
     <Compile Include="Development\Execution\Data\ActiveScene.cs" />
     <Compile Include="Development\Execution\Data\ActiveWorld.cs" />
     <Compile Include="Development\Execution\Data\DataContext.cs" />
@@ -164,7 +158,6 @@
     <Compile Include="Development\Execution\Runtime\EngineJS.cs" />
     <Compile Include="Development\Execution\Runtime\MathJS.cs" />
     <Compile Include="Development\Execution\Runtime\NoiseJS.cs" />
-    <Compile Include="Development\Execution\Runtime\OutputJS.cs" />
     <Compile Include="Development\Execution\Runtime\RandomJS.cs" />
     <Compile Include="Development\Instances\Instance.cs" />
     <Compile Include="Development\Instances\Part.cs" />
@@ -179,7 +172,6 @@
     <Compile Include="Development\Instances\World.cs" />
     <Compile Include="Development\Physics\PhysicsEngine.cs" />
     <Compile Include="Development\Rendering\MainDXScene.cs" />
-    <Compile Include="Misc\Runtime\InstanceTree.cs" />
     <Compile Include="Misc\Tracker\NotifyPropertyChangedObject.cs" />
     <Compile Include="Misc\Tracker\TrackClassAttribute.cs" />
     <Compile Include="Misc\Tracker\Tracker.cs" />
@@ -3396,6 +3388,7 @@
   <ItemGroup>
     <Folder Include="Actions\" />
     <Folder Include="Development\ValueTypes\" />
+    <Folder Include="Misc\Runtime\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <UsingTask TaskName="CosturaCleanup" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.v4.0.dll" TaskFactory="CodeTaskFactory">

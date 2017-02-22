@@ -1,5 +1,4 @@
 ﻿using Caliburn.Micro;
-using Flex.CustomTreeView;
 using Flex.Development.Execution.Data;
 using Flex.Development.Instances;
 using Flex.Misc.Utility;
@@ -39,6 +38,24 @@ namespace Flex.Modules.Explorer.Views
             _propertyGrid = IoC.Get<IPropertyGrid>();
         }
 
+        private void ActiveInstancesSelectedChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
+        {
+            _propertyGrid.SelectedObject = e.NewValue;
+            /*
+            foreach (PropertyItem prop in _propertyGrid)
+            {
+                if (prop.IsExpandable)
+                {
+                    prop.IsExpanded = true;
+                    prop.IsExpandable = false;
+                }
+            }
+            */
+            /*
+            (_propertyGrid.SelectedObject as Instance).OnChanged += Tracker_Changed;
+            */
+        }
+
         private void TreeInstancePreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             _startPoint = e.GetPosition(null);
@@ -46,7 +63,7 @@ namespace Flex.Modules.Explorer.Views
 
         private void TreeInstancePreviewMouseMove(object sender, MouseEventArgs e)
         {
-            if (e.LeftButton == MouseButtonState.Pressed)
+            if (e.LeftButton == MouseButtonState.Pressed && !ActiveScene.Running)
             {
                 var mousePos = e.GetPosition(null);
                 var diff = _startPoint - mousePos;
@@ -80,7 +97,7 @@ namespace Flex.Modules.Explorer.Views
 
         private void TreeInstancesDrop(object sender, DragEventArgs e)
         {
-            if (e.Data.GetDataPresent(e.Data.GetFormats()[0]))
+            if (e.Data.GetDataPresent(e.Data.GetFormats()[0]) && !ActiveScene.Running)
             {
                 Instance dragging = e.Data.GetData(e.Data.GetFormats()[0], true) as Instance;
                 TreeViewItem treeViewItem =
@@ -93,7 +110,7 @@ namespace Flex.Modules.Explorer.Views
 
                 dragging.parent = dropTarget;
 
-                ChildrenElements.Refresh();
+                ActiveInstances.Items.Refresh();
             }
         }
 
@@ -164,11 +181,6 @@ namespace Flex.Modules.Explorer.Views
                     shell.OpenDocument(new ScriptViewModel(context as Script));
                 }
             }
-        }
-
-        private void Children_SelectedItemChanged(object sender, RoutedTreeItemEventArgs<Instance> e)
-        {
-            _propertyGrid.SelectedObject = e.NewItem;
         }
     }
 }

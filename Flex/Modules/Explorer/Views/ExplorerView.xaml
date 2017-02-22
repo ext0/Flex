@@ -4,68 +4,27 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:Flex.Modules.Explorer.ViewModels"
-             xmlns:ui="clr-namespace:Flex.Misc.Runtime"
-             xmlns:flex="clr-namespace:Flex.Misc.Utility"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300">
-    <UserControl.Resources>
-        <TreeViewItem x:Key="CustomRootNode">
-            <TreeViewItem.Header>
-                <StackPanel Orientation="Horizontal"
-                    Margin="0,2,0,2">
-                    <Image
-                        Source="/Resources/Icons/16/application-gear.png"
-                        Width="16"
-                        Height="16" />
-                    <TextBlock Margin="2,0,0,0"
-                     VerticalAlignment="Center"
-                     FontWeight="Bold"
-                     Text="Project" />
-                </StackPanel>
-            </TreeViewItem.Header>
-        </TreeViewItem>
-    </UserControl.Resources>
     <Grid>
         <ScrollViewer Name="TreeScroller" Grid.Row="0" Margin="0" VerticalScrollBarVisibility="Auto">
-            <ui:InstanceTree x:Name="ChildrenElements"
-                          Items="{Binding Children}"
-                          RootNode="{StaticResource CustomRootNode}"
-                          NodeContextMenu="{StaticResource CategoryMenu}"
-                          TreeNodeStyle="{StaticResource SimpleFolders}"
-                          TreeStyle="{StaticResource SimpleTreeStyle}"
-                          SelectedItemChanged="Children_SelectedItemChanged"                      
-                          Margin="0,0,0,0">
-                <ui:InstanceTree.Resources>
-                    <!--
-                    <Style x:Key="SimpleTreeStyle" TargetType="{x:Type TreeView}">
-
-                        <Setter Property="Background" Value="#AAA" />
-                        <Setter Property="BorderThickness" Value="4" />
-
-                        <Setter Property="BorderBrush" Value="#FFA6AAAB" />
-                    </Style>
-                    -->
-                </ui:InstanceTree.Resources>
-            </ui:InstanceTree>
-            <!--
-            <TreeView ItemsSource="{Binding Path=Children}"  Name="ActiveInstances" SelectedItemChanged="ActiveInstancesSelectedChanged" PreviewMouseLeftButtonDown="TreeInstancePreviewMouseLeftButtonDown" 
-                              PreviewMouseMove="TreeInstancePreviewMouseMove" DragEnter="TreeInstancesDragEnter">
+            <TreeView ItemsSource="{Binding Children}" Name="ActiveInstances" SelectedItemChanged="ActiveInstancesSelectedChanged" PreviewMouseLeftButtonDown="TreeInstancePreviewMouseLeftButtonDown" 
+                              PreviewMouseMove="TreeInstancePreviewMouseMove" DragEnter="TreeInstancesDragEnter" >
                 <TreeView.ItemContainerStyle>
                     <Style TargetType="{x:Type TreeViewItem}">
                         <Setter Property="IsExpanded" Value="True"/>
                     </Style>
                 </TreeView.ItemContainerStyle>
                 <TreeView.ItemTemplate>
-                    <HierarchicalDataTemplate ItemsSource="{Binding Path=Children, UpdateSourceTrigger=PropertyChanged}" DataType="{x:Type flex:ObservableInstanceHierarchy}">
+                    <HierarchicalDataTemplate ItemsSource="{Binding Children}">
                         <StackPanel Background="Transparent" Orientation="Horizontal" AllowDrop="True" Drop="TreeInstancesDrop">
-                            <Image Source="{Binding Current.icon}" Margin="0 0 5 0" MouseDown="ImageTreeViewMouseDown" />
-                            <TextBox Text="{Binding Current.name}" Focusable="False" MouseDoubleClick="DisplayNameTreeViewMouseDoubleClick" LostFocus="DisplayNameTreeViewLostFocus" FocusableChanged="DisplayNameTreeViewFocusableChanged" 
+                            <Image Source="{Binding icon}" Margin="0 0 5 0" MouseDown="ImageTreeViewMouseDown" />
+                            <TextBox Text="{Binding name}" Focusable="False" MouseDoubleClick="DisplayNameTreeViewMouseDoubleClick" LostFocus="DisplayNameTreeViewLostFocus" FocusableChanged="DisplayNameTreeViewFocusableChanged" 
                                              Cursor="Arrow" AllowDrop="True" PreviewKeyDown="DisplayNameTreeViewPreviewKeyDown" Background="Transparent" BorderThickness="0" PreviewDragOver="DisplayNameTreeViewPreviewDragOver"/>
                         </StackPanel>
                     </HierarchicalDataTemplate>
                 </TreeView.ItemTemplate>
             </TreeView>
-            -->
         </ScrollViewer>
     </Grid>
 </UserControl>

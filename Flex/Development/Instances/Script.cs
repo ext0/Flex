@@ -51,7 +51,7 @@ namespace Flex.Development.Instances
 
         public override void Cleanup()
         {
-
+            RemoveFromParent();
         }
 
         public override void Reload()
@@ -88,7 +88,7 @@ namespace Flex.Development.Instances
             }
         }
 
-        public override string Icon
+        public override string icon
         {
             get
             {
