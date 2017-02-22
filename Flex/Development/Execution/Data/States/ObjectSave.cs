@@ -34,6 +34,7 @@ namespace Flex.Development.Execution.Data.States
                 foreach (PropertyInfo property in _type.GetProperties(BindingFlags.Public | BindingFlags.Instance))
                 {
                     //System.Diagnostics.Debug.WriteLine(property.Name + " " + property.PropertyType.Name);
+                    /*
                     if (property.PropertyType.Equals(typeof(UISafeObservableCollection<Instance>))) //For parent checks, special case! We'll assume the parent is Instance here
                     {
                         if (property.CanWrite)
@@ -72,7 +73,8 @@ namespace Flex.Development.Execution.Data.States
                         }
                         continue;
                     }
-                    else if (property.PropertyType.IsValueType || property.PropertyType.Equals(typeof(String))) //String check because the String datatype is a special snowflake...
+                    */
+                    if (property.PropertyType.IsValueType || property.PropertyType.Equals(typeof(String))) //String check because the String datatype is a special snowflake...
                     {
                         ScriptMemberAttribute scriptMemberAttribute = property.GetCustomAttribute<ScriptMemberAttribute>();
                         if (property.CanWrite)

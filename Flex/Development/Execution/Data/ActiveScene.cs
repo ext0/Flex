@@ -19,6 +19,34 @@ namespace Flex.Development.Execution.Data
 {
     public static class ActiveScene
     {
+        internal class InstancePair
+        {
+            private Instance _old;
+            private Instance _current;
+
+            public InstancePair(Instance old, Instance current)
+            {
+                _old = old;
+                _current = current;
+            }
+
+            public Instance Old
+            {
+                get
+                {
+                    return _old;
+                }
+            }
+
+            public Instance Current
+            {
+                get
+                {
+                    return _current;
+                }
+            }
+        }
+
         private static DataContext _context;
         private static List<CancellationTokenSource> _activeTasks;
         private static EngineJS _currentEngine;
@@ -86,7 +114,10 @@ namespace Flex.Development.Execution.Data
         {
             _activeTasks.Clear();
             _context.IsRunning = true;
-            RunningChanged(null, new EventArgs());
+            if (RunningChanged != null)
+            {
+                RunningChanged(null, new EventArgs());
+            }
             Save();
             //Output.Out.AddLine("Saved cached copy of current state: " + _savedState.Length);
             _currentEngine = new EngineJS();
@@ -139,7 +170,10 @@ namespace Flex.Development.Execution.Data
             }
             Reset();
             _context.IsRunning = false;
-            RunningChanged(null, new EventArgs());
+            if (RunningChanged != null)
+            {
+                RunningChanged(null, new EventArgs());
+            }
         }
 
         public static void Save()
@@ -155,28 +189,68 @@ namespace Flex.Development.Execution.Data
         private static void Reset()
         {
             ActiveWorld world = FlexUtility.DeserializeToObject(_savedState) as ActiveWorld;
-            ResetInstance(world.World, _context.ActiveWorld.World);
+
+            List<InstancePair> correspondings;
+            List<Instance> removedInstances;
+            List<Instance> newInstances;
+
+            List<Instance> newChildren = new List<Instance>();
+            List<Instance> oldChildren = new List<Instance>();
+
+            LoadResetInstanceHelper(_context.ActiveWorld.World, world.World, newChildren, oldChildren);
+
+            newInstances = newChildren.Where(x => !oldChildren.Any(y => x.Equals(y))).ToList();
+            removedInstances = oldChildren.Where(x => !newChildren.Any(y => x.Equals(y))).ToList();
+            correspondings = oldChildren.Join(newChildren, x => x, y => y, (x, y) =>
+            {
+                return new InstancePair(x, y);
+            }).ToList();
+
+            foreach (Instance newInstance in newInstances)
+            {
+                newInstance.Cleanup();
+            }
+
+            foreach (Instance removedInstance in removedInstances)
+            {
+                /*
+                Implement
+                */
+            }
+
+            foreach (InstancePair instancePair in correspondings)
+            {
+                ObjectSave save = new ObjectSave(instancePair.Old, instancePair.Current, instancePair.Current.GetType());
+                save.Reset();
+            }
+
             ResetInstance(world.Sky, _context.ActiveWorld.Sky);
+        }
+
+        private static void LoadResetInstanceHelper(Instance newRoot, Instance oldRoot, List<Instance> newFound, List<Instance> oldFound)
+        {
+            if (newRoot != null)
+            {
+                foreach (Instance newChild in newRoot.getChildren())
+                {
+                    newFound.Add(newChild);
+                    LoadResetInstanceHelper(newChild, null, newFound, oldFound);
+                }
+            }
+            if (oldRoot != null)
+            {
+                foreach (Instance oldChild in oldRoot.getChildren())
+                {
+                    oldFound.Add(oldChild);
+                    LoadResetInstanceHelper(null, oldChild, newFound, oldFound);
+                }
+            }
         }
 
         private static void ResetInstance(Instance old, Instance current)
         {
             ObjectSave save = new ObjectSave(old, current, old.GetType());
-
             save.Reset();
-
-            foreach (Instance oldChild in old.getChildren())
-            {
-                foreach (Instance currentChild in current.getChildren())
-                {
-                    if (oldChild.Equals(currentChild))
-                    {
-                        ResetInstance(oldChild, currentChild);
-                        continue;
-                    }
-                }
-            }
-
             current.Reload();
         }
 

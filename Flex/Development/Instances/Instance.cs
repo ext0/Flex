@@ -109,7 +109,7 @@ namespace Flex.Development.Instances
 
         [ScriptMember(ScriptAccess.None)]
         [Browsable(true)]
-        public abstract String Icon { get; }
+        public abstract String icon { get; }
 
         internal bool RemoveFromParent()
         {

@@ -143,6 +143,7 @@ namespace Flex.Development.Instances
                     MainDXScene.Scene.RemoveChildVisual(_visual3D);
                 });
             }
+            RemoveFromParent();
         }
 
         [Category("Appearance")]
@@ -187,7 +188,7 @@ namespace Flex.Development.Instances
             }
         }
 
-        public override string Icon
+        public override string icon
         {
             get
             {
