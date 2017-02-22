@@ -222,6 +222,7 @@ namespace Flex.Development.Execution.Data
             {
                 ObjectSave save = new ObjectSave(instancePair.Old, instancePair.Current, instancePair.Current.GetType());
                 save.Reset();
+                instancePair.Current.Reload();
             }
 
             ResetInstance(world.Sky, _context.ActiveWorld.Sky);
