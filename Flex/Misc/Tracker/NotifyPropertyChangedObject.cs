@@ -21,7 +21,7 @@ namespace Flex.Misc.Tracker
         {
             if (PropertyChanged != null)
             {
-                MainDXScene.Scene.RunOnUIThread(() =>
+                MainDXScene.RunOnUIThread(() =>
                 {
                     PropertyChanged(this, new PropertyChangedEventArgs(info));
                 });

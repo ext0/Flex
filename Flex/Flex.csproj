@@ -39,6 +39,9 @@
   <PropertyGroup>
     <ApplicationIcon>FlexVRBanner.ico</ApplicationIcon>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'CustomFlex|AnyCPU'">
+    <OutputPath>bin\CustomFlex\</OutputPath>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="Ab3d.DXEngine, Version=2.0.6178.45, Culture=neutral, PublicKeyToken=d45c8e156fba2841, processorArchitecture=MSIL" />
     <Reference Include="Ab3d.DXEngine.Wpf, Version=2.0.6178.45, Culture=neutral, PublicKeyToken=d45c8e156fba2841, processorArchitecture=MSIL" />
@@ -184,11 +187,12 @@
     <Compile Include="Commands\Global\OpenFileCommandHandler.cs" />
     <Compile Include="Misc\Utility\UISafeObservableCollection.cs" />
     <Compile Include="Modules\Explorer\IExplorer.cs" />
-    <Compile Include="Modules\Explorer\MenuDefinitions.cs" />
     <Compile Include="Modules\Explorer\Views\ExplorerView.xaml.cs">
       <DependentUpon>ExplorerView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Modules\Explorer\ViewModels\ExplorerViewModel.cs" />
+    <Compile Include="Modules\External\Commands\ImportScriptCommandDefinition.cs" />
+    <Compile Include="Modules\External\Commands\ImportScriptCommandHandler.cs" />
     <Compile Include="Modules\External\Commands\ViewPropertyGridCommandDefinition.cs" />
     <Compile Include="Modules\Explorer\Commands\ViewPropertyGridCommandDefinition.cs" />
     <Compile Include="Modules\External\Commands\ViewPropertyGridCommandHandler.cs" />

@@ -70,10 +70,6 @@ namespace Flex.Modules.Explorer.ViewModels
 
         private void ExplorerView_ListChanged(object sender, System.ComponentModel.ListChangedEventArgs e)
         {
-            /*
-            FlexUtility.RunWindowAction(() =>
-                _view.ActiveInstances.Items.Refresh(), System.Windows.Threading.DispatcherPriority.Normal, true);
-            */
 
         }
 

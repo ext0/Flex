@@ -45,7 +45,7 @@ namespace Flex.Modules.Explorer.Views
             PositionedInstance positioned = e.NewValue as PositionedInstance;
             if (positioned != null && !(positioned is Camera))
             {
-                MainDXScene.Scene.SelectInstance(positioned);
+                MainDXScene.SelectInstance(positioned);
             }
             /*
             foreach (PropertyItem prop in _propertyGrid)

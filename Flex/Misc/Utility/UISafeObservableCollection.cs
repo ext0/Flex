@@ -10,6 +10,7 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using Flex.Misc.Utility;
 using System.Threading;
+using Flex.Development.Rendering;
 
 namespace Flex.Misc.Utility
 {
@@ -18,35 +19,19 @@ namespace Flex.Misc.Utility
     {
         public new void Add(T obj)
         {
-            Dispatcher dispatcher = Dispatcher.FromThread(Thread.CurrentThread);
-            if (dispatcher != null)
+            MainDXScene.RunOnUIThread(() =>
             {
                 base.Add(obj);
-            }
-            else
-            {
-                FlexUtility.RunWindowAction(() =>
-                {
-                    base.Add(obj);
-                }, DispatcherPriority.Normal, false);
-            }
+            });
         }
 
         public new bool Remove(T obj)
         {
             bool value = true;
-            Dispatcher dispatcher = Dispatcher.FromThread(Thread.CurrentThread);
-            if (dispatcher != null)
+            MainDXScene.RunOnUIThread(() =>
             {
                 value = base.Remove(obj);
-            }
-            else
-            {
-                FlexUtility.RunWindowAction(() =>
-                {
-                    value = base.Remove(obj);
-                }, DispatcherPriority.Normal, false);
-            }
+            });
             return value;
         }
     }

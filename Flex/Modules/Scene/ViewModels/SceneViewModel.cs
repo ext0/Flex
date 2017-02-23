@@ -33,7 +33,6 @@ namespace Flex.Modules.Scene.ViewModels
         private CancellationToken _keyboardPollCancelToken;
 
         private SceneView _sceneView;
-        private MainDXScene _scene;
 
         public SceneViewModel()
         {
@@ -54,7 +53,7 @@ namespace Flex.Modules.Scene.ViewModels
             _keyboardPollCancelToken = cancellationTokenSource.Token;
             Task listener = Task.Factory.StartNew(KeyboardTick, _keyboardPollCancelToken, TaskCreationOptions.LongRunning, TaskScheduler.Default);
 
-            _scene = new MainDXScene(ActiveScene.Context, _sceneView);
+            MainDXScene.Initialize(ActiveScene.Context, _sceneView);
         }
 
         private void SceneViewMouseWheel(object sender, MouseWheelEventArgs e)
@@ -92,7 +91,7 @@ namespace Flex.Modules.Scene.ViewModels
                 while (true)
                 {
                     Thread.Sleep(KeyboardInputPollingFrequency);
-                    FlexUtility.RunWindowAction(() =>
+                    MainDXScene.RunOnUIThread(() =>
                     {
                         if (!_sceneView.IsMouseOver)
                         {
@@ -130,7 +129,7 @@ namespace Flex.Modules.Scene.ViewModels
                             sA = 1;
                             dA = 1;
                         }
-                    }, DispatcherPriority.Normal);
+                    });
 
                     if (_keyboardPollCancelToken.IsCancellationRequested)
                     {
@@ -147,11 +146,6 @@ namespace Flex.Modules.Scene.ViewModels
         public override bool ShouldReopenOnStart
         {
             get { return true; }
-        }
-
-        public void PhysicsStep()
-        {
-            _scene.PhysicsStep();
         }
 
         void ICommandHandler<AddPartCommandDefinition>.Update(Command command)

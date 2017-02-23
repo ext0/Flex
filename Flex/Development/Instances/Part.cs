@@ -65,7 +65,7 @@ namespace Flex.Development.Instances
             _position = new Vector3Property(0, 0, 0);
             _position.PropertyChanged += (sender, e) =>
             {
-                MainDXScene.Scene.RunOnUIThread(() =>
+                MainDXScene.RunOnUIThread(() =>
                 {
                     if (_initialized)
                     {
@@ -79,7 +79,7 @@ namespace Flex.Development.Instances
             _rotation = new RotationProperty();
             _rotation.PropertyChanged += (sender, e) =>
             {
-                MainDXScene.Scene.RunOnUIThread(() =>
+                MainDXScene.RunOnUIThread(() =>
                 {
                     if (_initialized)
                     {
@@ -93,7 +93,7 @@ namespace Flex.Development.Instances
             _size = new Vector3Property(8, 4, 4);
             _size.PropertyChanged += (sender, e) =>
             {
-                MainDXScene.Scene.RunOnUIThread(() =>
+                MainDXScene.RunOnUIThread(() =>
                 {
                     if (_initialized)
                     {
@@ -108,7 +108,7 @@ namespace Flex.Development.Instances
             _color = new ColorProperty(Colors.Green);
             _color.PropertyChanged += (sender, e) =>
             {
-                MainDXScene.Scene.RunOnUIThread(() =>
+                MainDXScene.RunOnUIThread(() =>
                 {
                     if (_initialized)
                     {
@@ -118,12 +118,12 @@ namespace Flex.Development.Instances
                 NotifyPropertyChanged("Color");
             };
 
-            MainDXScene.Scene.RunOnUIThread(() =>
+            MainDXScene.RunOnUIThread(() =>
             {
                 LoadPhysicsInstance();
                 InitializeVisual();
+                _initialized = true;
             });
-            _initialized = true;
         }
 
         [ScriptMember(ScriptAccess.None)]
@@ -138,11 +138,11 @@ namespace Flex.Development.Instances
         {
             if (_initialized)
             {
-                MainDXScene.Scene.RunOnUIThread(() =>
+                MainDXScene.RunOnUIThread(() =>
                 {
                     UnloadPhysicsInstance();
-                    MainDXScene.Scene.VisualInstances.Remove(this);
-                    MainDXScene.Scene.RemoveChildVisual(_visual3D);
+                    MainDXScene.VisualInstances.Remove(this);
+                    MainDXScene.RemoveChildVisual(_visual3D);
                 });
             }
             RemoveFromParent();
@@ -233,8 +233,8 @@ namespace Flex.Development.Instances
             (_visual3D as BoxVisual3D).Size = size.Size3D;
             (_visual3D as BoxVisual3D).Material = Material;
 
-            MainDXScene.Scene.VisualInstances.Add(this);
-            MainDXScene.Scene.AddChildVisual(_visual3D);
+            MainDXScene.VisualInstances.Add(this);
+            MainDXScene.AddChildVisual(_visual3D);
         }
     }
 }

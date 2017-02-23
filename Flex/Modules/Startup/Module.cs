@@ -27,9 +27,6 @@ namespace Flex.Modules.Startup
     [Export(typeof(IModule))]
     public class Module : ModuleBase
     {
-        [Export]
-        public static ExcludeMenuItemGroupDefinition ExcludeToolsOptionsMenuItemGroup = new ExcludeMenuItemGroupDefinition(Gemini.Modules.MainMenu.MenuDefinitions.ViewPropertiesMenuGroup);
-
         public override IEnumerable<IDocument> DefaultDocuments
         {
             get

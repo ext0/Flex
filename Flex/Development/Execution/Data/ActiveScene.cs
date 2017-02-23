@@ -2,6 +2,7 @@
 using Flex.Development.Execution.Data.States;
 using Flex.Development.Execution.Runtime;
 using Flex.Development.Instances;
+using Flex.Development.Rendering;
 using Flex.Misc.Utility;
 using Flex.Modules.Scene.ViewModels;
 using Gemini.Framework;
@@ -92,7 +93,7 @@ namespace Flex.Development.Execution.Data
         public static Instance AddInstance<T>() where T : Instance
         {
             Instance ret = null;
-            FlexUtility.RunWindowAction(() =>
+            MainDXScene.RunOnUIThread(() =>
             {
                 if (typeof(T).Equals(typeof(Part)))
                 {
@@ -106,7 +107,7 @@ namespace Flex.Development.Execution.Data
                     script.parent = _context.ActiveWorld.World;
                     ret = script;
                 }
-            }, System.Windows.Threading.DispatcherPriority.Normal, false);
+            });
             return ret;
         }
 
@@ -153,7 +154,7 @@ namespace Flex.Development.Execution.Data
         {
             while (_context.IsRunning)
             {
-                GetSceneViewModel().PhysicsStep();
+                MainDXScene.PhysicsStep();
                 Thread.Sleep(1000 / 60);
             }
         }

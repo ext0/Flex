@@ -36,7 +36,7 @@ namespace Flex.Development.Instances
             _position = new Vector3Property(0, 0, 0);
             _position.PropertyChanged += (sender, e) =>
             {
-                MainDXScene.Scene.RunOnUIThread(() =>
+                MainDXScene.RunOnUIThread(() =>
                 {
                     if (_initialized)
                     {
@@ -49,7 +49,7 @@ namespace Flex.Development.Instances
             _rotation = new RotationProperty();
             _rotation.PropertyChanged += (sender, e) =>
             {
-                MainDXScene.Scene.RunOnUIThread(() =>
+                MainDXScene.RunOnUIThread(() =>
                 {
                     if (_initialized)
                     {

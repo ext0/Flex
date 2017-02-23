@@ -94,25 +94,6 @@ namespace Flex.Misc.Utility
             }
         }
 
-        public static void RunWindowAction(Action action, DispatcherPriority priority, bool async = true)
-        {
-            try
-            {
-                if (async)
-                {
-                    Application.Current.Dispatcher.BeginInvoke(priority, action);
-                }
-                else
-                {
-                    Application.Current.Dispatcher.Invoke(priority, action);
-                }
-            }
-            catch (NullReferenceException)
-            {
-                //Ignore this, because it's probably just the closing of the application
-            }
-        }
-
         public static double ConstrainValue(double value, double lower, double upper)
         {
             return Math.Min(upper, Math.Max(lower, value));

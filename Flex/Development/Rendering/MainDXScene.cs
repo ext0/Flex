@@ -29,70 +29,64 @@ using Flex.Modules.Explorer;
 
 namespace Flex.Development.Rendering
 {
-    public class MainDXScene : IDisposable
+    public static class MainDXScene
     {
         private static readonly TimeSpan EventUnselectCooldown = new TimeSpan(0, 0, 0, 0, 50);
         private static readonly TimeSpan ModelMoveUnselectCooldown = new TimeSpan(0, 0, 0, 0, 50);
 
-        public static MainDXScene Scene = null;
-        public List<Instance> VisualInstances;
+        public static List<Instance> VisualInstances;
 
-        private VarianceShadowRenderingProvider _varianceShadowRenderingProvider;
-        private Model3DGroup _lightsModel3DGroup;
+        private static VarianceShadowRenderingProvider _varianceShadowRenderingProvider;
+        private static Model3DGroup _lightsModel3DGroup;
 
-        private int _shadowMapSize;
-        private int _shadowDepthBluringSize;
-        private float _shadowTreshold;
+        private static int _shadowMapSize;
+        private static int _shadowDepthBluringSize;
+        private static float _shadowTreshold;
 
-        private SplitScreenVirtualRealityProvider _virtualRealityProvider;
+        private static Queue<System.Action> _dispatcherActions;
 
-        private DirectionalLight _directionalLight;
+        private static SplitScreenVirtualRealityProvider _virtualRealityProvider;
 
-        private DXViewportView _viewport;
+        private static DirectionalLight _directionalLight;
 
-        private FirstPersonCamera _camera;
+        private static DXViewportView _viewport;
 
-        private ModelVisual3D _modelVisual3D;
-        public ContainerUIElement3D RootContainer;
+        private static FirstPersonCamera _camera;
 
-        private PositionedInstance _selectedPhysicalInstance;
+        private static ModelVisual3D _modelVisual3D;
+        public static ContainerUIElement3D RootContainer;
 
-        private DateTime _selectedPhysicalInstanceTime;
+        private static PositionedInstance _selectedPhysicalInstance;
 
-        private Point3D _startModelMoverPosition;
+        private static DateTime _selectedPhysicalInstanceTime;
 
-        public ModelMoverVisual3D ModelMover;
-        private DateTime _modelMoveEndTime;
+        private static Point3D _startModelMoverPosition;
 
-        public EventManager3D EventManager;
-        private EventManager3D _skyboxEventManager;
+        public static ModelMoverVisual3D ModelMover;
+        private static DateTime _modelMoveEndTime;
 
-        private TranslateTransform3D _currentTranslateTransform3D;
+        public static EventManager3D EventManager;
+        private static EventManager3D _skyboxEventManager;
 
-        private DataContext _context;
-        private SceneView _sceneView;
+        private static TranslateTransform3D _currentTranslateTransform3D;
 
-        private PolyLineVisual3D _boundingBoxSelected;
-        private PolyLineVisual3D _boundingBoxHover;
+        private static DataContext _context;
+        private static SceneView _sceneView;
 
-        private IOutput _output;
+        private static PolyLineVisual3D _boundingBoxSelected;
+        private static PolyLineVisual3D _boundingBoxHover;
 
-        public MainDXScene(DataContext context, SceneView sceneView)
+        private static IOutput _output;
+
+        public static void Initialize(DataContext context, SceneView sceneView)
         {
-            if (Scene == null)
-            {
-                Scene = this;
-            }
-            else
-            {
-                throw new Exception("Cannot create multiple DXScenes!");
-            }
             //Careful with cross threading!
             _sceneView = sceneView;
             _context = context;
             _output = IoC.Get<IOutput>();
 
             VisualInstances = new List<Instance>();
+            _dispatcherActions = new Queue<System.Action>();
             _viewport = _sceneView.MainDXViewportView;
             _camera = _sceneView.Camera;
 
@@ -113,7 +107,7 @@ namespace Flex.Development.Rendering
             _viewport.DXSceneInitialized += DXSceneInitialized;
         }
 
-        private void DXSceneInitialized(object sender, EventArgs e)
+        private static void DXSceneInitialized(object sender, EventArgs e)
         {
             if (_viewport.DXScene == null)
             {
@@ -178,16 +172,33 @@ namespace Flex.Development.Rendering
 
             InitializeLights();
 
+            /*
+            DispatcherTimer dispatcherTimer = new DispatcherTimer(new TimeSpan(0, 0, 0, 0, 16), DispatcherPriority.Normal, (sendera, ea) =>
+            {
+                lock(_dispatcherActions)
+                {
+                    while (_dispatcherActions.Count != 0)
+                    {
+                        System.Action todo = _dispatcherActions.Dequeue();
+                        if (todo != null)
+                        {
+                            todo.Invoke();
+                        }
+                    }
+                }
+            }, RootContainer.Dispatcher);
+            */
+
             _output.AppendLine("Welcome to Flex!");
         }
 
-        private void _camera_CameraChanged(object sender, Ab3d.Common.Cameras.CameraChangedRoutedEventArgs e)
+        private static void _camera_CameraChanged(object sender, Ab3d.Common.Cameras.CameraChangedRoutedEventArgs e)
         {
             Point3D point = e.ChangedCamera.GetCameraPosition();
             ActiveWorld.Active.Camera.position.setTo((float)point.X, (float)point.Y, (float)point.Z);
         }
 
-        public void PhysicsStep()
+        public static void PhysicsStep()
         {
             if (ActiveScene.Running)
             {
@@ -195,34 +206,40 @@ namespace Flex.Development.Rendering
             }
         }
 
-        public void AddChildVisual(Visual3D visual)
+        public static void AddChildVisual(Visual3D visual)
         {
             RunOnUIThread(() =>
             {
-                Scene.RootContainer.Children.Add(visual);
+                RootContainer.Children.Add(visual);
             });
         }
 
-        public void RemoveChildVisual(Visual3D visual)
+        public static void RemoveChildVisual(Visual3D visual)
         {
             RunOnUIThread(() =>
             {
-                Scene.RootContainer.Children.Remove(visual);
+                RootContainer.Children.Remove(visual);
             });
         }
 
-        public void RunOnUIThread(System.Action action)
+        public static void RunOnUIThread(System.Action action)
         {
-            if (Scene.RootContainer.Dispatcher.CheckAccess())
+            if (RootContainer == null)
+            {
+                Application.Current.Dispatcher.Invoke(DispatcherPriority.Normal, action);
+                return;
+            }
+            if (RootContainer.Dispatcher.CheckAccess())
             {
                 action();
             }
             else {
-                Scene.RootContainer.Dispatcher.Invoke(action);
+                //_dispatcherActions.Enqueue(action);
+                RootContainer.Dispatcher.Invoke(action);
             }
         }
 
-        private void SetupModelMover()
+        private static void SetupModelMover()
         {
             ModelMover = new ModelMoverVisual3D();
 
@@ -305,7 +322,7 @@ namespace Flex.Development.Rendering
             _viewport.Viewport3D.Children.Insert(0, ModelMover);
         }
 
-        private PositionedInstance GetInstanceFromVisual(Visual3D visual)
+        private static PositionedInstance GetInstanceFromVisual(Visual3D visual)
         {
             foreach (PositionedInstance positionedInstance in VisualInstances)
             {
@@ -317,7 +334,7 @@ namespace Flex.Development.Rendering
             return null;
         }
 
-        private Point3D GetVisualCenter(Visual3D visual, Model3D model)
+        private static Point3D GetVisualCenter(Visual3D visual, Model3D model)
         {
             Rect3D modelBounds = model.Bounds;
 
@@ -331,7 +348,7 @@ namespace Flex.Development.Rendering
             return modelCenter;
         }
 
-        private void VisualEventSource3D_MouseClick(object sender, MouseButton3DEventArgs e)
+        private static void VisualEventSource3D_MouseClick(object sender, MouseButton3DEventArgs e)
         {
             Visual3D hitModel = e.RayHitResult.VisualHit;
 
@@ -371,7 +388,7 @@ namespace Flex.Development.Rendering
             }
         }
 
-        public void SelectInstance(PositionedInstance instance)
+        public static void SelectInstance(PositionedInstance instance)
         {
             if (instance.Equals(_selectedPhysicalInstance))
             {
@@ -390,13 +407,6 @@ namespace Flex.Development.Rendering
 
             _selectedPhysicalInstanceTime = DateTime.Now;
 
-            FlexUtility.RunWindowAction(() =>
-            {
-                /*
-                _mainWindow.SelectInstance(_selectedPhysicalInstance.Instance);
-                */
-            }, DispatcherPriority.Normal);
-
             if (_selectedPhysicalInstance != null)
             {
                 _selectedPhysicalInstance.PropertyChanged += SelectPolylineBox;
@@ -406,7 +416,7 @@ namespace Flex.Development.Rendering
             IoC.Get<IExplorer>().SelectInstance(_selectedPhysicalInstance);
         }
 
-        private void SelectPolylineBox(object sender, PropertyChangedEventArgs e)
+        private static void SelectPolylineBox(object sender, PropertyChangedEventArgs e)
         {
             if (e.PropertyName.Equals("Position"))
             {
@@ -417,7 +427,7 @@ namespace Flex.Development.Rendering
             }
         }
 
-        public void PolyLineBoundingBox(PolyLineVisual3D polyLine, Vector3D position, Rect3D bounds)
+        public static void PolyLineBoundingBox(PolyLineVisual3D polyLine, Vector3D position, Rect3D bounds)
         {
             if (!RootContainer.Children.Contains(polyLine))
             {
@@ -459,7 +469,7 @@ namespace Flex.Development.Rendering
             polyLine.Positions.Add(new Point3D(xValues[1], yValues[0], zValues[0]));
         }
 
-        private void VisualEventSource3DOnMouseMove(object sender, Mouse3DEventArgs mouse3DEventArgs)
+        private static void VisualEventSource3DOnMouseMove(object sender, Mouse3DEventArgs mouse3DEventArgs)
         {
             Model3D hitModel = mouse3DEventArgs.RayHitResult.ModelHit;
 
@@ -475,12 +485,12 @@ namespace Flex.Development.Rendering
         }
 
 
-        private void VisualEventSource3D_MouseEnter(object sender, Mouse3DEventArgs e)
+        private static void VisualEventSource3D_MouseEnter(object sender, Mouse3DEventArgs e)
         {
             _sceneView.Cursor = Cursors.Hand;
         }
 
-        private void VisualEventSource3DOnMouseLeave(object sender, Mouse3DEventArgs mouse3DEventArgs)
+        private static void VisualEventSource3DOnMouseLeave(object sender, Mouse3DEventArgs mouse3DEventArgs)
         {
             _sceneView.Cursor = Cursors.Arrow;
 
@@ -496,7 +506,7 @@ namespace Flex.Development.Rendering
             }
         }
 
-        private void InitializeLights()
+        private static void InitializeLights()
         {
             _context.ActiveWorld.Sky.OnChanged += (sender, e) =>
             {
@@ -514,7 +524,7 @@ namespace Flex.Development.Rendering
         }
 
 
-        private Vector3D GetSunDirection()
+        private static Vector3D GetSunDirection()
         {
             Point3D position = CalculateLightPosition();
 
@@ -524,7 +534,7 @@ namespace Flex.Development.Rendering
             return lightDirection;
         }
 
-        private Point3D CalculateLightPosition()
+        private static Point3D CalculateLightPosition()
         {
             float xRad = MathUtil.DegreesToRadians(_context.ActiveWorld.Sky.sunHorizontalAngle);
             float yRad = MathUtil.DegreesToRadians(_context.ActiveWorld.Sky.sunVerticalAngle);
@@ -534,11 +544,6 @@ namespace Flex.Development.Rendering
             float z = (float)(Math.Cos(xRad) * Math.Cos(yRad)) * _context.ActiveWorld.Sky.sunDistance;
 
             return new Point3D(x, y, z);
-        }
-
-        public void Dispose()
-        {
-            _viewport.Dispose();
         }
     }
 }

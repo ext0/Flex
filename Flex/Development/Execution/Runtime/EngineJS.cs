@@ -160,7 +160,7 @@ namespace Flex.Development.Execution.Runtime
             _engine.AddHostType(HostItemFlags.DirectAccess, typeof(Sky));
             _engine.AddHostType(HostItemFlags.DirectAccess, typeof(World));
 
-            MainDXScene.Scene.RunOnUIThread(() =>
+            MainDXScene.RunOnUIThread(() =>
             {
                 if (script.source == null)
                 {
@@ -174,7 +174,7 @@ namespace Flex.Development.Execution.Runtime
             }
             catch (ScriptEngineException e)
             {
-                MainDXScene.Scene.RunOnUIThread(() =>
+                MainDXScene.RunOnUIThread(() =>
                 {
                     try
                     {
