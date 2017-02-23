@@ -155,13 +155,13 @@ namespace Flex.Development.Instances
             return true;
         }
 
-        public IEnumerable<Instance> getChildren(bool recursive = false)
+        public Instance[] getChildren(bool recursive = false)
         {
             if (recursive)
             {
-                return GetChildrenHelper(this);
+                return GetChildrenHelper(this).ToArray();
             }
-            return _instances;
+            return _instances.ToArray();
         }
 
         [ScriptMember(ScriptAccess.None)]

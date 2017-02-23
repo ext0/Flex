@@ -31,46 +31,25 @@
       <Word>void</Word>
       <Word>while</Word>
       <Word>with</Word>
-      <Word>abstract</Word>
-      <Word>boolean</Word>
-      <Word>byte</Word>
       <Word>case</Word>
       <Word>catch</Word>
-      <Word>char</Word>
-      <Word>class</Word>
       <Word>const</Word>
       <Word>debugger</Word>
       <Word>default</Word>
       <Word>do</Word>
-      <Word>double</Word>
-      <Word>enum</Word>
-      <Word>export</Word>
       <Word>extends</Word>
-      <Word>final</Word>
       <Word>finally</Word>
-      <Word>float</Word>
-      <Word>goto</Word>
       <Word>implements</Word>
-      <Word>import</Word>
       <Word>instanceof</Word>
-      <Word>int</Word>
       <Word>interface</Word>
-      <Word>long</Word>
-      <Word>native</Word>
       <Word>package</Word>
       <Word>private</Word>
       <Word>protected</Word>
       <Word>public</Word>
-      <Word>short</Word>
       <Word>static</Word>
-      <Word>super</Word>
       <Word>switch</Word>
-      <Word>synchronized</Word>
       <Word>throw</Word>
-      <Word>throws</Word>
-      <Word>transient</Word>
       <Word>try</Word>
-      <Word>volatile</Word>
     </Keywords>
     <Keywords color="JavaScriptIntrinsics">
       <Word>Array</Word>
@@ -108,7 +87,7 @@
       <Word>script</Word>
       <Word>world</Word>
       <Word>sky</Word>
-      <Word>output</Word>
+      <Word>camera</Word>
     </Keywords>
     <Span color="Comment">
       <Begin>//</Begin>

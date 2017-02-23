@@ -13,10 +13,14 @@ using Gemini.Modules.PropertyGrid.Views;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Interop;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 
 namespace Flex.Modules.Startup
 {
@@ -47,6 +51,13 @@ namespace Flex.Modules.Startup
 
             //MainWindow.WindowState = WindowState.Maximized;
             MainWindow.Title = "Flex Development Tool";
+
+            Bitmap bmp = new Bitmap(System.Reflection.Assembly.GetEntryAssembly().GetManifestResourceStream("Flex.Resources.FlexIcon.png"));
+            IntPtr hBmp = bmp.GetHbitmap();
+            ImageSource wpfBitmap = Imaging.CreateBitmapSourceFromHBitmap(
+            hBmp, IntPtr.Zero, Int32Rect.Empty,
+          BitmapSizeOptions.FromEmptyOptions());
+            MainWindow.Icon = wpfBitmap;
 
             Shell.StatusBar.AddItem("Flex - By Patrick Bell", new GridLength(1, GridUnitType.Star));
 

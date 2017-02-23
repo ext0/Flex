@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -141,6 +142,7 @@ namespace Flex.Development.Execution.Runtime
             _engine.AddHostObject("script", script);
             _engine.AddHostObject("world", ActiveWorld.Active.World);
             _engine.AddHostObject("sky", ActiveWorld.Active.Sky);
+            _engine.AddHostObject("camera", ActiveWorld.Active.Camera);
 
             _engine.Script.print = new Action<Object>(print);
             _engine.Script.spawn = new Action<Object>(spawn);
@@ -174,7 +176,24 @@ namespace Flex.Development.Execution.Runtime
             {
                 MainDXScene.Scene.RunOnUIThread(() =>
                 {
-                    _output.AppendLine(e.ErrorDetails);
+                    try
+                    {
+                        String errorDetails = e.ErrorDetails;
+                        Match errDetailsMatch = Regex.Match(errorDetails, @"'(?<type>Flex\..*)'");
+                        if (errDetailsMatch.Success)
+                        {
+                            Match match = Regex.Match(errorDetails, @"'Flex\..*.\.(?<class>.+)'");
+                            if (match.Success)
+                            {
+                                errorDetails = errorDetails.Replace(errDetailsMatch.Groups["type"].Value, match.Groups["class"].Value);
+                            }
+                        }
+                        _output.AppendLine(errorDetails);
+                    }
+                    catch (Exception ee)
+                    {
+                        System.Diagnostics.Debug.WriteLine(ee.Message);
+                    }
                 });
             }
         }

@@ -36,6 +36,9 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>FlexVRBanner.ico</ApplicationIcon>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="Ab3d.DXEngine, Version=2.0.6178.45, Culture=neutral, PublicKeyToken=d45c8e156fba2841, processorArchitecture=MSIL" />
     <Reference Include="Ab3d.DXEngine.Wpf, Version=2.0.6178.45, Culture=neutral, PublicKeyToken=d45c8e156fba2841, processorArchitecture=MSIL" />
@@ -3390,6 +3393,12 @@
     <Folder Include="Actions\" />
     <Folder Include="Development\ValueTypes\" />
     <Folder Include="Misc\Runtime\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="FlexVRBanner.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\FlexIcon.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <UsingTask TaskName="CosturaCleanup" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.v4.0.dll" TaskFactory="CodeTaskFactory">
