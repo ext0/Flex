@@ -25,6 +25,7 @@ using Gemini.Modules.PropertyGrid;
 using System.ComponentModel;
 using System.Threading;
 using System.Windows;
+using Flex.Modules.Explorer;
 
 namespace Flex.Development.Rendering
 {
@@ -359,40 +360,50 @@ namespace Flex.Development.Rendering
 
                 if (_selectedPhysicalInstance == null || !_selectedPhysicalInstance.Visual3D.Equals(e.RayHitResult.VisualHit))
                 {
-                    _selectedPhysicalInstance = GetInstanceFromVisual(e.RayHitResult.VisualHit);
+                    PositionedInstance instance = GetInstanceFromVisual(e.RayHitResult.VisualHit);
+                    IoC.Get<IPropertyGrid>().SelectedObject = instance;
+                    SelectInstance(instance);
                 }
                 else
                 {
                     return;
                 }
-
-                IoC.Get<IPropertyGrid>().SelectedObject = _selectedPhysicalInstance;
-
-                EventManager.RegisterExcludedVisual3D(_selectedPhysicalInstance.Visual3D);
-                EventManager.RemoveExcludedVisual3D(_selectedPhysicalInstance.Visual3D);
-
-                if (ModelMover == null)
-                    SetupModelMover();
-
-                _startModelMoverPosition = GetVisualCenter(_selectedPhysicalInstance.Visual3D, _selectedPhysicalInstance.Model);
-                ModelMover.Position = _startModelMoverPosition;
-
-                _selectedPhysicalInstanceTime = DateTime.Now;
-
-                FlexUtility.RunWindowAction(() =>
-                {
-                    /*
-                    _mainWindow.SelectInstance(_selectedPhysicalInstance.Instance);
-                    */
-                }, DispatcherPriority.Normal);
-
-                if (_selectedPhysicalInstance != null)
-                {
-                    _selectedPhysicalInstance.PropertyChanged += SelectPolylineBox;
-                    PolyLineBoundingBox(_boundingBoxSelected, _selectedPhysicalInstance.position.Vector3D, _selectedPhysicalInstance.Model.Bounds);
-                }
-                // Tell ModelDecoratorVisual3D which Model3D to show
             }
+        }
+
+        public void SelectInstance(PositionedInstance instance)
+        {
+            if (instance.Equals(_selectedPhysicalInstance))
+            {
+                return;
+            }
+            _selectedPhysicalInstance = instance;
+
+            EventManager.RegisterExcludedVisual3D(_selectedPhysicalInstance.Visual3D);
+            EventManager.RemoveExcludedVisual3D(_selectedPhysicalInstance.Visual3D);
+
+            if (ModelMover == null)
+                SetupModelMover();
+
+            _startModelMoverPosition = GetVisualCenter(_selectedPhysicalInstance.Visual3D, _selectedPhysicalInstance.Model);
+            ModelMover.Position = _startModelMoverPosition;
+
+            _selectedPhysicalInstanceTime = DateTime.Now;
+
+            FlexUtility.RunWindowAction(() =>
+            {
+                /*
+                _mainWindow.SelectInstance(_selectedPhysicalInstance.Instance);
+                */
+            }, DispatcherPriority.Normal);
+
+            if (_selectedPhysicalInstance != null)
+            {
+                _selectedPhysicalInstance.PropertyChanged += SelectPolylineBox;
+                PolyLineBoundingBox(_boundingBoxSelected, _selectedPhysicalInstance.position.Vector3D, _selectedPhysicalInstance.Model.Bounds);
+            }
+
+            IoC.Get<IExplorer>().SelectInstance(_selectedPhysicalInstance);
         }
 
         private void SelectPolylineBox(object sender, PropertyChangedEventArgs e)

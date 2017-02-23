@@ -99,8 +99,11 @@ namespace Flex.Development.Instances
             {
                 if (value == _anchored) return;
                 _anchored = value;
-                _rigidBody.IsActive = !_anchored;
-                _rigidBody.IsStatic = anchored;
+                if (_rigidBody != null)
+                {
+                    _rigidBody.IsActive = !_anchored;
+                    _rigidBody.IsStatic = anchored;
+                }
                 NotifyPropertyChanged("Anchored");
             }
         }

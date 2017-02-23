@@ -6,25 +6,27 @@ using System.Threading.Tasks;
 
 namespace Flex.Development.Execution.Runtime
 {
-    public class Random
+    public static class Random
     {
-        private int _seed;
-        private System.Random _random;
+        private static int _seed;
+        private static System.Random _random;
 
-        public Random()
+        static Random()
         {
             _random = new System.Random();
             _seed = _random.Next();
+            _random = new System.Random(_seed);
         }
 
-        public Random(int seed)
+        static void seed(int seed)
         {
             _seed = seed;
+            _random = new System.Random(_seed);
         }
 
-        public int next()
+        public static double next()
         {
-            return _random.Next();
+            return (double)_random.Next() / int.MaxValue;
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using Caliburn.Micro;
 using Flex.Development.Execution.Data;
 using Flex.Development.Instances;
+using Flex.Development.Rendering;
 using Flex.Misc.Utility;
 using Flex.Modules.ScriptEditor.ViewModels;
 using Gemini.Framework;
@@ -41,6 +42,11 @@ namespace Flex.Modules.Explorer.Views
         private void ActiveInstancesSelectedChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
             _propertyGrid.SelectedObject = e.NewValue;
+            PositionedInstance positioned = e.NewValue as PositionedInstance;
+            if (positioned != null && !(positioned is Camera))
+            {
+                MainDXScene.Scene.SelectInstance(positioned);
+            }
             /*
             foreach (PropertyItem prop in _propertyGrid)
             {

@@ -86,6 +86,7 @@
       <Word>Part</Word>
       <Word>Script</Word>
       <Word>Noise</Word>
+      <Word>Random</Word>
     </Keywords>
     <Keywords color="JavaScriptLiterals">
       <Word>false</Word>

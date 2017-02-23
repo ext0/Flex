@@ -33,17 +33,14 @@ namespace Flex.Development.Execution.Runtime
 
         private void print(dynamic obj)
         {
-            MainDXScene.Scene.RunOnUIThread(() =>
+            if (obj != null)
             {
-                if (obj != null)
-                {
-                    _output.AppendLine(obj.ToString());
-                }
-                else
-                {
-                    _output.AppendLine("null");
-                }
-            });
+                _output.AppendLine(obj.ToString());
+            }
+            else
+            {
+                _output.AppendLine("null");
+            }
         }
 
         private void wait(double time)

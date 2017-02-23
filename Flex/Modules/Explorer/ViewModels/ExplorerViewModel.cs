@@ -12,6 +12,7 @@ using System.ComponentModel.Composition;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Controls;
 
 namespace Flex.Modules.Explorer.ViewModels
 {
@@ -30,6 +31,33 @@ namespace Flex.Modules.Explorer.ViewModels
             {
                 return "Explorer";
             }
+        }
+
+        public bool SelectInstance(Instance o)
+        {
+            TreeViewItem item = SelectItemHelper(_view.ActiveInstances, o);
+            if (item == null)
+            {
+                return false;
+            }
+            item.IsSelected = true;
+            return true;
+        }
+
+        private TreeViewItem SelectItemHelper(ItemsControl control, Instance o)
+        {
+            //Search for the object model in first level children (recursively)
+            TreeViewItem tvi = control.ItemContainerGenerator.ContainerFromItem(o) as TreeViewItem;
+            if (tvi != null) return tvi;
+            //Loop through user object models
+            foreach (object i in control.Items)
+            {
+                //Get the TreeViewItem associated with the iterated object model
+                TreeViewItem tvi2 = control.ItemContainerGenerator.ContainerFromItem(i) as TreeViewItem;
+                tvi = SelectItemHelper(tvi2, o);
+                if (tvi != null) return tvi;
+            }
+            return null;
         }
 
         protected override void OnViewLoaded(object view)

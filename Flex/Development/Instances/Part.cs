@@ -28,6 +28,8 @@ namespace Flex.Development.Instances
     {
         private ColorProperty _color;
 
+        private bool _initializedVisual = false;
+
         public Part() : base()
         {
             _displayName = "Part";
@@ -42,6 +44,7 @@ namespace Flex.Development.Instances
 
             Initialize();
         }
+
         internal Part(bool flag) : base()
         {
 
@@ -120,7 +123,6 @@ namespace Flex.Development.Instances
                 LoadPhysicsInstance();
                 InitializeVisual();
             });
-
             _initialized = true;
         }
 

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.ClearScript.JavaScript;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,61 +11,58 @@ namespace Flex.Development.Execution.Runtime
     /// Implementation of the Perlin simplex noise, an improved Perlin noise algorithm.
     /// Based loosely on SimplexNoise1234 by Stefan Gustavson <http://staffwww.itn.liu.se/~stegu/aqsis/aqsis-newnoise/>
     /// </summary>
-    public class Noise
+    public static class Noise
     {
-        public float[] calculate1D(int width, float scale)
+        /*
+        public static float[] calculate1D(dynamic width, dynamic scale)
         {
-            float[] values = new float[width];
-            for (int i = 0; i < width; i++)
-                values[i] = Generate(i * scale) * 128 + 128;
+            float[] values = new float[(int)width];
+            for (int i = 0; i < (int)width; i++)
+                values[i] = Generate(i * (float)scale) * 128 + 128;
             return values;
         }
 
-        public float[,] calculate2D(int width, int height, float scale)
+        public static float[,] calculate2D(dynamic width, dynamic height, dynamic scale)
         {
-            float[,] values = new float[width, height];
-            for (int i = 0; i < width; i++)
-                for (int j = 0; j < height; j++)
-                    values[i, j] = Generate(i * scale, j * scale) * 128 + 128;
+            float[,] values = new float[(int)width, (int)height];
+            for (int i = 0; i < (int)width; i++)
+                for (int j = 0; j < (int)height; j++)
+                    values[i, j] = Generate(i * (float)scale, j * (float)scale) * 128 + 128;
             return values;
         }
 
-        public float[,,] calculate3D(int width, int height, int length, float scale)
+        public static dynamic calculate3D(dynamic width, dynamic height, dynamic length, dynamic scale)
         {
-            float[,,] values = new float[width, height, length];
-            for (int i = 0; i < width; i++)
-                for (int j = 0; j < height; j++)
-                    for (int k = 0; k < length; k++)
-                        values[i, j, k] = Generate(i * scale, j * scale, k * scale) * 128 + 128;
+            float[,,] values = new float[(int)width, (int)height, (int)length];
+            for (int i = 0; i < (int)width; i++)
+                for (int j = 0; j < (int)height; j++)
+                    for (int k = 0; k < (int)length; k++)
+                        values[i, j, k] = Generate(i * (float)scale, j * (float)scale, k * (float)scale) * 128 + 128;
             return values;
         }
+        */
 
-        public Noise()
+        static Noise()
         {
             Seed = new System.Random().Next();
         }
 
-        public Noise(int seed)
+        public static float calculate(dynamic x, dynamic scale)
         {
-            Seed = seed;
+            return Generate((float)x * (float)scale) * 128 + 128;
         }
 
-        public float calculate(double x, double scale)
+        public static float calculate(dynamic x, dynamic y, dynamic scale)
         {
-            return Generate((float)(x * scale)) * 128 + 128;
+            return Generate((float)x * (float)scale, (float)y * (float)scale) * 128 + 128;
         }
 
-        public float calculate(double x, double y, double scale)
+        public static float calculate(dynamic x, dynamic y, dynamic z, dynamic scale)
         {
-            return Generate((float)(x * scale), (float)(y * scale)) * 128 + 128;
+            return Generate((float)x * (float)scale, (float)y * (float)scale, (float)z * (float)scale) * 128 + 128;
         }
 
-        public float calculate(double x, double y, double z, double scale)
-        {
-            return Generate((float)(x * scale), (float)(y * scale), (float)(z * scale)) * 128 + 128;
-        }
-
-        public int Seed
+        public static int Seed
         {
             get { return seed; }
             set
@@ -82,14 +80,14 @@ namespace Flex.Development.Execution.Runtime
                 }
             }
         }
-        private int seed = 0;
+        private static int seed = 0;
 
         /// <summary>
         /// 1D simplex noise
         /// </summary>
         /// <param name="x"></param>
         /// <returns></returns>
-        internal float Generate(float x)
+        internal static float Generate(float x)
         {
             int i0 = FastFloor(x);
             int i1 = i0 + 1;
@@ -116,7 +114,7 @@ namespace Flex.Development.Execution.Runtime
         /// <param name="x"></param>
         /// <param name="y"></param>
         /// <returns></returns>
-        internal float Generate(float x, float y)
+        internal static float Generate(float x, float y)
         {
             const float F2 = 0.366025403f; // F2 = 0.5*(sqrt(3.0)-1.0)
             const float G2 = 0.211324865f; // G2 = (3.0-Math.sqrt(3.0))/6.0
@@ -186,7 +184,7 @@ namespace Flex.Development.Execution.Runtime
         }
 
 
-        internal float Generate(float x, float y, float z)
+        internal static float Generate(float x, float y, float z)
         {
             // Simple skewing factors for the 3D case
             const float F3 = 0.333333333f;
@@ -289,9 +287,9 @@ namespace Flex.Development.Execution.Runtime
             return 32.0f * (n0 + n1 + n2 + n3); // TODO: The scale factor is preliminary!
         }
 
-        private byte[] perm;
+        private static byte[] perm;
 
-        private readonly byte[] permOriginal = new byte[]
+        private static readonly byte[] permOriginal = new byte[]
         {
             151,160,137,91,90,15,
             131,13,201,95,96,53,194,233,7,225,140,36,103,30,69,142,8,99,37,240,21,10,23,
@@ -321,18 +319,18 @@ namespace Flex.Development.Execution.Runtime
             138,236,205,93,222,114,67,29,24,72,243,141,128,195,78,66,215,61,156,180
         };
 
-        private int FastFloor(float x)
+        private static int FastFloor(float x)
         {
             return (x > 0) ? ((int)x) : (((int)x) - 1);
         }
 
-        private int Mod(int x, int m)
+        private static int Mod(int x, int m)
         {
             int a = x % m;
             return a < 0 ? a + m : a;
         }
 
-        private float grad(int hash, float x)
+        private static float grad(int hash, float x)
         {
             int h = hash & 15;
             float grad = 1.0f + (h & 7);   // Gradient value 1.0, 2.0, ..., 8.0
@@ -340,7 +338,7 @@ namespace Flex.Development.Execution.Runtime
             return (grad * x);           // Multiply the gradient with the distance
         }
 
-        private float grad(int hash, float x, float y)
+        private static float grad(int hash, float x, float y)
         {
             int h = hash & 7;      // Convert low 3 bits of hash code
             float u = h < 4 ? x : y;  // into 8 simple gradient directions,
@@ -348,7 +346,7 @@ namespace Flex.Development.Execution.Runtime
             return ((h & 1) != 0 ? -u : u) + ((h & 2) != 0 ? -2.0f * v : 2.0f * v);
         }
 
-        private float grad(int hash, float x, float y, float z)
+        private static float grad(int hash, float x, float y, float z)
         {
             int h = hash & 15;     // Convert low 4 bits of hash code into 12 simple
             float u = h < 8 ? x : y; // gradient directions, and compute dot product.
@@ -356,7 +354,7 @@ namespace Flex.Development.Execution.Runtime
             return ((h & 1) != 0 ? -u : u) + ((h & 2) != 0 ? -v : v);
         }
 
-        private float grad(int hash, float x, float y, float z, float t)
+        private static float grad(int hash, float x, float y, float z, float t)
         {
             int h = hash & 31;      // Convert low 5 bits of hash code into 32 simple
             float u = h < 24 ? x : y; // gradient directions, and compute dot product.
