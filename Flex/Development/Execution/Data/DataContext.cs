@@ -14,7 +14,7 @@ namespace Flex.Development.Execution.Data
         private ActiveWorld _activeWorld;
 
         private bool _isRunning;
-
+        
         public DataContext()
         {
             _isRunning = false;

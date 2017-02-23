@@ -52,8 +52,15 @@ namespace Flex.Development.Execution.Data
         private static List<CancellationTokenSource> _activeTasks;
         private static EngineJS _currentEngine;
         private static SceneViewModel _viewModel;
+        private static bool _vrToggle;
+
+        public static event EventHandler OnRenderStep;
+        public static event EventHandler OnStep;
+        public static event EventHandler OnPhysicsStep;
 
         public static event EventHandler RunningChanged;
+
+        private static Dictionary<KeyAction, Dictionary<int, List<System.Action>>> _runtimeKeybinds;
 
         private static byte[] _savedState;
 
@@ -62,7 +69,45 @@ namespace Flex.Development.Execution.Data
             _currentEngine = null;
             _context = new DataContext();
             _activeTasks = new List<CancellationTokenSource>();
+            _runtimeKeybinds = new Dictionary<KeyAction, Dictionary<int, List<System.Action>>>();
             _viewModel = null;
+        }
+
+        public static void RegisterKeyCallback(KeyAction keyAction, int key, System.Action action)
+        {
+            if (!_runtimeKeybinds.ContainsKey(keyAction))
+            {
+                _runtimeKeybinds.Add(keyAction, new Dictionary<int, List<System.Action>>());
+            }
+            if (!_runtimeKeybinds[keyAction].ContainsKey(key))
+            {
+                _runtimeKeybinds[keyAction].Add(key, new List<System.Action>());
+            }
+
+            _runtimeKeybinds[keyAction][key].Add(action);
+        }
+
+        public static IEnumerable<int> GetRegisteredKeyPressKeys()
+        {
+            if (_runtimeKeybinds.ContainsKey(KeyAction.KeyPress))
+            {
+                return _runtimeKeybinds[KeyAction.KeyPress].Keys;
+            }
+            return Enumerable.Empty<int>();
+        }
+
+        public static void RunKeyCallback(KeyAction keyAction, int key)
+        {
+            if (_runtimeKeybinds.ContainsKey(keyAction))
+            {
+                if (_runtimeKeybinds[keyAction].ContainsKey(key))
+                {
+                    foreach (System.Action action in _runtimeKeybinds[keyAction][key])
+                    {
+                        action();
+                    }
+                }
+            }
         }
 
         private static SceneViewModel GetSceneViewModel()
@@ -87,6 +132,18 @@ namespace Flex.Development.Execution.Data
             get
             {
                 return _context.IsRunning;
+            }
+        }
+
+        public static bool IsVR
+        {
+            get
+            {
+                return _vrToggle;
+            }
+            set
+            {
+                _vrToggle = value;
             }
         }
 
@@ -147,7 +204,17 @@ namespace Flex.Development.Execution.Data
             Thread physicsThread = new Thread(PhysicsLoop);
             physicsThread.Start();
 
+            Thread stepThread = new Thread(MainLoop);
+            stepThread.Start();
             //Output.Out.AddLine("Reloaded cached copy of current state: " + _savedState.Length);
+        }
+
+        public static void NotifyRenderStep()
+        {
+            if (OnRenderStep != null)
+            {
+                OnRenderStep(null, null);
+            }
         }
 
         public static void PhysicsLoop()
@@ -155,6 +222,22 @@ namespace Flex.Development.Execution.Data
             while (_context.IsRunning)
             {
                 MainDXScene.PhysicsStep();
+                if (OnPhysicsStep != null)
+                {
+                    OnPhysicsStep(null, null);
+                }
+                Thread.Sleep(1000 / 60);
+            }
+        }
+
+        public static void MainLoop()
+        {
+            while (_context.IsRunning)
+            {
+                if (OnStep != null)
+                {
+                    OnStep(null, null);
+                }
                 Thread.Sleep(1000 / 60);
             }
         }
@@ -175,6 +258,11 @@ namespace Flex.Development.Execution.Data
             {
                 RunningChanged(null, new EventArgs());
             }
+
+            OnStep = null;
+            OnRenderStep = null;
+            OnPhysicsStep = null;
+            _runtimeKeybinds.Clear();
         }
 
         public static void Save()

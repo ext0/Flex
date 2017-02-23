@@ -34,7 +34,6 @@ namespace Flex.Modules.External.Commands
         public override Task Run(Command command)
         {
             OpenFileDialog dialog = new OpenFileDialog();
-            dialog.InitialDirectory = Environment.SpecialFolder.Personal.ToString();
             dialog.Multiselect = false;
             dialog.Filter = "flex scripts (*.flexscript)|*.flexscript|All files (*.*)|*.*";
             dialog.FilterIndex = 0;

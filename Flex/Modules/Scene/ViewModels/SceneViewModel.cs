@@ -26,7 +26,7 @@ namespace Flex.Modules.Scene.ViewModels
 {
     [DisplayName("Scene View Model")]
     [Export]
-    public class SceneViewModel : Document, ICommandHandler<AddPartCommandDefinition>, ICommandHandler<AddScriptCommandDefinition>
+    public class SceneViewModel : Document, ICommandHandler<AddPartCommandDefinition>, ICommandHandler<AddScriptCommandDefinition>, ICommandHandler<ToggleVRCommandDefinition>
     {
         private static readonly int KeyboardInputPollingFrequency = 16;
 
@@ -48,12 +48,32 @@ namespace Flex.Modules.Scene.ViewModels
         {
             _sceneView = view as SceneView;
             _sceneView.MouseWheel += SceneViewMouseWheel;
+            _sceneView.KeyDown += SceneViewKeyDown;
+            _sceneView.KeyUp += SceneViewKeyUp;
 
             CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
             _keyboardPollCancelToken = cancellationTokenSource.Token;
             Task listener = Task.Factory.StartNew(KeyboardTick, _keyboardPollCancelToken, TaskCreationOptions.LongRunning, TaskScheduler.Default);
 
             MainDXScene.Initialize(ActiveScene.Context, _sceneView);
+        }
+
+        private void SceneViewKeyUp(object sender, KeyEventArgs e)
+        {
+            int key = (int)e.Key;
+            if (ActiveScene.Running)
+            {
+                ActiveScene.RunKeyCallback(KeyAction.KeyUp, key);
+            }
+        }
+
+        private void SceneViewKeyDown(object sender, KeyEventArgs e)
+        {
+            int key = (int)e.Key;
+            if (ActiveScene.Running)
+            {
+                ActiveScene.RunKeyCallback(KeyAction.KeyDown, key);
+            }
         }
 
         private void SceneViewMouseWheel(object sender, MouseWheelEventArgs e)
@@ -96,6 +116,14 @@ namespace Flex.Modules.Scene.ViewModels
                         if (!_sceneView.IsMouseOver)
                         {
                             return;
+                        }
+
+                        foreach (int key in ActiveScene.GetRegisteredKeyPressKeys())
+                        {
+                            if (Keyboard.IsKeyDown((Key)key))
+                            {
+                                ActiveScene.RunKeyCallback(KeyAction.KeyPress, key);
+                            }
                         }
                         bool none = true;
                         if (Keyboard.IsKeyDown(Key.W))
@@ -146,6 +174,26 @@ namespace Flex.Modules.Scene.ViewModels
         public override bool ShouldReopenOnStart
         {
             get { return true; }
+        }
+
+        void ICommandHandler<ToggleVRCommandDefinition>.Update(Command command)
+        {
+
+        }
+
+        Task ICommandHandler<ToggleVRCommandDefinition>.Run(Command command)
+        {
+            ActiveScene.IsVR = !ActiveScene.IsVR;
+            MainDXScene.ToggleVR();
+            if (ActiveScene.IsVR)
+            {
+                command.IconSource = new Uri("pack://application:,,,/Flex;component/Resources/Icons/Legacy/webcam_delete.png");
+            }
+            else
+            {
+                command.IconSource = new Uri("pack://application:,,,/Flex;component/Resources/Icons/Legacy/webcam.png");
+            }
+            return TaskUtility.Completed;
         }
 
         void ICommandHandler<AddPartCommandDefinition>.Update(Command command)

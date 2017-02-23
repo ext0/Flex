@@ -6,6 +6,7 @@ using Flex.Misc.Utility;
 using Gemini.Modules.Output;
 using Microsoft.ClearScript;
 using Microsoft.ClearScript.V8;
+using Microsoft.CSharp.RuntimeBinder;
 using System;
 using System.Collections.Generic;
 using System.Dynamic;
@@ -44,16 +45,6 @@ namespace Flex.Development.Execution.Runtime
             }
         }
 
-        private void wait(double time)
-        {
-            _engine.GetType().GetMethod("ScriptInvoke", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic, null, new Type[] { typeof(System.Action) }, null)
-                .Invoke(_engine, new object[] {
-                    new System.Action(() => {
-                        Thread.Sleep((int)(time * 1000d));
-                    })
-                });
-        }
-
         private void delay(dynamic obj, double time)
         {
             CancellationTokenSource token = new CancellationTokenSource();
@@ -75,6 +66,14 @@ namespace Flex.Development.Execution.Runtime
                     catch (ScriptEngineException e)
                     {
                         _output.AppendLine(e.ErrorDetails);
+                    }
+                    catch (RuntimeBinderException e)
+                    {
+                        _output.AppendLine("[external error] " + e.Message);
+                    }
+                    catch (Exception e)
+                    {
+                        _output.AppendLine("[external error] " + e.Message);
                     }
                 }
             }));
@@ -101,6 +100,14 @@ namespace Flex.Development.Execution.Runtime
                     catch (ScriptEngineException e)
                     {
                         _output.AppendLine(e.ErrorDetails);
+                    }
+                    catch (RuntimeBinderException e)
+                    {
+                        _output.AppendLine("[external error] " + e.Message);
+                    }
+                    catch (Exception e)
+                    {
+                        _output.AppendLine("[external error] " + e.Message);
                     }
                 }
             }));
@@ -132,9 +139,52 @@ namespace Flex.Development.Execution.Runtime
                     {
                         _output.AppendLine(e.ErrorDetails);
                     }
+                    catch (Exception e)
+                    {
+                        _output.AppendLine("[external error] " + e.Message);
+                    }
                 }
             }));
             thread.Start();
+        }
+
+        private void onRenderStep(dynamic obj)
+        {
+            ActiveScene.OnRenderStep += (sender, e) =>
+            {
+                obj();
+            };
+        }
+
+        private void onPhysicsStep(dynamic obj)
+        {
+            ActiveScene.OnPhysicsStep += (sender, e) =>
+            {
+                obj();
+            };
+        }
+
+        private void onStep(dynamic obj)
+        {
+            ActiveScene.OnStep += (sender, e) =>
+            {
+                obj();
+            };
+        }
+
+        private void onKeyPress(int key, dynamic obj)
+        {
+            ActiveScene.RegisterKeyCallback(KeyAction.KeyPress, key, () => obj());
+        }
+
+        private void onKeyDown(int key, dynamic obj)
+        {
+            ActiveScene.RegisterKeyCallback(KeyAction.KeyDown, key, () => obj());
+        }
+
+        private void onKeyUp(int key, dynamic obj)
+        {
+            ActiveScene.RegisterKeyCallback(KeyAction.KeyUp, key, () => obj());
         }
 
         public void Execute(Script script)
@@ -148,10 +198,17 @@ namespace Flex.Development.Execution.Runtime
             _engine.Script.spawn = new Action<Object>(spawn);
             _engine.Script.delay = new Action<Object, double>(delay);
             _engine.Script.loop = new Action<Object, double>(loop);
+            _engine.Script.onRenderStep = new Action<Object>(onRenderStep);
+            _engine.Script.onPhysicsStep = new Action<Object>(onPhysicsStep);
+            _engine.Script.onStep = new Action<Object>(onStep);
+            _engine.Script.onKeyPress = new Action<int, Object>(onKeyPress);
+            _engine.Script.onKeyDown = new Action<int, Object>(onKeyDown);
+            _engine.Script.onKeyUp = new Action<int, Object>(onKeyUp);
 
             _engine.AddHostType(HostItemFlags.DirectAccess, typeof(Math));
             _engine.AddHostType(HostItemFlags.DirectAccess, typeof(Noise));
             _engine.AddHostType(HostItemFlags.DirectAccess, typeof(Random));
+            _engine.AddHostType(HostItemFlags.DirectAccess, typeof(Key));
 
             _engine.AddHostType(HostItemFlags.DirectAccess, typeof(Instance));
             _engine.AddHostType(HostItemFlags.DirectAccess, typeof(PositionedInstance));
@@ -176,25 +233,22 @@ namespace Flex.Development.Execution.Runtime
             {
                 MainDXScene.RunOnUIThread(() =>
                 {
-                    try
+                    String errorDetails = e.ErrorDetails;
+                    Match errDetailsMatch = Regex.Match(errorDetails, @"'(?<type>Flex\..*)'");
+                    if (errDetailsMatch.Success)
                     {
-                        String errorDetails = e.ErrorDetails;
-                        Match errDetailsMatch = Regex.Match(errorDetails, @"'(?<type>Flex\..*)'");
-                        if (errDetailsMatch.Success)
+                        Match match = Regex.Match(errorDetails, @"'Flex\..*.\.(?<class>.+)'");
+                        if (match.Success)
                         {
-                            Match match = Regex.Match(errorDetails, @"'Flex\..*.\.(?<class>.+)'");
-                            if (match.Success)
-                            {
-                                errorDetails = errorDetails.Replace(errDetailsMatch.Groups["type"].Value, match.Groups["class"].Value);
-                            }
+                            errorDetails = errorDetails.Replace(errDetailsMatch.Groups["type"].Value, match.Groups["class"].Value);
                         }
-                        _output.AppendLine(errorDetails);
                     }
-                    catch (Exception ee)
-                    {
-                        System.Diagnostics.Debug.WriteLine(ee.Message);
-                    }
+                    _output.AppendLine(errorDetails);
                 });
+            }
+            catch (Exception e)
+            {
+                _output.AppendLine("[external error] " + e.Message);
             }
         }
 

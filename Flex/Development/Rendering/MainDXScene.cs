@@ -107,6 +107,11 @@ namespace Flex.Development.Rendering
             _viewport.DXSceneInitialized += DXSceneInitialized;
         }
 
+        public static void ToggleVR()
+        {
+            _viewport.DXScene.InitializeVirtualRealityRendering((ActiveScene.IsVR) ? _virtualRealityProvider : null);
+        }
+
         private static void DXSceneInitialized(object sender, EventArgs e)
         {
             if (_viewport.DXScene == null)
@@ -115,8 +120,11 @@ namespace Flex.Development.Rendering
                 return;
             }
 
-            _camera.CameraChanged += _camera_CameraChanged;
-            /*
+            _viewport.DXScene.AfterFrameRendered += (sendera, ea) =>
+            {
+                ActiveScene.NotifyRenderStep();
+            };
+
             _virtualRealityProvider = new SplitScreenVirtualRealityProvider(
                 eyeSeparation: 0.07f,
                 parallax: 0.6f,
@@ -124,8 +132,10 @@ namespace Flex.Development.Rendering
             );
 
             _virtualRealityProvider.ImagesSeparationDistance = 0;
-            _viewport.DXScene.InitializeVirtualRealityRendering(_virtualRealityProvider);
-            */
+
+            ToggleVR();
+
+            _camera.CameraChanged += _camera_CameraChanged;
 
             EventManager = new EventManager3D(_viewport.Viewport3D);
             EventManager.CustomEventsSourceElement = _sceneView.ViewportBorder;

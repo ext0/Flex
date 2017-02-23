@@ -42,5 +42,16 @@ namespace Flex.Modules
         [Export]
         public static ToolBarItemDefinition StopSceneToolBarItem = new CommandToolBarItemDefinition<StopSceneCommandDefinition>(
             SceneToolBarGroup, 2);
+
+        [Export]
+        public static ToolBarDefinition VRToolBar = new ToolBarDefinition(0, "VR");
+
+        [Export]
+        public static ToolBarItemGroupDefinition VRToolBarGroup = new ToolBarItemGroupDefinition(
+            VRToolBar, 8);
+
+        [Export]
+        public static ToolBarItemDefinition ToggleVRToolBarItem = new CommandToolBarItemDefinition<ToggleVRCommandDefinition>(
+           VRToolBarGroup, 2);
     }
 }

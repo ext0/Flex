@@ -157,11 +157,14 @@
     <Compile Include="Commands\Global\StopSceneCommandHandler.cs" />
     <Compile Include="Commands\Scene\AddScriptCommandDefinition.cs" />
     <Compile Include="Commands\Scene\AddPartCommandDefinition.cs" />
+    <Compile Include="Commands\Scene\ToggleVRCommandDefinition.cs" />
     <Compile Include="Development\Execution\Data\ActiveScene.cs" />
     <Compile Include="Development\Execution\Data\ActiveWorld.cs" />
     <Compile Include="Development\Execution\Data\DataContext.cs" />
+    <Compile Include="Development\Execution\Data\KeyAction.cs" />
     <Compile Include="Development\Execution\Data\States\ObjectSave.cs" />
     <Compile Include="Development\Execution\Runtime\EngineJS.cs" />
+    <Compile Include="Development\Execution\Runtime\KeyJS.cs" />
     <Compile Include="Development\Execution\Runtime\MathJS.cs" />
     <Compile Include="Development\Execution\Runtime\NoiseJS.cs" />
     <Compile Include="Development\Execution\Runtime\RandomJS.cs" />
