@@ -3407,6 +3407,9 @@
   <ItemGroup>
     <EmbeddedResource Include="Resources\FlexIcon.png" />
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="SquareLogo.ico" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <UsingTask TaskName="CosturaCleanup" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.v4.0.dll" TaskFactory="CodeTaskFactory">
     <ParameterGroup>

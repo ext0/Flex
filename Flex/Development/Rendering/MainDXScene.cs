@@ -236,7 +236,14 @@ namespace Flex.Development.Rendering
         {
             if (RootContainer == null)
             {
-                Application.Current.Dispatcher.Invoke(DispatcherPriority.Normal, action);
+                if (Application.Current.Dispatcher.CheckAccess())
+                {
+                    action();
+                }
+                else
+                {
+                    Application.Current.Dispatcher.Invoke(DispatcherPriority.Normal, action);
+                }
                 return;
             }
             if (RootContainer.Dispatcher.CheckAccess())

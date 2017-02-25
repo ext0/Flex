@@ -67,6 +67,8 @@
       <Word>Noise</Word>
       <Word>Random</Word>
       <Word>Key</Word>
+      <Word>Vector3</Word>
+      <Word>Rotation</Word>
     </Keywords>
     <Keywords color="JavaScriptLiterals">
       <Word>false</Word>

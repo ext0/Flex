@@ -6,6 +6,7 @@ using Flex.Misc.Utility;
 using Microsoft.ClearScript;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -33,33 +34,37 @@ namespace Flex.Development.Instances
 
         public override void Initialize()
         {
-            _position = new Vector3Property(0, 0, 0);
-            _position.PropertyChanged += (sender, e) =>
-            {
-                MainDXScene.RunOnUIThread(() =>
-                {
-                    if (_initialized)
-                    {
-                        //_transformGroup.Children[1] = new TranslateTransform3D(position.Vector3D);
-                    }
-                });
-                NotifyPropertyChanged("Position");
-            };
+            _position = new Vector3(0, 0, 0);
+            _position.PropertyChanged += PositionPropertyChanged;
 
-            _rotation = new RotationProperty();
-            _rotation.PropertyChanged += (sender, e) =>
-            {
-                MainDXScene.RunOnUIThread(() =>
-                {
-                    if (_initialized)
-                    {
-                        //_transformGroup.Children[0] = new MatrixTransform3D(rotation.Matrix);
-                    }
-                });
-                NotifyPropertyChanged("Rotation");
-            };
+            _rotation = new Rotation();
+            _rotation.PropertyChanged += RotationPropertyChanged;
 
             _initialized = true;
+        }
+
+        private void RotationPropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            MainDXScene.RunOnUIThread(() =>
+            {
+                if (_initialized)
+                {
+                    //_transformGroup.Children[0] = new MatrixTransform3D(rotation.Matrix);
+                }
+            });
+            NotifyPropertyChanged("Rotation");
+        }
+
+        private void PositionPropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            MainDXScene.RunOnUIThread(() =>
+            {
+                if (_initialized)
+                {
+                    //_transformGroup.Children[1] = new TranslateTransform3D(position.Vector3D);
+                }
+            });
+            NotifyPropertyChanged("Position");
         }
 
         [ScriptMember(ScriptAccess.None)]
@@ -116,6 +121,40 @@ namespace Flex.Development.Instances
             get
             {
                 return _allowedChildren;
+            }
+        }
+
+        public override Vector3 position
+        {
+            get
+            {
+                return _position;
+            }
+
+            set
+            {
+                if (_position == value) return;
+                _position.PropertyChanged -= PositionPropertyChanged;
+                _position = value;
+                _position.PropertyChanged += PositionPropertyChanged;
+                PositionPropertyChanged(this, null);
+            }
+        }
+
+        public override Rotation rotation
+        {
+            get
+            {
+                return _rotation;
+            }
+
+            set
+            {
+                if (_rotation == value) return;
+                _rotation.PropertyChanged -= RotationPropertyChanged;
+                _rotation = value;
+                _rotation.PropertyChanged += RotationPropertyChanged;
+                RotationPropertyChanged(this, null);
             }
         }
 

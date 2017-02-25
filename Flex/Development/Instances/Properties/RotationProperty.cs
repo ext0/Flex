@@ -14,7 +14,7 @@ namespace Flex.Development.Instances.Properties
 {
     [TrackClass]
     [Serializable]
-    public class RotationProperty : NotifyPropertyChangedObject
+    public class Rotation : NotifyPropertyChangedObject
     {
         private float _x;
         private float _y;
@@ -22,7 +22,7 @@ namespace Flex.Development.Instances.Properties
 
         private Matrix3D _matrix;
 
-        public RotationProperty()
+        public Rotation()
         {
             _x = 0;
             _y = 0;
@@ -30,9 +30,26 @@ namespace Flex.Development.Instances.Properties
             _matrix = new Matrix3D();
         }
 
+        public Rotation(double n)
+        {
+            _x = (float)n;
+            _y = (float)n;
+            _z = (float)n;
+            _matrix = MatrixFromEulerAngles(_x, _y, _z);
+        }
+
+        public Rotation(double x, double y, double z)
+        {
+            _x = (float)x;
+            _y = (float)y;
+            _z = (float)z;
+            _matrix = MatrixFromEulerAngles(_x, _y, _z);
+        }
+
         [DisplayName("X")]
         [Description("The X axis value")]
         [TrackMember]
+        [ScriptMember(ScriptAccess.Full)]
         public float x
         {
             get
@@ -51,6 +68,7 @@ namespace Flex.Development.Instances.Properties
         [DisplayName("Y")]
         [Description("The Y axis value")]
         [TrackMember]
+        [ScriptMember(ScriptAccess.Full)]
         public float y
         {
             get
@@ -69,6 +87,7 @@ namespace Flex.Development.Instances.Properties
         [DisplayName("Z")]
         [Description("The Z axis value")]
         [TrackMember]
+        [ScriptMember(ScriptAccess.Full)]
         public float z
         {
             get
@@ -96,6 +115,7 @@ namespace Flex.Development.Instances.Properties
         }
 
         [ScriptMember(ScriptAccess.None)]
+        [Browsable(false)]
         public JMatrix JMatrix
         {
             get
@@ -107,6 +127,7 @@ namespace Flex.Development.Instances.Properties
                 );
             }
         }
+
         [ScriptMember(ScriptAccess.None)]
         public void setTo(JMatrix matrix)
         {
@@ -140,6 +161,7 @@ namespace Flex.Development.Instances.Properties
             NotifyPropertyChanged("XYZ");
         }
 
+        [ScriptMember(ScriptAccess.Full)]
         public void setTo(float x, float y, float z)
         {
             _x = x;

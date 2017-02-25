@@ -28,8 +28,6 @@ namespace Flex.Development.Instances
     {
         private ColorProperty _color;
 
-        private bool _initializedVisual = false;
-
         public Part() : base()
         {
             _displayName = "Part";
@@ -62,61 +60,17 @@ namespace Flex.Development.Instances
 
         public override void Initialize()
         {
-            _position = new Vector3Property(0, 0, 0);
-            _position.PropertyChanged += (sender, e) =>
-            {
-                MainDXScene.RunOnUIThread(() =>
-                {
-                    if (_initialized)
-                    {
-                        _transformGroup.Children[1] = new TranslateTransform3D(position.Vector3D);
-                        _rigidBody.Position = new Jitter.LinearMath.JVector(position.x, position.y, position.z);
-                    }
-                });
-                NotifyPropertyChanged("Position");
-            };
+            _position = new Vector3(0, 0, 0);
+            _position.PropertyChanged += PositionPropertyChanged;
 
-            _rotation = new RotationProperty();
-            _rotation.PropertyChanged += (sender, e) =>
-            {
-                MainDXScene.RunOnUIThread(() =>
-                {
-                    if (_initialized)
-                    {
-                        _transformGroup.Children[0] = new MatrixTransform3D(rotation.Matrix);
-                        _rigidBody.Orientation = rotation.JMatrix;
-                    }
-                });
-                NotifyPropertyChanged("Rotation");
-            };
+            _rotation = new Rotation();
+            _rotation.PropertyChanged += RotationPropertyChanged;
 
-            _size = new Vector3Property(8, 4, 4);
-            _size.PropertyChanged += (sender, e) =>
-            {
-                MainDXScene.RunOnUIThread(() =>
-                {
-                    if (_initialized)
-                    {
-                        (_visual3D as BoxVisual3D).Size = _size.Size3D;
-                        _shape = new BoxShape(_size.x, _size.y, _size.z);
-                        _rigidBody.Shape = _shape;
-                    }
-                });
-                NotifyPropertyChanged("Size");
-            };
+            _size = new Vector3(8, 4, 4);
+            _size.PropertyChanged += SizePropertyChanged;
 
             _color = new ColorProperty(Colors.Green);
-            _color.PropertyChanged += (sender, e) =>
-            {
-                MainDXScene.RunOnUIThread(() =>
-                {
-                    if (_initialized)
-                    {
-                        (_visual3D as BoxVisual3D).Material = Material;
-                    }
-                });
-                NotifyPropertyChanged("Color");
-            };
+            _color.PropertyChanged += ColorPropertyChanged;
 
             MainDXScene.RunOnUIThread(() =>
             {
@@ -124,6 +78,58 @@ namespace Flex.Development.Instances
                 InitializeVisual();
                 _initialized = true;
             });
+        }
+
+        private void PositionPropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            MainDXScene.RunOnUIThread(() =>
+            {
+                if (_initialized)
+                {
+                    _transformGroup.Children[1] = new TranslateTransform3D(position.Vector3D);
+                    _rigidBody.Position = new Jitter.LinearMath.JVector(position.x, position.y, position.z);
+                }
+            });
+            NotifyPropertyChanged("Position");
+        }
+
+        private void RotationPropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            MainDXScene.RunOnUIThread(() =>
+            {
+                if (_initialized)
+                {
+                    _transformGroup.Children[0] = new MatrixTransform3D(rotation.Matrix);
+                    _rigidBody.Orientation = rotation.JMatrix;
+                }
+            });
+            NotifyPropertyChanged("Rotation");
+        }
+
+        private void SizePropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            MainDXScene.RunOnUIThread(() =>
+            {
+                if (_initialized)
+                {
+                    (_visual3D as BoxVisual3D).Size = _size.Size3D;
+                    _shape = new BoxShape(_size.x, _size.y, _size.z);
+                    _rigidBody.Shape = _shape;
+                }
+            });
+            NotifyPropertyChanged("Size");
+        }
+
+        private void ColorPropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            MainDXScene.RunOnUIThread(() =>
+            {
+                if (_initialized)
+                {
+                    (_visual3D as BoxVisual3D).Material = Material;
+                }
+            });
+            NotifyPropertyChanged("Color");
         }
 
         [ScriptMember(ScriptAccess.None)]
@@ -145,6 +151,11 @@ namespace Flex.Development.Instances
                     MainDXScene.RemoveChildVisual(_visual3D);
                 });
             }
+            _position.PropertyChanged -= PositionPropertyChanged;
+            _rotation.PropertyChanged -= RotationPropertyChanged;
+            _size.PropertyChanged -= SizePropertyChanged;
+            _color.PropertyChanged -= ColorPropertyChanged;
+
             RemoveFromParent();
         }
 
@@ -152,6 +163,7 @@ namespace Flex.Development.Instances
         [DisplayName("Color")]
         [Description("The color of this instance")]
         [TrackMember]
+        [ScriptMember(ScriptAccess.None)]
         public Color color
         {
             get
@@ -219,6 +231,57 @@ namespace Flex.Development.Instances
             get
             {
                 return _allowedChildren;
+            }
+        }
+
+        public override Vector3 position
+        {
+            get
+            {
+                return _position;
+            }
+
+            set
+            {
+                if (_position == value) return;
+                _position.PropertyChanged -= PositionPropertyChanged;
+                _position = value;
+                _position.PropertyChanged += PositionPropertyChanged;
+                PositionPropertyChanged(this, null);
+            }
+        }
+
+        public override Rotation rotation
+        {
+            get
+            {
+                return _rotation;
+            }
+
+            set
+            {
+                if (_rotation == value) return;
+                _rotation.PropertyChanged -= RotationPropertyChanged;
+                _rotation = value;
+                _rotation.PropertyChanged += RotationPropertyChanged;
+                RotationPropertyChanged(this, null);
+            }
+        }
+
+        public override Vector3 size
+        {
+            get
+            {
+                return _size;
+            }
+
+            set
+            {
+                if (_size == value) return;
+                _size.PropertyChanged -= SizePropertyChanged;
+                _size = value;
+                _size.PropertyChanged += SizePropertyChanged;
+                SizePropertyChanged(this, null);
             }
         }
 

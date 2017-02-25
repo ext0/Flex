@@ -104,9 +104,9 @@ namespace Flex.Development.Execution.Data.States
                         if (property.GetCustomAttribute<NonSerializedAttribute>() != null)
                         {
                             continue;
-                        } 
+                        }
                         ScriptMemberAttribute scriptMemberAttribute = property.GetCustomAttribute<ScriptMemberAttribute>();
-                        if (scriptMemberAttribute != null && scriptMemberAttribute.Access.HasFlag(ScriptAccess.None))
+                        if (!property.CanWrite || scriptMemberAttribute != null && scriptMemberAttribute.Access.HasFlag(ScriptAccess.None | ScriptAccess.ReadOnly))
                         {
                             continue;
                         }

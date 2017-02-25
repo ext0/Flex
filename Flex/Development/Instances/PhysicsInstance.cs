@@ -70,6 +70,7 @@ namespace Flex.Development.Instances
         [DisplayName("Collidable")]
         [Description("Whether or not this object can be collided with by other objects")]
         [TrackMember]
+        [ScriptMember(ScriptAccess.Full)]
         public bool collidable
         {
             get
@@ -89,6 +90,7 @@ namespace Flex.Development.Instances
         [DisplayName("Anchored")]
         [Description("Whether or not this object is affected by physics")]
         [TrackMember]
+        [ScriptMember(ScriptAccess.Full)]
         public bool anchored
         {
             get

@@ -1,5 +1,6 @@
 ﻿using Flex.Misc.Tracker;
 using Flex.Misc.Utility;
+using Microsoft.ClearScript;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -48,6 +49,7 @@ namespace Flex.Development.Instances
         [DisplayName("Sun Horizontal Angle")]
         [Description("The angle of the directional light from the sun around the X axis")]
         [TrackMember]
+        [ScriptMember(ScriptAccess.None)]
         public int sunHorizontalAngle
         {
             get
@@ -66,6 +68,7 @@ namespace Flex.Development.Instances
         [DisplayName("Sun Vertical Angle")]
         [Description("The angle of the directional light from the sun around the Y axis")]
         [TrackMember]
+        [ScriptMember(ScriptAccess.None)]
         public int sunVerticalAngle
         {
             get
@@ -84,6 +87,7 @@ namespace Flex.Development.Instances
         [DisplayName("Sun Distance")]
         [Description("The distance of the sun from the origin of the world")]
         [TrackMember]
+        [ScriptMember(ScriptAccess.None)]
         public int sunDistance
         {
             get
@@ -102,6 +106,7 @@ namespace Flex.Development.Instances
         [DisplayName("Cast Shadows")]
         [Description("Whether or not to cast shadows from the sun")]
         [TrackMember]
+        [ScriptMember(ScriptAccess.None)]
         public bool castShadows
         {
             get

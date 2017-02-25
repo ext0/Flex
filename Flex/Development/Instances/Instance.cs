@@ -73,16 +73,19 @@ namespace Flex.Development.Instances
         [Category("Information")]
         [DisplayName("Parent")]
         [Description("The parent of this instance")]
+        [ScriptMember(ScriptAccess.Full)]
         public abstract Instance parent { get; set; }
 
         [Category("Information")]
         [DisplayName("Name")]
         [Description("The name of this instance")]
+        [ScriptMember(ScriptAccess.Full)]
         public abstract String name { get; set; }
 
         [Category("Information")]
         [DisplayName("Type")]
         [Description("The type of this instance")]
+        [ScriptMember(ScriptAccess.ReadOnly)]
         public String type
         {
             get
@@ -155,13 +158,14 @@ namespace Flex.Development.Instances
             return true;
         }
 
-        public Instance[] getChildren(bool recursive = false)
+        [ScriptMember(ScriptAccess.ReadOnly)]
+        public IEnumerable<Instance> getChildren(bool recursive = false)
         {
             if (recursive)
             {
-                return GetChildrenHelper(this).ToArray();
+                return GetChildrenHelper(this).AsEnumerable<Instance>();
             }
-            return _instances.ToArray();
+            return _instances.AsEnumerable<Instance>();
         }
 
         [ScriptMember(ScriptAccess.None)]
@@ -173,11 +177,13 @@ namespace Flex.Development.Instances
         [ScriptMember(ScriptAccess.None)]
         public abstract void Reload();
 
+        [ScriptMember(ScriptAccess.ReadOnly)]
         public void remove()
         {
             Cleanup();
         }
 
+        [ScriptMember(ScriptAccess.ReadOnly)]
         public Instance getChild(String name, bool recursive = false)
         {
             IEnumerable<Instance> instances = getChildren(recursive);
@@ -202,11 +208,13 @@ namespace Flex.Development.Instances
             return instances;
         }
 
+        [ScriptMember(ScriptAccess.ReadOnly)]
         public String toString()
         {
             return ToString();
         }
 
+        [ScriptMember(ScriptAccess.ReadOnly)]
         public bool equals(object obj)
         {
             return Equals(obj);

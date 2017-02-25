@@ -1,5 +1,6 @@
 ﻿using Flex.Development.Instances.Properties;
 using Flex.Misc.Tracker;
+using Microsoft.ClearScript;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -14,8 +15,8 @@ namespace Flex.Development.Instances
     [Serializable]
     public abstract class PositionedInstance : Instance
     {
-        protected Vector3Property _position;
-        protected RotationProperty _rotation;
+        protected Vector3 _position;
+        protected Rotation _rotation;
 
         [NonSerialized()]
         protected Visual3D _visual3D;
@@ -56,12 +57,11 @@ namespace Flex.Development.Instances
         [Description("The 3D coordinates of this instance")]
         [ExpandableObject]
         [TrackMember]
-        public Vector3Property position
+        [ScriptMember(ScriptAccess.Full)]
+        public abstract Vector3 position
         {
-            get
-            {
-                return _position;
-            }
+            get;
+            set;
         }
 
         [Category("3D")]
@@ -69,12 +69,11 @@ namespace Flex.Development.Instances
         [Description("The rotation of this instance")]
         [ExpandableObject]
         [TrackMember]
-        public RotationProperty rotation
+        [ScriptMember(ScriptAccess.Full)]
+        public abstract Rotation rotation
         {
-            get
-            {
-                return _rotation;
-            }
+            get;
+            set;
         }
     }
 }

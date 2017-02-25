@@ -1,4 +1,5 @@
-﻿using Microsoft.ClearScript.JavaScript;
+﻿using Microsoft.ClearScript;
+using Microsoft.ClearScript.JavaScript;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -44,27 +45,31 @@ namespace Flex.Development.Execution.Runtime
 
         static Noise()
         {
-            Seed = new System.Random().Next();
+            seed = new System.Random().Next();
         }
 
+        [ScriptMember(ScriptAccess.ReadOnly)]
         public static float calculate(dynamic x, dynamic scale)
         {
             return Generate((float)x * (float)scale) * 128 + 128;
         }
 
+        [ScriptMember(ScriptAccess.ReadOnly)]
         public static float calculate(dynamic x, dynamic y, dynamic scale)
         {
             return Generate((float)x * (float)scale, (float)y * (float)scale) * 128 + 128;
         }
 
+        [ScriptMember(ScriptAccess.ReadOnly)]
         public static float calculate(dynamic x, dynamic y, dynamic z, dynamic scale)
         {
             return Generate((float)x * (float)scale, (float)y * (float)scale, (float)z * (float)scale) * 128 + 128;
         }
 
-        public static int Seed
+        [ScriptMember(ScriptAccess.ReadOnly)]
+        public static int seed
         {
-            get { return seed; }
+            get { return _seed; }
             set
             {
                 if (value == 0)
@@ -80,7 +85,8 @@ namespace Flex.Development.Execution.Runtime
                 }
             }
         }
-        private static int seed = 0;
+
+        private static int _seed = 0;
 
         /// <summary>
         /// 1D simplex noise

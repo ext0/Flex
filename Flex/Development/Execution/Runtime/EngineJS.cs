@@ -1,6 +1,7 @@
 ﻿using Caliburn.Micro;
 using Flex.Development.Execution.Data;
 using Flex.Development.Instances;
+using Flex.Development.Instances.Properties;
 using Flex.Development.Rendering;
 using Flex.Misc.Utility;
 using Gemini.Modules.Output;
@@ -148,6 +149,40 @@ namespace Flex.Development.Execution.Runtime
             thread.Start();
         }
 
+        private void forLoop(dynamic obj, int max, double interval)
+        {
+            CancellationTokenSource token = new CancellationTokenSource();
+            _childrenThreads.Add(token);
+            Thread thread = new Thread(new ThreadStart(() =>
+            {
+                Thread currentThread = Thread.CurrentThread;
+                using (token.Token.Register(currentThread.Abort))
+                {
+                    try
+                    {
+                        for (int i = 0; i < max; i++)
+                        {
+                            obj(i);
+                            Thread.Sleep((int)(interval * 1000d));
+                        }
+                    }
+                    catch (ThreadAbortException)
+                    {
+                        //Ignore
+                    }
+                    catch (ScriptEngineException e)
+                    {
+                        _output.AppendLine(e.ErrorDetails);
+                    }
+                    catch (Exception e)
+                    {
+                        _output.AppendLine("[external error] " + e.Message);
+                    }
+                }
+            }));
+            thread.Start();
+        }
+
         private void onRenderStep(dynamic obj)
         {
             ActiveScene.OnRenderStep += (sender, e) =>
@@ -198,6 +233,7 @@ namespace Flex.Development.Execution.Runtime
             _engine.Script.spawn = new Action<Object>(spawn);
             _engine.Script.delay = new Action<Object, double>(delay);
             _engine.Script.loop = new Action<Object, double>(loop);
+            _engine.Script.forLoop = new Action<Object, int, double>(forLoop);
             _engine.Script.onRenderStep = new Action<Object>(onRenderStep);
             _engine.Script.onPhysicsStep = new Action<Object>(onPhysicsStep);
             _engine.Script.onStep = new Action<Object>(onStep);
@@ -210,41 +246,42 @@ namespace Flex.Development.Execution.Runtime
             _engine.AddHostType(HostItemFlags.DirectAccess, typeof(Random));
             _engine.AddHostType(HostItemFlags.DirectAccess, typeof(Key));
 
-            _engine.AddHostType(HostItemFlags.DirectAccess, typeof(Instance));
-            _engine.AddHostType(HostItemFlags.DirectAccess, typeof(PositionedInstance));
+            _engine.AddHostType(HostItemFlags.DirectAccess, typeof(Camera));
             _engine.AddHostType(HostItemFlags.DirectAccess, typeof(Part));
             _engine.AddHostType(HostItemFlags.DirectAccess, typeof(Script));
             _engine.AddHostType(HostItemFlags.DirectAccess, typeof(Sky));
             _engine.AddHostType(HostItemFlags.DirectAccess, typeof(World));
 
-            MainDXScene.RunOnUIThread(() =>
-            {
-                if (script.source == null)
-                {
-                    script.source = String.Empty;
-                }
-            });
+            _engine.AddHostType(HostItemFlags.DirectAccess, typeof(Vector3));
+            _engine.AddHostType(HostItemFlags.DirectAccess, typeof(Rotation));
+
+            //Allow for reflection on Instance types to access higher concrete implementation properties
+            _engine.DisableTypeRestriction = true;
+
+            _engine.AllowReflection = true;
+            _engine.SuppressExtensionMethodEnumeration = false;
+            _engine.UseReflectionBindFallback = true;
+
+            _engine.DefaultAccess = ScriptAccess.None;
+
             try
             {
-                V8Script v8Script = _engine.Compile(script.source);
+                V8Script v8Script = _engine.Compile((script.source != null) ? script.source : String.Empty);
                 _engine.Execute(v8Script);
             }
             catch (ScriptEngineException e)
             {
-                MainDXScene.RunOnUIThread(() =>
+                String errorDetails = e.ErrorDetails;
+                Match errDetailsMatch = Regex.Match(errorDetails, @"'(?<type>Flex\..*)'");
+                if (errDetailsMatch.Success)
                 {
-                    String errorDetails = e.ErrorDetails;
-                    Match errDetailsMatch = Regex.Match(errorDetails, @"'(?<type>Flex\..*)'");
-                    if (errDetailsMatch.Success)
+                    Match match = Regex.Match(errorDetails, @"'Flex\..*.\.(?<class>.+)'");
+                    if (match.Success)
                     {
-                        Match match = Regex.Match(errorDetails, @"'Flex\..*.\.(?<class>.+)'");
-                        if (match.Success)
-                        {
-                            errorDetails = errorDetails.Replace(errDetailsMatch.Groups["type"].Value, match.Groups["class"].Value);
-                        }
+                        errorDetails = errorDetails.Replace(errDetailsMatch.Groups["type"].Value, match.Groups["class"].Value);
                     }
-                    _output.AppendLine(errorDetails);
-                });
+                }
+                _output.AppendLine(errorDetails);
             }
             catch (Exception e)
             {

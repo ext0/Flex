@@ -1,6 +1,7 @@
 ﻿using Flex.Development.Execution.Data;
 using Flex.Misc.Tracker;
 using Flex.Misc.Utility;
+using Microsoft.ClearScript;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -75,6 +76,7 @@ namespace Flex.Development.Instances
         }
 
         [Browsable(false)]
+        [ScriptMember(ScriptAccess.ReadOnly)]
         public String source
         {
             get

@@ -1,5 +1,6 @@
 ﻿using Flex.Development.Instances.Properties;
 using Flex.Misc.Tracker;
+using Microsoft.ClearScript;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -13,7 +14,7 @@ namespace Flex.Development.Instances
     [Serializable]
     public abstract class SizedInstance : PositionedInstance
     {
-        protected Vector3Property _size;
+        protected Vector3 _size;
 
         protected SizedInstance() : base()
         {
@@ -25,12 +26,11 @@ namespace Flex.Development.Instances
         [Description("The size of this instance")]
         [ExpandableObject]
         [TrackMember]
-        public Vector3Property size
+        [ScriptMember(ScriptAccess.Full)]
+        public abstract Vector3 size
         {
-            get
-            {
-                return _size;
-            }
+            get;
+            set;
         }
     }
 }
