@@ -21,7 +21,7 @@ namespace Flex.Commands.Global
         {
             if (!ActiveScene.Running)
             {
-                byte[] data = ActiveScene.SerializedContext();
+                byte[] data = ActiveScene.SerializedContext;
                 System.Diagnostics.Debug.WriteLine("Save: " + data.Length + " bytes!");
             }
         }

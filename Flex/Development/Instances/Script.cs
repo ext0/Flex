@@ -1,4 +1,5 @@
 ﻿using Flex.Development.Execution.Data;
+using Flex.Development.Execution.Data.States;
 using Flex.Misc.Tracker;
 using Flex.Misc.Utility;
 using Microsoft.ClearScript;
@@ -60,7 +61,14 @@ namespace Flex.Development.Instances
 
         }
 
-        [TrackMember]
+        public override Instance clone()
+        {
+            Script script = new Script();
+            ObjectSave save = new ObjectSave(this, script, GetType());
+            save.Reset();
+            return script;
+        }
+
         public override string name
         {
             get
@@ -98,7 +106,6 @@ namespace Flex.Development.Instances
             }
         }
 
-        [TrackMember]
         public override Instance parent
         {
             get

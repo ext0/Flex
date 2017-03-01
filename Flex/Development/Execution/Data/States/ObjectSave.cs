@@ -33,47 +33,6 @@ namespace Flex.Development.Execution.Data.States
             {
                 foreach (PropertyInfo property in _type.GetProperties(BindingFlags.Public | BindingFlags.Instance))
                 {
-                    //System.Diagnostics.Debug.WriteLine(property.Name + " " + property.PropertyType.Name);
-                    /*
-                    if (property.PropertyType.Equals(typeof(UISafeObservableCollection<Instance>))) //For parent checks, special case! We'll assume the parent is Instance here
-                    {
-                        if (property.CanWrite)
-                        {
-                            if (_subProperty == null)
-                            {
-                                UISafeObservableCollection<Instance> oldInstances = property.GetValue(_old) as UISafeObservableCollection<Instance>;
-                                UISafeObservableCollection<Instance> newInstances = property.GetValue(_current) as UISafeObservableCollection<Instance>;
-
-                                List<Instance> list = newInstances.Where(x => !oldInstances.Any(y => x.Equals(y))).ToList();
-
-                                //System.Diagnostics.Debug.WriteLine("New items = " + list.Count);
-                                foreach (Instance instance in list)
-                                {
-                                    instance.Cleanup();
-                                    instance.RemoveFromParent();
-                                }
-                            }
-                            else if (_parent != null)
-                            {
-                                Object subProp = _subProperty.GetValue(_parent);
-                                if (subProp != null)
-                                {
-                                    UISafeObservableCollection<Instance> oldInstances = property.GetValue(subProp) as UISafeObservableCollection<Instance>;
-                                    UISafeObservableCollection<Instance> newInstances = property.GetValue(_current) as UISafeObservableCollection<Instance>;
-
-                                    IEnumerable<Instance> newElements = newInstances.Where(x => !oldInstances.Any(y => x.Equals(y)));
-
-                                    foreach (Instance instance in newElements)
-                                    {
-                                        instance.Cleanup();
-                                        instance.RemoveFromParent();
-                                    }
-                                }
-                            }
-                        }
-                        continue;
-                    }
-                    */
                     if (property.PropertyType.IsValueType || property.PropertyType.Equals(typeof(String))) //String check because the String datatype is a special snowflake...
                     {
                         ScriptMemberAttribute scriptMemberAttribute = property.GetCustomAttribute<ScriptMemberAttribute>();

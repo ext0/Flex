@@ -38,7 +38,11 @@ namespace Flex.Development.Instances
 
         }
 
-        [TrackMember]
+        public override Instance clone()
+        {
+            throw new InvalidOperationException("Cannot clone World!");
+        }
+
         public override string name
         {
             get

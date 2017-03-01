@@ -45,10 +45,14 @@ namespace Flex.Development.Instances
 
         }
 
+        public override Instance clone()
+        {
+            throw new InvalidOperationException("Cannot clone Sky!");
+        }
+
         [Category("Lighting")]
         [DisplayName("Sun Horizontal Angle")]
         [Description("The angle of the directional light from the sun around the X axis")]
-        [TrackMember]
         [ScriptMember(ScriptAccess.None)]
         public int sunHorizontalAngle
         {
@@ -67,7 +71,6 @@ namespace Flex.Development.Instances
         [Category("Lighting")]
         [DisplayName("Sun Vertical Angle")]
         [Description("The angle of the directional light from the sun around the Y axis")]
-        [TrackMember]
         [ScriptMember(ScriptAccess.None)]
         public int sunVerticalAngle
         {
@@ -86,7 +89,6 @@ namespace Flex.Development.Instances
         [Category("Lighting")]
         [DisplayName("Sun Distance")]
         [Description("The distance of the sun from the origin of the world")]
-        [TrackMember]
         [ScriptMember(ScriptAccess.None)]
         public int sunDistance
         {
@@ -105,7 +107,6 @@ namespace Flex.Development.Instances
         [Category("Lighting")]
         [DisplayName("Cast Shadows")]
         [Description("Whether or not to cast shadows from the sun")]
-        [TrackMember]
         [ScriptMember(ScriptAccess.None)]
         public bool castShadows
         {
@@ -121,7 +122,6 @@ namespace Flex.Development.Instances
             }
         }
 
-        [TrackMember]
         public override string name
         {
             get

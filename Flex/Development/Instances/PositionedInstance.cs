@@ -56,7 +56,6 @@ namespace Flex.Development.Instances
         [DisplayName("Position")]
         [Description("The 3D coordinates of this instance")]
         [ExpandableObject]
-        [TrackMember]
         [ScriptMember(ScriptAccess.Full)]
         public abstract Vector3 position
         {
@@ -68,7 +67,6 @@ namespace Flex.Development.Instances
         [DisplayName("Rotation")]
         [Description("The rotation of this instance")]
         [ExpandableObject]
-        [TrackMember]
         [ScriptMember(ScriptAccess.Full)]
         public abstract Rotation rotation
         {

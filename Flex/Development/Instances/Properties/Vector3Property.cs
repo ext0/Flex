@@ -10,7 +10,6 @@ using System.Windows.Media.Media3D;
 
 namespace Flex.Development.Instances.Properties
 {
-    [TrackClass]
     [Serializable]
     public class Vector3 : NotifyPropertyChangedObject
     {
@@ -62,7 +61,6 @@ namespace Flex.Development.Instances.Properties
 
         [DisplayName("X")]
         [Description("The X axis value")]
-        [TrackMember]
         [ScriptMember(ScriptAccess.Full)]
         public float x
         {
@@ -80,7 +78,6 @@ namespace Flex.Development.Instances.Properties
 
         [DisplayName("Y")]
         [Description("The Y axis value")]
-        [TrackMember]
         [ScriptMember(ScriptAccess.Full)]
         public float y
         {
@@ -98,7 +95,6 @@ namespace Flex.Development.Instances.Properties
 
         [DisplayName("Z")]
         [Description("The Z axis value")]
-        [TrackMember]
         [ScriptMember(ScriptAccess.Full)]
         public float z
         {
@@ -114,6 +110,7 @@ namespace Flex.Development.Instances.Properties
             }
         }
 
+        [Browsable(false)]
         [ScriptMember(ScriptAccess.ReadOnly)]
         public double magnitude
         {
@@ -123,6 +120,7 @@ namespace Flex.Development.Instances.Properties
             }
         }
 
+        [Browsable(false)]
         [ScriptMember(ScriptAccess.ReadOnly)]
         public Vector3 normalized
         {

@@ -12,7 +12,6 @@ using System.Windows.Media.Media3D;
 
 namespace Flex.Development.Instances.Properties
 {
-    [TrackClass]
     [Serializable]
     public class Rotation : NotifyPropertyChangedObject
     {
@@ -48,7 +47,6 @@ namespace Flex.Development.Instances.Properties
 
         [DisplayName("X")]
         [Description("The X axis value")]
-        [TrackMember]
         [ScriptMember(ScriptAccess.Full)]
         public float x
         {
@@ -67,7 +65,6 @@ namespace Flex.Development.Instances.Properties
 
         [DisplayName("Y")]
         [Description("The Y axis value")]
-        [TrackMember]
         [ScriptMember(ScriptAccess.Full)]
         public float y
         {
@@ -86,7 +83,6 @@ namespace Flex.Development.Instances.Properties
 
         [DisplayName("Z")]
         [Description("The Z axis value")]
-        [TrackMember]
         [ScriptMember(ScriptAccess.Full)]
         public float z
         {

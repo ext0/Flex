@@ -1,5 +1,6 @@
 ﻿using Ab3d.Visuals;
 using Flex.Development.Execution.Data;
+using Flex.Development.Execution.Data.States;
 using Flex.Development.Execution.Runtime;
 using Flex.Development.Instances.Properties;
 using Flex.Development.Physics;
@@ -159,10 +160,17 @@ namespace Flex.Development.Instances
             RemoveFromParent();
         }
 
+        public override Instance clone()
+        {
+            Part part = new Part();
+            ObjectSave save = new ObjectSave(this, part, GetType());
+            save.Reset();
+            return part;
+        }
+
         [Category("Appearance")]
         [DisplayName("Color")]
         [Description("The color of this instance")]
-        [TrackMember]
         [ScriptMember(ScriptAccess.None)]
         public Color color
         {
@@ -187,7 +195,6 @@ namespace Flex.Development.Instances
             }
         }
 
-        [TrackMember]
         public override string name
         {
             get
@@ -210,7 +217,6 @@ namespace Flex.Development.Instances
             }
         }
 
-        [TrackMember]
         public override Instance parent
         {
             get

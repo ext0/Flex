@@ -267,12 +267,15 @@ namespace Flex.Development.Execution.Data
 
         public static void Save()
         {
-            _savedState = SerializedContext();
+            _savedState = SerializedContext;
         }
 
-        public static byte[] SerializedContext()
+        public static byte[] SerializedContext
         {
-            return FlexUtility.SerializeToBinary(_context.ActiveWorld);
+            get
+            {
+                return FlexUtility.SerializeToBinary(_context.ActiveWorld);
+            }
         }
 
         private static void Reset()

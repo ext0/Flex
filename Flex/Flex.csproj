@@ -183,9 +183,6 @@
     <Compile Include="Development\Physics\PhysicsEngine.cs" />
     <Compile Include="Development\Rendering\MainDXScene.cs" />
     <Compile Include="Misc\Tracker\NotifyPropertyChangedObject.cs" />
-    <Compile Include="Misc\Tracker\TrackClassAttribute.cs" />
-    <Compile Include="Misc\Tracker\Tracker.cs" />
-    <Compile Include="Misc\Tracker\TrackMemberAttribute.cs" />
     <Compile Include="Misc\Utility\FlexUtility.cs" />
     <Compile Include="Commands\Global\OpenFileCommandHandler.cs" />
     <Compile Include="Misc\Utility\UISafeObservableCollection.cs" />

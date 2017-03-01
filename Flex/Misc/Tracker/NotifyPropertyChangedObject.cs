@@ -9,7 +9,6 @@ using System.Threading.Tasks;
 
 namespace Flex.Misc.Tracker
 {
-    [TrackClass]
     [Serializable]
     public class NotifyPropertyChangedObject : INotifyPropertyChanged
     {

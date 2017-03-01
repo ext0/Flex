@@ -79,7 +79,11 @@ namespace Flex.Development.Instances
             throw new InvalidOperationException("Cannot remove Camera instance!");
         }
 
-        [TrackMember]
+        public override Instance clone()
+        {
+            throw new InvalidOperationException("Cannot clone Camera!");
+        }
+
         public override string name
         {
             get
@@ -102,7 +106,6 @@ namespace Flex.Development.Instances
             }
         }
 
-        [TrackMember]
         public override Instance parent
         {
             get

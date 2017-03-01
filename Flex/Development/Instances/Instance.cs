@@ -1,4 +1,5 @@
-﻿using Flex.Development.Execution.Runtime;
+﻿using Flex.Development.Execution.Data.States;
+using Flex.Development.Execution.Runtime;
 using Flex.Misc.Tracker;
 using Flex.Misc.Utility;
 using Microsoft.ClearScript;
@@ -33,17 +34,12 @@ namespace Flex.Development.Instances
 
         protected bool _initialized = false;
 
-        [NonSerialized()]
-        protected Tracker _tracker;
-
         [field: NonSerialized]
         protected event EventHandler<PropertyChangedEventArgs> _changed;
 
         protected Instance() : base()
         {
             _UUID = Guid.NewGuid().ToString();
-            _tracker = new Tracker(this);
-            _tracker.OnChanged += TrackerChanged;
         }
 
         private void TrackerChanged(Object sender, PropertyChangedEventArgs e)
@@ -110,6 +106,9 @@ namespace Flex.Development.Instances
             }
         }
 
+        [Category("Information")]
+        [DisplayName("Icon")]
+        [Description("The icon for this instance")]
         [ScriptMember(ScriptAccess.None)]
         [Browsable(true)]
         public abstract String icon { get; }
@@ -176,6 +175,9 @@ namespace Flex.Development.Instances
 
         [ScriptMember(ScriptAccess.None)]
         public abstract void Reload();
+
+        [ScriptMember(ScriptAccess.ReadOnly)]
+        public abstract Instance clone();
 
         [ScriptMember(ScriptAccess.ReadOnly)]
         public void remove()

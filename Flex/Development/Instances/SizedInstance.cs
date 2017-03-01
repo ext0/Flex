@@ -25,7 +25,6 @@ namespace Flex.Development.Instances
         [DisplayName("Size")]
         [Description("The size of this instance")]
         [ExpandableObject]
-        [TrackMember]
         [ScriptMember(ScriptAccess.Full)]
         public abstract Vector3 size
         {
