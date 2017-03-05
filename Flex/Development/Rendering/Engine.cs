@@ -90,7 +90,7 @@ namespace Flex.Development.Rendering
             {
                 while (true)
                 {
-                    Thread.Sleep(1000 / 90);
+                    Thread.Sleep(1000 / 60);
                     _renderer.Loop();
                 }
             });

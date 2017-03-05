@@ -87,6 +87,10 @@ namespace Flex.Development.Instances
                 if (_initialized)
                 {
                     _sceneNode.SetPosition(position.x, position.y, position.z);
+                    if (e.PropertyName.Equals("NOPHYSICS"))
+                    {
+                        return;
+                    }
                     _rigidBody.Position = new Jitter.LinearMath.JVector(position.x, position.y, position.z);
                 }
             });
@@ -101,7 +105,11 @@ namespace Flex.Development.Instances
                 {
                     Quaternion quaternion = rotation.Quaternion;
                     _sceneNode.SetOrientation((float)quaternion.W, (float)quaternion.X, (float)quaternion.Y, (float)quaternion.Z);
-                    _rigidBody.Orientation = rotation.JMatrix;
+
+                    if (e.PropertyName.Equals("NOPHYSICS"))
+                    {
+                        _rigidBody.Orientation = rotation.JMatrix;
+                    }
                 }
             });
             NotifyPropertyChanged("Rotation");

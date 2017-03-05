@@ -176,6 +176,14 @@ namespace Flex.Development.Instances.Properties
             NotifyPropertyChanged("XYZ");
         }
 
+        public void setToPhysics(float x, float y, float z)
+        {
+            _x = x;
+            _y = y;
+            _z = z;
+            NotifyPropertyChanged("NOPHYSICS");
+        }
+
         [ScriptMember(ScriptAccess.Full)]
         public Vector3 add(Vector3 other)
         {

@@ -90,7 +90,7 @@ namespace Flex.Development.Rendering.Modules
             config["externalWindowHandle"] = Handle.ToString();
             config["vsync"] = "False";
             config["FSAA"] = "2";
-            config["Multithreaded"] = "true";
+            config["Multithreaded"] = "false";
 
             _renderWindow = _root.CreateRenderWindow("Mogre Window", 0, 0, false, config);
             _renderWindow.IsAutoUpdated = false;

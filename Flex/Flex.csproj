@@ -85,16 +85,19 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="Mogre, Version=1.7.4.0, Culture=neutral, processorArchitecture=x86">
-      <HintPath>..\packages\Mogre1.7.4.1.0.6\lib\Mogre.dll</HintPath>
-      <Private>True</Private>
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>D:\MogreSDK\bin\Release\Mogre.dll</HintPath>
+    </Reference>
+    <Reference Include="MogreFramework">
+      <HintPath>D:\MogreSDK\bin\Release\MogreFramework.dll</HintPath>
     </Reference>
     <Reference Include="MogreNewt, Version=2.35.0.0, Culture=neutral, processorArchitecture=x86">
-      <HintPath>..\packages\Mogre1.7.4.1.0.6\lib\MogreNewt.dll</HintPath>
-      <Private>True</Private>
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>D:\MogreSDK\bin\Release\MogreNewt.dll</HintPath>
     </Reference>
     <Reference Include="MOIS, Version=1.1.0.0, Culture=neutral, processorArchitecture=x86">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>bin\Debug\MOIS.dll</HintPath>
+      <HintPath>D:\MogreSDK\bin\Release\MOIS.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />

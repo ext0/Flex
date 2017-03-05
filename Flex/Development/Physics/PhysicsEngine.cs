@@ -60,10 +60,10 @@ namespace Flex.Development.Physics
                                 Math.Abs(instance.RigidBody.Position.Y - instance.position.y) > POSITION_EPSILION ||
                                 Math.Abs(instance.RigidBody.Position.Z - instance.position.z) > POSITION_EPSILION)
                         {
-                            instance.position.setTo(instance.RigidBody.Position.X, instance.RigidBody.Position.Y, instance.RigidBody.Position.Z);
+                            instance.position.setToPhysics(instance.RigidBody.Position.X, instance.RigidBody.Position.Y, instance.RigidBody.Position.Z);
                         }
 
-                        instance.rotation.setTo(instance.RigidBody.Orientation);
+                        instance.rotation.setToPhysics(instance.RigidBody.Orientation);
                     }
                 }
             }

@@ -126,6 +126,12 @@ namespace Flex.Development.Instances.Properties
         [ScriptMember(ScriptAccess.None)]
         public void setTo(JMatrix matrix)
         {
+            InternalMatrixConversion(matrix);
+            NotifyPropertyChanged("XYZ");
+        }
+
+        private void InternalMatrixConversion(JMatrix matrix)
+        {
             _matrix.M11 = matrix.M11;
             _matrix.M12 = matrix.M12;
             _matrix.M13 = matrix.M13;
@@ -152,8 +158,12 @@ namespace Flex.Development.Instances.Properties
                 _y = Mogre.Math.RadiansToDegrees((float)Math.Atan2(-matrix.M31, sy));
                 _z = 0;
             }
+        }
 
-            NotifyPropertyChanged("XYZ");
+        public void setToPhysics(JMatrix matrix)
+        {
+            InternalMatrixConversion(matrix);
+            NotifyPropertyChanged("NOPHYSICS");
         }
 
         [ScriptMember(ScriptAccess.Full)]
