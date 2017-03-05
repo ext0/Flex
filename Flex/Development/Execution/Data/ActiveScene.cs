@@ -150,7 +150,7 @@ namespace Flex.Development.Execution.Data
         public static Instance AddInstance<T>() where T : Instance
         {
             Instance ret = null;
-            MainDXScene.RunOnUIThread(() =>
+            Engine.RunOnUIThread(() =>
             {
                 if (typeof(T).Equals(typeof(Part)))
                 {
@@ -221,7 +221,7 @@ namespace Flex.Development.Execution.Data
         {
             while (_context.IsRunning)
             {
-                MainDXScene.PhysicsStep();
+                Engine.PhysicsStep();
                 if (OnPhysicsStep != null)
                 {
                     OnPhysicsStep(null, null);

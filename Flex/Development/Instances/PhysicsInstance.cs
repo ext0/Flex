@@ -4,7 +4,6 @@ using Flex.Misc.Tracker;
 using Jitter.Collision.Shapes;
 using Jitter.Dynamics;
 using Microsoft.ClearScript;
-using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;

@@ -1,23 +1,30 @@
-﻿using Flex.Misc.Tracker;
+﻿using Flex.Development.Instances.Properties;
+using Flex.Development.Rendering;
+using Flex.Misc.Tracker;
 using Flex.Misc.Utility;
 using Microsoft.ClearScript;
+using Mogre;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Xceed.Wpf.Toolkit.PropertyGrid.Attributes;
 
 namespace Flex.Development.Instances
 {
     [Serializable]
     public class Sky : Instance
     {
-        private int _sunHorizontalAngle = 20;
-        private int _sunVerticalAngle = 30;
-        private int _sunLightDistance = 500;
-        private bool _sunShadows = false;
+        private ColorProperty _ambient;
+
+        [field: NonSerialized]
+        private Light _sun;
+
+        private Properties.Vector3 _sunDirection;
 
         internal Sky(bool flag) : base()
         {
@@ -26,13 +33,37 @@ namespace Flex.Development.Instances
             _instances = new UISafeObservableCollection<Instance>();
             _allowedChildren = new List<Type>();
             _isRoot = true;
+            _ambient = new ColorProperty(25, 25, 25, 255);
+            _sunDirection = new Properties.Vector3(-1, -1, -0.5);
+            _sunDirection.PropertyChanged += SunDirectionPropertyChanged;
 
             Initialize();
         }
 
+        private void SunDirectionPropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            _sun.SetDirection(_sunDirection.x / 360f, _sunDirection.y / 360f, _sunDirection.z / 360f);
+        }
+
         public override void Initialize()
         {
-            _initialized = true;
+            Engine.QueueInitializationAction(() =>
+            {
+                SceneNode sunNode = Engine.Renderer.Scene.CreateSceneNode();
+
+                _sun = Engine.Renderer.Scene.CreateLight("Sun");
+
+                _sun.Type = Light.LightTypes.LT_DIRECTIONAL;
+                _sun.SetDiffuseColour(1.0f, 1.0f, 1.0f);
+                _sun.SetDirection(_sunDirection.x / 360f, _sunDirection.y / 360f, _sunDirection.z / 360f);
+                _sun.CastShadows = true;
+
+                sunNode.AttachObject(_sun);
+
+                Engine.Renderer.Scene.RootSceneNode.AddChild(sunNode);
+
+                _initialized = true;
+            });
         }
 
         public override void Cleanup()
@@ -51,74 +82,42 @@ namespace Flex.Development.Instances
         }
 
         [Category("Lighting")]
-        [DisplayName("Sun Horizontal Angle")]
-        [Description("The angle of the directional light from the sun around the X axis")]
-        [ScriptMember(ScriptAccess.None)]
-        public int sunHorizontalAngle
+        [DisplayName("Ambient")]
+        [Description("The ambient color of the world")]
+        [ScriptMember(ScriptAccess.Full)]
+        public System.Windows.Media.Color ambient
         {
             get
             {
-                return _sunHorizontalAngle;
+                return _ambient.color;
             }
             set
             {
-                if (value == _sunHorizontalAngle) return;
-                _sunHorizontalAngle = value;
-                NotifyPropertyChanged("SunHorizontalAngle");
+                if (value == _ambient.color) return;
+                _ambient = new ColorProperty(value);
+                Engine.Renderer.Scene.AmbientLight = new ColourValue(_ambient.r / 255f, _ambient.g / 255f, _ambient.b / 255f, _ambient.transparency / 255f);
+                NotifyPropertyChanged("Ambient");
             }
         }
 
         [Category("Lighting")]
-        [DisplayName("Sun Vertical Angle")]
-        [Description("The angle of the directional light from the sun around the Y axis")]
-        [ScriptMember(ScriptAccess.None)]
-        public int sunVerticalAngle
+        [DisplayName("Sun Direction")]
+        [Description("The direction of the light from the Sun")]
+        [ExpandableObject]
+        [ScriptMember(ScriptAccess.Full)]
+        public Properties.Vector3 sunDirection
         {
             get
             {
-                return _sunVerticalAngle;
+                return _sunDirection;
             }
             set
             {
-                if (value == _sunVerticalAngle) return;
-                _sunVerticalAngle = value;
-                NotifyPropertyChanged("SunVerticalAngle");
-            }
-        }
+                if (value == _sunDirection) return;
+                _sunDirection = value;
+                _sun.SetDirection(_sunDirection.x / 360f, _sunDirection.y / 360f, _sunDirection.z / 360f);
 
-        [Category("Lighting")]
-        [DisplayName("Sun Distance")]
-        [Description("The distance of the sun from the origin of the world")]
-        [ScriptMember(ScriptAccess.None)]
-        public int sunDistance
-        {
-            get
-            {
-                return _sunLightDistance;
-            }
-            set
-            {
-                if (value == _sunLightDistance) return;
-                _sunLightDistance = value;
-                NotifyPropertyChanged("SunDistance");
-            }
-        }
-
-        [Category("Lighting")]
-        [DisplayName("Cast Shadows")]
-        [Description("Whether or not to cast shadows from the sun")]
-        [ScriptMember(ScriptAccess.None)]
-        public bool castShadows
-        {
-            get
-            {
-                return _sunShadows;
-            }
-            set
-            {
-                if (value == _sunShadows) return;
-                _sunShadows = value;
-                NotifyPropertyChanged("SunShadows");
+                NotifyPropertyChanged("SunDirection");
             }
         }
 

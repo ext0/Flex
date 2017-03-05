@@ -1,5 +1,4 @@
 ﻿using Jitter.LinearMath;
-using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -50,12 +49,6 @@ namespace Flex.Misc.Utility
         {
             FieldInfo field = typeof(S).GetField(fieldName, BindingFlags.NonPublic | BindingFlags.Instance);
             return (T)field.GetValue(obj);
-        }
-
-        public static System.Windows.Media.Media3D.Quaternion FromYawPitchRoll(float yaw, float pitch, float roll)
-        {
-            SharpDX.Quaternion quaternion = SharpDX.Quaternion.RotationYawPitchRoll(MathUtil.DegreesToRadians(yaw), MathUtil.DegreesToRadians(pitch), MathUtil.DegreesToRadians(roll));
-            return new System.Windows.Media.Media3D.Quaternion(quaternion.X, quaternion.Y, quaternion.Z, quaternion.W);
         }
 
         public static T FindAncestor<T>(DependencyObject current) where T : DependencyObject

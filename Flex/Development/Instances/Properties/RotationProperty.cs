@@ -1,7 +1,6 @@
 ﻿using Flex.Misc.Tracker;
 using Jitter.LinearMath;
 using Microsoft.ClearScript;
-using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -143,14 +142,14 @@ namespace Flex.Development.Instances.Properties
 
             if (!singular)
             {
-                _x = MathUtil.RadiansToDegrees((float)Math.Atan2(matrix.M32, matrix.M33));
-                _y = MathUtil.RadiansToDegrees((float)Math.Atan2(-matrix.M31, sy));
-                _z = MathUtil.RadiansToDegrees((float)Math.Atan2(matrix.M21, matrix.M11));
+                _x = Mogre.Math.RadiansToDegrees((float)Math.Atan2(matrix.M32, matrix.M33));
+                _y = Mogre.Math.RadiansToDegrees((float)Math.Atan2(-matrix.M31, sy));
+                _z = Mogre.Math.RadiansToDegrees((float)Math.Atan2(matrix.M21, matrix.M11));
             }
             else
             {
-                _x = MathUtil.RadiansToDegrees((float)Math.Atan2(-matrix.M23, matrix.M22));
-                _y = MathUtil.RadiansToDegrees((float)Math.Atan2(-matrix.M31, sy));
+                _x = Mogre.Math.RadiansToDegrees((float)Math.Atan2(-matrix.M23, matrix.M22));
+                _y = Mogre.Math.RadiansToDegrees((float)Math.Atan2(-matrix.M31, sy));
                 _z = 0;
             }
 
@@ -173,6 +172,19 @@ namespace Flex.Development.Instances.Properties
             get
             {
                 return _matrix;
+            }
+        }
+
+        public Quaternion Quaternion
+        {
+            get
+            {
+                double w = Math.Sqrt(1.0 + _matrix.M11 + _matrix.M22 + _matrix.M33) / 2.0;
+                double w4 = w * 4.0;
+                double x = (_matrix.M32 - _matrix.M23) / w4;
+                double y = (_matrix.M13 - _matrix.M31) / w4;
+                double z = (_matrix.M21 - _matrix.M12) / w4;
+                return new Quaternion(x, y, z, w);
             }
         }
 

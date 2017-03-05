@@ -1,6 +1,7 @@
 ﻿using Flex.Development.Instances.Properties;
 using Flex.Misc.Tracker;
 using Microsoft.ClearScript;
+using Mogre;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -15,17 +16,14 @@ namespace Flex.Development.Instances
     [Serializable]
     public abstract class PositionedInstance : Instance
     {
-        protected Vector3 _position;
+        protected Properties.Vector3 _position;
         protected Rotation _rotation;
 
         [NonSerialized()]
-        protected Visual3D _visual3D;
+        protected SceneNode _sceneNode;
 
         [NonSerialized()]
-        protected Transform3DGroup _transformGroup;
-
-        [NonSerialized()]
-        protected Model3D _model;
+        protected Entity _entity;
 
         protected abstract void InitializeVisual();
 
@@ -35,20 +33,20 @@ namespace Flex.Development.Instances
         }
 
         [Browsable(false)]
-        public Visual3D Visual3D
+        public SceneNode SceneNode
         {
             get
             {
-                return _visual3D;
+                return _sceneNode;
             }
         }
 
         [Browsable(false)]
-        public Model3D Model
+        public Entity Entity
         {
             get
             {
-                return _model;
+                return _entity;
             }
         }
 
@@ -57,7 +55,7 @@ namespace Flex.Development.Instances
         [Description("The 3D coordinates of this instance")]
         [ExpandableObject]
         [ScriptMember(ScriptAccess.Full)]
-        public abstract Vector3 position
+        public abstract Properties.Vector3 position
         {
             get;
             set;

@@ -19,7 +19,7 @@ namespace Flex.Misc.Utility
     {
         public new void Add(T obj)
         {
-            MainDXScene.RunOnUIThread(() =>
+            Engine.RunOnUIThread(() =>
             {
                 base.Add(obj);
             });
@@ -28,7 +28,7 @@ namespace Flex.Misc.Utility
         public new bool Remove(T obj)
         {
             bool value = true;
-            MainDXScene.RunOnUIThread(() =>
+            Engine.RunOnUIThread(() =>
             {
                 value = base.Remove(obj);
             });

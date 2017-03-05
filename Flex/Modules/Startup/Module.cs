@@ -54,6 +54,7 @@ namespace Flex.Modules.Startup
             ImageSource wpfBitmap = Imaging.CreateBitmapSourceFromHBitmap(
             hBmp, IntPtr.Zero, Int32Rect.Empty,
           BitmapSizeOptions.FromEmptyOptions());
+
             MainWindow.Icon = wpfBitmap;
 
             Shell.StatusBar.AddItem("Flex - By Patrick Bell", new GridLength(1, GridUnitType.Star));

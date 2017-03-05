@@ -3,6 +3,7 @@ using Flex.Commands.Scene;
 using Flex.Development.Execution.Data;
 using Flex.Development.Instances;
 using Flex.Development.Rendering;
+using Flex.Development.Rendering.Modules;
 using Flex.Misc.Utility;
 using Flex.Modules.Scene.Views;
 using Flex.Modules.ScriptEditor.ViewModels;
@@ -10,6 +11,7 @@ using Gemini.Framework;
 using Gemini.Framework.Commands;
 using Gemini.Framework.Services;
 using Gemini.Framework.Threading;
+using Mogre;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -34,6 +36,16 @@ namespace Flex.Modules.Scene.ViewModels
 
         private SceneView _sceneView;
 
+        private MogreImage _mogreImage;
+
+        public SceneView View
+        {
+            get
+            {
+                return _sceneView;
+            }
+        }
+
         public SceneViewModel()
         {
             DisplayName = "World";
@@ -51,11 +63,32 @@ namespace Flex.Modules.Scene.ViewModels
             _sceneView.KeyDown += SceneViewKeyDown;
             _sceneView.KeyUp += SceneViewKeyUp;
 
+            _sceneView.Render.SizeChanged += OuterRender_SizeChanged;
+
             CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
             _keyboardPollCancelToken = cancellationTokenSource.Token;
             Task listener = Task.Factory.StartNew(KeyboardTick, _keyboardPollCancelToken, TaskCreationOptions.LongRunning, TaskScheduler.Default);
 
-            MainDXScene.Initialize(ActiveScene.Context, _sceneView);
+            Engine.Initialize(this);
+        }
+
+        private void OuterRender_SizeChanged(object sender, System.Windows.SizeChangedEventArgs e)
+        {
+            if (_mogreImage != null)
+            {
+                _mogreImage.SetSize((uint)_sceneView.Render.ActualWidth, (uint)_sceneView.Render.ActualHeight);
+            }
+        }
+
+        public void BindMogreImage(MogreImage image)
+        {
+            _sceneView.Render.Source = image;
+            _mogreImage = image;
+        }
+
+        public Tuple<uint, uint> GetViewPortSize()
+        {
+            return new Tuple<uint, uint>((uint)_sceneView.Render.ActualWidth, (uint)_sceneView.Render.ActualHeight);
         }
 
         private void SceneViewKeyUp(object sender, KeyEventArgs e)
@@ -78,7 +111,7 @@ namespace Flex.Modules.Scene.ViewModels
 
         private void SceneViewMouseWheel(object sender, MouseWheelEventArgs e)
         {
-            _sceneView.Camera.MoveForward(e.Delta / 10d);
+            Engine.Renderer.Camera.Move(Engine.Renderer.Camera.Direction * (e.Delta / 10f));
         }
 
         private double CameraDeltaCalculation(double value, double minimum, double maximum, double acceleration)
@@ -111,7 +144,7 @@ namespace Flex.Modules.Scene.ViewModels
                 while (true)
                 {
                     Thread.Sleep(KeyboardInputPollingFrequency);
-                    MainDXScene.RunOnUIThread(() =>
+                    Engine.RunOnUIThread(() =>
                     {
                         if (!_sceneView.IsMouseOver)
                         {
@@ -125,28 +158,29 @@ namespace Flex.Modules.Scene.ViewModels
                                 ActiveScene.RunKeyCallback(KeyAction.KeyPress, key);
                             }
                         }
+
                         bool none = true;
                         if (Keyboard.IsKeyDown(Key.W))
                         {
-                            _sceneView.Camera.MoveForward(defaultSpeed * wA);
+                            Engine.Renderer.Camera.Move(Engine.Renderer.Camera.Direction * (float)(defaultSpeed * wA));
                             wA = CameraDeltaCalculation(wA, minimum, maximum, acceleration);
                             none = false;
                         }
                         if (Keyboard.IsKeyDown(Key.A))
                         {
-                            _sceneView.Camera.MoveLeft(defaultSpeed * aA);
+                            Engine.Renderer.Camera.Move(-Engine.Renderer.Camera.Right * (float)(defaultSpeed * aA));
                             aA = CameraDeltaCalculation(aA, minimum, maximum, acceleration);
                             none = false;
                         }
                         if (Keyboard.IsKeyDown(Key.S))
                         {
-                            _sceneView.Camera.MoveBackward(defaultSpeed * sA);
+                            Engine.Renderer.Camera.Move(-Engine.Renderer.Camera.Direction * (float)(defaultSpeed * sA));
                             sA = CameraDeltaCalculation(sA, minimum, maximum, acceleration);
                             none = false;
                         }
                         if (Keyboard.IsKeyDown(Key.D))
                         {
-                            _sceneView.Camera.MoveRight(defaultSpeed * dA);
+                            Engine.Renderer.Camera.Move(Engine.Renderer.Camera.Right * (float)(defaultSpeed * dA));
                             dA = CameraDeltaCalculation(dA, minimum, maximum, acceleration);
                             none = false;
                         }
@@ -184,7 +218,7 @@ namespace Flex.Modules.Scene.ViewModels
         Task ICommandHandler<ToggleVRCommandDefinition>.Run(Command command)
         {
             ActiveScene.IsVR = !ActiveScene.IsVR;
-            MainDXScene.ToggleVR();
+            //Engine.ToggleVR();
             if (ActiveScene.IsVR)
             {
                 command.IconSource = new Uri("pack://application:,,,/Flex;component/Resources/Icons/Legacy/webcam_delete.png");

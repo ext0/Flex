@@ -45,11 +45,11 @@ namespace Flex.Development.Instances
 
         private void RotationPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            MainDXScene.RunOnUIThread(() =>
+            Engine.RunOnUIThread(() =>
             {
                 if (_initialized)
                 {
-                    //_transformGroup.Children[0] = new MatrixTransform3D(rotation.Matrix);
+                    //Engine.Renderer.Camera.SetDirection(rotation.x, rotation.y, rotation.z);
                 }
             });
             NotifyPropertyChanged("Rotation");
@@ -57,11 +57,11 @@ namespace Flex.Development.Instances
 
         private void PositionPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            MainDXScene.RunOnUIThread(() =>
+            Engine.RunOnUIThread(() =>
             {
                 if (_initialized)
                 {
-                    //_transformGroup.Children[1] = new TranslateTransform3D(position.Vector3D);
+                    _sceneNode.SetPosition(position.x, position.y, position.z);
                 }
             });
             NotifyPropertyChanged("Position");

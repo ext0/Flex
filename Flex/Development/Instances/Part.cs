@@ -1,5 +1,4 @@
-﻿using Ab3d.Visuals;
-using Flex.Development.Execution.Data;
+﻿using Flex.Development.Execution.Data;
 using Flex.Development.Execution.Data.States;
 using Flex.Development.Execution.Runtime;
 using Flex.Development.Instances.Properties;
@@ -73,7 +72,7 @@ namespace Flex.Development.Instances
             _color = new ColorProperty(Colors.Green);
             _color.PropertyChanged += ColorPropertyChanged;
 
-            MainDXScene.RunOnUIThread(() =>
+            Engine.RunOnUIThread(() =>
             {
                 LoadPhysicsInstance();
                 InitializeVisual();
@@ -83,11 +82,11 @@ namespace Flex.Development.Instances
 
         private void PositionPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            MainDXScene.RunOnUIThread(() =>
+            Engine.RunOnUIThread(() =>
             {
                 if (_initialized)
                 {
-                    _transformGroup.Children[1] = new TranslateTransform3D(position.Vector3D);
+                    _sceneNode.SetPosition(position.x, position.y, position.z);
                     _rigidBody.Position = new Jitter.LinearMath.JVector(position.x, position.y, position.z);
                 }
             });
@@ -96,11 +95,12 @@ namespace Flex.Development.Instances
 
         private void RotationPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            MainDXScene.RunOnUIThread(() =>
+            Engine.RunOnUIThread(() =>
             {
                 if (_initialized)
                 {
-                    _transformGroup.Children[0] = new MatrixTransform3D(rotation.Matrix);
+                    Quaternion quaternion = rotation.Quaternion;
+                    _sceneNode.SetOrientation((float)quaternion.W, (float)quaternion.X, (float)quaternion.Y, (float)quaternion.Z);
                     _rigidBody.Orientation = rotation.JMatrix;
                 }
             });
@@ -109,11 +109,11 @@ namespace Flex.Development.Instances
 
         private void SizePropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            MainDXScene.RunOnUIThread(() =>
+            Engine.RunOnUIThread(() =>
             {
                 if (_initialized)
                 {
-                    (_visual3D as BoxVisual3D).Size = _size.Size3D;
+                    _sceneNode.SetScale(_size.x, _size.y, _size.z);
                     _shape = new BoxShape(_size.x, _size.y, _size.z);
                     _rigidBody.Shape = _shape;
                 }
@@ -123,11 +123,14 @@ namespace Flex.Development.Instances
 
         private void ColorPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            MainDXScene.RunOnUIThread(() =>
+            Engine.RunOnUIThread(() =>
             {
                 if (_initialized)
                 {
-                    (_visual3D as BoxVisual3D).Material = Material;
+                    //_entity.GetSubEntity(0).GetMaterial().SetAmbient(_color.r, _color.g, _color.b);
+                    _entity.GetSubEntity(0).GetMaterial().SetDiffuse(_color.r / 255f, _color.g / 255f, _color.b / 255f, _color.transparency / 255f);
+                    //do this at some point
+                    //(_entity.ma.Material = Material;
                 }
             });
             NotifyPropertyChanged("Color");
@@ -145,11 +148,10 @@ namespace Flex.Development.Instances
         {
             if (_initialized)
             {
-                MainDXScene.RunOnUIThread(() =>
+                Engine.RunOnUIThread(() =>
                 {
                     UnloadPhysicsInstance();
-                    MainDXScene.VisualInstances.Remove(this);
-                    MainDXScene.RemoveChildVisual(_visual3D);
+                    Engine.Destroy(this);
                 });
             }
             _position.PropertyChanged -= PositionPropertyChanged;
@@ -293,17 +295,11 @@ namespace Flex.Development.Instances
 
         protected override void InitializeVisual()
         {
-            _visual3D = new BoxVisual3D();
-            _transformGroup = new Transform3DGroup();
-            _transformGroup.Children.Add(new MatrixTransform3D(rotation.Matrix));
-            _transformGroup.Children.Add(new TranslateTransform3D(position.Vector3D));
-            _visual3D.Transform = _transformGroup;
-            _model = (_visual3D as BoxVisual3D).Content;
-            (_visual3D as BoxVisual3D).Size = size.Size3D;
-            (_visual3D as BoxVisual3D).Material = Material;
+            _sceneNode = Engine.Renderer.CreateEntity(out _entity, "box.mesh");
+            _sceneNode.SetPosition(_position.x, _position.y, _position.z);
+            _sceneNode.SetScale(_size.x, _size.y, _size.z);
 
-            MainDXScene.VisualInstances.Add(this);
-            MainDXScene.AddChildVisual(_visual3D);
+            _entity.GetSubEntity(0).GetMaterial().SetDiffuse(_color.r / 255f, _color.g / 255f, _color.b / 255f, _color.transparency / 255f);
         }
     }
 }

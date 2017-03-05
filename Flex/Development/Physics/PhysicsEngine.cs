@@ -3,7 +3,6 @@ using Flex.Development.Instances;
 using Flex.Development.Rendering;
 using Flex.Misc.Utility;
 using Jitter.Collision;
-using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Linq;

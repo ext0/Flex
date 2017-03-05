@@ -1,4 +1,5 @@
 ﻿using Caliburn.Micro;
+using Flex.Development.Rendering;
 using Flex.Properties;
 using Gemini.Framework.Services;
 using Gemini.Modules.Shell.Views;
