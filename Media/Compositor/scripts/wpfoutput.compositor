@@ -1,0 +1,15 @@
+compositor WPFOutput
+{
+    technique
+    {
+        target_output
+        {
+            input none
+            
+            pass render_quad
+            {
+                material "WPF/Compositor/Identity"
+            }
+        }
+    }
+}
