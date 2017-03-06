@@ -65,10 +65,6 @@ namespace Flex.Modules.Scene.ViewModels
 
             _sceneView.Render.SizeChanged += OuterRender_SizeChanged;
 
-            CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
-            _keyboardPollCancelToken = cancellationTokenSource.Token;
-            Task listener = Task.Factory.StartNew(KeyboardTick, _keyboardPollCancelToken, TaskCreationOptions.LongRunning, TaskScheduler.Default);
-
             Engine.Initialize(this);
         }
 
@@ -128,76 +124,7 @@ namespace Flex.Modules.Scene.ViewModels
         {
             try
             {
-                double wA = 1;
-                double aA = 1;
-                double sA = 1;
-                double dA = 1;
 
-                double defaultSpeed = 0.08d * 16;
-
-                double acceleration = 0.01;
-
-                double minimum = 1d;
-
-                double maximum = 2d;
-
-                while (true)
-                {
-                    Thread.Sleep(KeyboardInputPollingFrequency);
-                    Engine.RunOnUIThread(() =>
-                    {
-                        if (!_sceneView.IsMouseOver)
-                        {
-                            return;
-                        }
-
-                        foreach (int key in ActiveScene.GetRegisteredKeyPressKeys())
-                        {
-                            if (Keyboard.IsKeyDown((Key)key))
-                            {
-                                ActiveScene.RunKeyCallback(KeyAction.KeyPress, key);
-                            }
-                        }
-
-                        bool none = true;
-                        if (Keyboard.IsKeyDown(Key.W))
-                        {
-                            Engine.Renderer.Camera.Move(Engine.Renderer.Camera.Direction * (float)(defaultSpeed * wA));
-                            wA = CameraDeltaCalculation(wA, minimum, maximum, acceleration);
-                            none = false;
-                        }
-                        if (Keyboard.IsKeyDown(Key.A))
-                        {
-                            Engine.Renderer.Camera.Move(-Engine.Renderer.Camera.Right * (float)(defaultSpeed * aA));
-                            aA = CameraDeltaCalculation(aA, minimum, maximum, acceleration);
-                            none = false;
-                        }
-                        if (Keyboard.IsKeyDown(Key.S))
-                        {
-                            Engine.Renderer.Camera.Move(-Engine.Renderer.Camera.Direction * (float)(defaultSpeed * sA));
-                            sA = CameraDeltaCalculation(sA, minimum, maximum, acceleration);
-                            none = false;
-                        }
-                        if (Keyboard.IsKeyDown(Key.D))
-                        {
-                            Engine.Renderer.Camera.Move(Engine.Renderer.Camera.Right * (float)(defaultSpeed * dA));
-                            dA = CameraDeltaCalculation(dA, minimum, maximum, acceleration);
-                            none = false;
-                        }
-                        if (none)
-                        {
-                            wA = 1;
-                            aA = 1;
-                            sA = 1;
-                            dA = 1;
-                        }
-                    });
-
-                    if (_keyboardPollCancelToken.IsCancellationRequested)
-                    {
-                        break;
-                    }
-                }
             }
             catch
             {

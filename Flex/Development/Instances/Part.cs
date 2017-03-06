@@ -135,10 +135,7 @@ namespace Flex.Development.Instances
             {
                 if (_initialized)
                 {
-                    //_entity.GetSubEntity(0).GetMaterial().SetAmbient(_color.r, _color.g, _color.b);
                     _entity.GetSubEntity(0).GetMaterial().SetDiffuse(_color.r / 255f, _color.g / 255f, _color.b / 255f, _color.transparency / 255f);
-                    //do this at some point
-                    //(_entity.ma.Material = Material;
                 }
             });
             NotifyPropertyChanged("Color");

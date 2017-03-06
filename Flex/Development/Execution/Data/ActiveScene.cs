@@ -201,12 +201,9 @@ namespace Flex.Development.Execution.Data
             {
                 execution.Start();
             }
-            Thread physicsThread = new Thread(PhysicsLoop);
-            physicsThread.Start();
 
-            Thread stepThread = new Thread(MainLoop);
-            stepThread.Start();
-            //Output.Out.AddLine("Reloaded cached copy of current state: " + _savedState.Length);
+            Thread mainLoop = new Thread(MainLoop);
+            mainLoop.Start();
         }
 
         public static void NotifyRenderStep()
@@ -217,28 +214,15 @@ namespace Flex.Development.Execution.Data
             }
         }
 
-        public static void PhysicsLoop()
-        {
-            while (_context.IsRunning)
-            {
-                Engine.PhysicsStep();
-                if (OnPhysicsStep != null)
-                {
-                    OnPhysicsStep(null, null);
-                }
-                Thread.Sleep(1000 / 60);
-            }
-        }
-
         public static void MainLoop()
         {
-            while (_context.IsRunning)
+            while (Running)
             {
+                Thread.Sleep(1000 / 60);
                 if (OnStep != null)
                 {
                     OnStep(null, null);
                 }
-                Thread.Sleep(1000 / 60);
             }
         }
 

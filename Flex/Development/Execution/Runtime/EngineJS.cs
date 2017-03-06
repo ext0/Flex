@@ -191,14 +191,6 @@ namespace Flex.Development.Execution.Runtime
             };
         }
 
-        private void onPhysicsStep(dynamic obj)
-        {
-            ActiveScene.OnPhysicsStep += (sender, e) =>
-            {
-                obj();
-            };
-        }
-
         private void onStep(dynamic obj)
         {
             ActiveScene.OnStep += (sender, e) =>
@@ -235,7 +227,6 @@ namespace Flex.Development.Execution.Runtime
             _engine.Script.loop = new Action<Object, double>(loop);
             _engine.Script.forLoop = new Action<Object, int, double>(forLoop);
             _engine.Script.onRenderStep = new Action<Object>(onRenderStep);
-            _engine.Script.onPhysicsStep = new Action<Object>(onPhysicsStep);
             _engine.Script.onStep = new Action<Object>(onStep);
             _engine.Script.onKeyPress = new Action<int, Object>(onKeyPress);
             _engine.Script.onKeyDown = new Action<int, Object>(onKeyDown);

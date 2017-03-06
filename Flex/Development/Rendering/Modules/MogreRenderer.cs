@@ -90,7 +90,7 @@ namespace Flex.Development.Rendering.Modules
             config["externalWindowHandle"] = Handle.ToString();
             config["vsync"] = "False";
             config["FSAA"] = "2";
-            config["Multithreaded"] = "false";
+            config["Multithreaded"] = "False";
 
             _renderWindow = _root.CreateRenderWindow("Mogre Window", 0, 0, false, config);
             _renderWindow.IsAutoUpdated = false;
@@ -107,6 +107,7 @@ namespace Flex.Development.Rendering.Modules
         public SceneNode CreateEntity(out Entity entity, String entityMesh)
         {
             entity = _scene.CreateEntity(entityMesh);
+            entity.CastShadows = true;
             SceneNode node = _scene.CreateSceneNode();
             node.AttachObject(entity);
             _scene.RootSceneNode.AddChild(node);
@@ -117,14 +118,13 @@ namespace Flex.Development.Rendering.Modules
         {
             _scene = _root.CreateSceneManager(SceneType.ST_GENERIC);
 
-            ColourValue color = new ColourValue(
+            _scene.AmbientLight = new ColourValue(
                 ActiveScene.Context.ActiveWorld.Sky.ambient.R / 255f,
                 ActiveScene.Context.ActiveWorld.Sky.ambient.G / 255f,
                 ActiveScene.Context.ActiveWorld.Sky.ambient.B / 255f);
 
-            _scene.AmbientLight = color;
-
             _scene.SetSkyBox(true, "Skyboxes/Default", 500);
+            _scene.ShadowTechnique = ShadowTechnique.SHADOWTYPE_STENCIL_MODULATIVE;
 
             _viewCamera = _scene.CreateCamera("ViewPoint");
             _viewCamera.ProjectionType = ProjectionType.PT_PERSPECTIVE;
@@ -149,7 +149,7 @@ namespace Flex.Development.Rendering.Modules
         {
             float elapsed = _timer.Microseconds / 1000000f;
             _timer.Reset();
-
+            Engine.RunOnUIThread(() => Image.CompositeToWPF(null, null));
             Image.PrepareForRender(elapsed);
             try
             {

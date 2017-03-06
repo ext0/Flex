@@ -33,8 +33,14 @@ namespace Flex.Development.Rendering
         private static Point _mousePosition;
 
         private static SceneView _view;
-
         private static SceneNode _hoverSceneNode;
+
+        private static double _wA = 1;
+        private static double _aA = 1;
+        private static double _sA = 1;
+        private static double _dA = 1;
+
+        private static double _defaultSpeed = 0.08d * 16;
 
         public static MogreRenderer Renderer
         {
@@ -56,7 +62,7 @@ namespace Flex.Development.Rendering
         {
             if (_initialized)
             {
-                action.Invoke();
+                RunOnUIThread(action);
             }
             _preInitializationActions.Enqueue(action);
         }
@@ -86,16 +92,64 @@ namespace Flex.Development.Rendering
 
             view.BindMogreImage(Renderer.CreateMogreImage(view.GetViewPortSize()));
 
+            CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+            Task listener = Task.Factory.StartNew(KeyboardTick, cancellationTokenSource.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+
             Thread thread = new Thread(() =>
             {
                 while (true)
                 {
                     Thread.Sleep(1000 / 60);
+                    KeyboardTick();
+                    PhysicsEngine.Step();
                     _renderer.Loop();
                 }
             });
 
             thread.Start();
+        }
+
+        private static void KeyboardTick()
+        {
+            RunOnUIThread(() =>
+            {
+                foreach (int key in ActiveScene.GetRegisteredKeyPressKeys())
+                {
+                    if (System.Windows.Input.Keyboard.IsKeyDown((Key)key))
+                    {
+                        ActiveScene.RunKeyCallback(KeyAction.KeyPress, key);
+                    }
+                }
+
+                bool none = true;
+                if (System.Windows.Input.Keyboard.IsKeyDown(Key.W))
+                {
+                    Engine.Renderer.Camera.Move(Engine.Renderer.Camera.Direction * (float)(_defaultSpeed * _wA));
+                    none = false;
+                }
+                if (System.Windows.Input.Keyboard.IsKeyDown(Key.A))
+                {
+                    Engine.Renderer.Camera.Move(-Engine.Renderer.Camera.Right * (float)(_defaultSpeed * _aA));
+                    none = false;
+                }
+                if (System.Windows.Input.Keyboard.IsKeyDown(Key.S))
+                {
+                    Engine.Renderer.Camera.Move(-Engine.Renderer.Camera.Direction * (float)(_defaultSpeed * _sA));
+                    none = false;
+                }
+                if (System.Windows.Input.Keyboard.IsKeyDown(Key.D))
+                {
+                    Engine.Renderer.Camera.Move(Engine.Renderer.Camera.Right * (float)(_defaultSpeed * _dA));
+                    none = false;
+                }
+                if (none)
+                {
+                    _wA = 1;
+                    _aA = 1;
+                    _sA = 1;
+                    _dA = 1;
+                }
+            });
         }
 
         private static void MouseMove(object sender, MouseEventArgs e)
@@ -162,7 +216,7 @@ namespace Flex.Development.Rendering
             {
                 if (Application.Current.Dispatcher.CheckAccess())
                 {
-                    action();
+                    action.Invoke();
                 }
                 else
                 {
@@ -170,13 +224,14 @@ namespace Flex.Development.Rendering
                 }
                 return;
             }
-            if (_window.Dispatcher.CheckAccess())
+
+            if (Application.Current.Dispatcher.CheckAccess())
             {
-                action();
+                action.Invoke();
             }
-            else {
-                //_dispatcherActions.Enqueue(action);
-                _window.Dispatcher.Invoke(action);
+            else
+            {
+                Application.Current.Dispatcher.Invoke(DispatcherPriority.Normal, action);
             }
         }
 
