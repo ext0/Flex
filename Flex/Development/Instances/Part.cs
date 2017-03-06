@@ -72,7 +72,7 @@ namespace Flex.Development.Instances
             _color = new ColorProperty(Colors.Green);
             _color.PropertyChanged += ColorPropertyChanged;
 
-            Engine.RunOnUIThread(() =>
+            Engine.QueueForRenderDispatcher(() =>
             {
                 LoadPhysicsInstance();
                 InitializeVisual();
@@ -82,7 +82,7 @@ namespace Flex.Development.Instances
 
         private void PositionPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            Engine.RunOnUIThread(() =>
+            Engine.QueueForRenderDispatcher(() =>
             {
                 if (_initialized)
                 {
@@ -99,7 +99,7 @@ namespace Flex.Development.Instances
 
         private void RotationPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            Engine.RunOnUIThread(() =>
+            Engine.QueueForRenderDispatcher(() =>
             {
                 if (_initialized)
                 {
@@ -117,7 +117,7 @@ namespace Flex.Development.Instances
 
         private void SizePropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            Engine.RunOnUIThread(() =>
+            Engine.QueueForRenderDispatcher(() =>
             {
                 if (_initialized)
                 {
@@ -131,7 +131,7 @@ namespace Flex.Development.Instances
 
         private void ColorPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            Engine.RunOnUIThread(() =>
+            Engine.QueueForRenderDispatcher(() =>
             {
                 if (_initialized)
                 {
@@ -153,7 +153,7 @@ namespace Flex.Development.Instances
         {
             if (_initialized)
             {
-                Engine.RunOnUIThread(() =>
+                Engine.QueueForRenderDispatcher(() =>
                 {
                     UnloadPhysicsInstance();
                     Engine.Destroy(this);

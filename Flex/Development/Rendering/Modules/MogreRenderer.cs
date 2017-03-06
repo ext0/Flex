@@ -149,14 +149,14 @@ namespace Flex.Development.Rendering.Modules
         {
             float elapsed = _timer.Microseconds / 1000000f;
             _timer.Reset();
-            Engine.RunOnUIThread(() => Image.CompositeToWPF(null, null), true);
+            Engine.RunOnUIThread(() => Image.CompositeToWPF(null, null));
             try
             {
                 _root.RenderOneFrame();
             }
             catch { }
 
-            Engine.RunOnUIThread(Image.PostRender, true);
+            Engine.RunOnUIThread(Image.PostRender);
         }
 
         public void ManualRender()

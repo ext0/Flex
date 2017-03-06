@@ -56,7 +56,6 @@ namespace Flex.Development.Execution.Data
 
         public static event EventHandler OnRenderStep;
         public static event EventHandler OnStep;
-        public static event EventHandler OnPhysicsStep;
 
         public static event EventHandler RunningChanged;
 
@@ -245,7 +244,6 @@ namespace Flex.Development.Execution.Data
 
             OnStep = null;
             OnRenderStep = null;
-            OnPhysicsStep = null;
             _runtimeKeybinds.Clear();
         }
 

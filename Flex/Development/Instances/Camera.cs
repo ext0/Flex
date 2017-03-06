@@ -45,7 +45,7 @@ namespace Flex.Development.Instances
 
         private void RotationPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            Engine.RunOnUIThread(() =>
+            Engine.QueueForRenderDispatcher(() =>
             {
                 if (_initialized)
                 {
@@ -57,7 +57,7 @@ namespace Flex.Development.Instances
 
         private void PositionPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            Engine.RunOnUIThread(() =>
+            Engine.QueueForRenderDispatcher(() =>
             {
                 if (_initialized)
                 {

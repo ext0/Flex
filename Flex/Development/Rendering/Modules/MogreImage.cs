@@ -50,10 +50,7 @@ namespace Flex.Development.Rendering.Modules
                 return;
 
             //First Detach the render target.
-            if (!TryLock(lockDuration))
-            {
-                return;
-            }
+            Lock();
             try
             {
                 SetBackBuffer(System.Windows.Interop.D3DResourceType.IDirect3DSurface9, IntPtr.Zero);

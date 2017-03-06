@@ -42,7 +42,7 @@ namespace Flex.Development.Rendering
 
         private static double _defaultSpeed = 0.08d * 16;
 
-        private static Queue<System.Action> _UIDispatcherActionQueue = new Queue<System.Action>();
+        private static Queue<System.Action> _renderDispatcherActionQueue = new Queue<System.Action>();
 
         public static MogreRenderer Renderer
         {
@@ -100,9 +100,9 @@ namespace Flex.Development.Rendering
                 int attemptedFrameRate = 60;
                 while (true)
                 {
-                    while (_UIDispatcherActionQueue.Count != 0)
+                    while (_renderDispatcherActionQueue.Count != 0)
                     {
-                        RunOnUIThread(_UIDispatcherActionQueue.Dequeue(), true);
+                        _renderDispatcherActionQueue.Dequeue().Invoke();
                     }
                     uint elapsed = timer.Milliseconds;
                     timer.Reset();
@@ -127,45 +127,64 @@ namespace Flex.Development.Rendering
 
         private static void KeyboardTick()
         {
+            foreach (int key in ActiveScene.GetRegisteredKeyPressKeys())
+            {
+                bool down = false;
+                RunOnUIThread(() =>
+                {
+                    down = System.Windows.Input.Keyboard.IsKeyDown((Key)key);
+                });
+                if (down)
+                {
+                    ActiveScene.RunKeyCallback(KeyAction.KeyPress, key);
+                }
+            }
+
+            bool none = true;
+
+            bool aDown = false;
+            bool wDown = false;
+            bool sDown = false;
+            bool dDown = false;
+
             RunOnUIThread(() =>
             {
-                foreach (int key in ActiveScene.GetRegisteredKeyPressKeys())
-                {
-                    if (System.Windows.Input.Keyboard.IsKeyDown((Key)key))
-                    {
-                        ActiveScene.RunKeyCallback(KeyAction.KeyPress, key);
-                    }
-                }
+                wDown = System.Windows.Input.Keyboard.IsKeyDown(Key.W);
+                aDown = System.Windows.Input.Keyboard.IsKeyDown(Key.A);
+                sDown = System.Windows.Input.Keyboard.IsKeyDown(Key.S);
+                dDown = System.Windows.Input.Keyboard.IsKeyDown(Key.D);
+            });
+            if (wDown)
+            {
+                Engine.Renderer.Camera.Move(Engine.Renderer.Camera.Direction * (float)(_defaultSpeed * _wA));
+                none = false;
+            }
 
-                bool none = true;
-                if (System.Windows.Input.Keyboard.IsKeyDown(Key.W))
-                {
-                    Engine.Renderer.Camera.Move(Engine.Renderer.Camera.Direction * (float)(_defaultSpeed * _wA));
-                    none = false;
-                }
-                if (System.Windows.Input.Keyboard.IsKeyDown(Key.A))
-                {
-                    Engine.Renderer.Camera.Move(-Engine.Renderer.Camera.Right * (float)(_defaultSpeed * _aA));
-                    none = false;
-                }
-                if (System.Windows.Input.Keyboard.IsKeyDown(Key.S))
-                {
-                    Engine.Renderer.Camera.Move(-Engine.Renderer.Camera.Direction * (float)(_defaultSpeed * _sA));
-                    none = false;
-                }
-                if (System.Windows.Input.Keyboard.IsKeyDown(Key.D))
-                {
-                    Engine.Renderer.Camera.Move(Engine.Renderer.Camera.Right * (float)(_defaultSpeed * _dA));
-                    none = false;
-                }
-                if (none)
-                {
-                    _wA = 1;
-                    _aA = 1;
-                    _sA = 1;
-                    _dA = 1;
-                }
-            }, true);
+            if (aDown)
+            {
+                Engine.Renderer.Camera.Move(-Engine.Renderer.Camera.Right * (float)(_defaultSpeed * _aA));
+                none = false;
+            }
+
+            if (sDown)
+            {
+                Engine.Renderer.Camera.Move(-Engine.Renderer.Camera.Direction * (float)(_defaultSpeed * _sA));
+                none = false;
+            }
+
+            if (dDown)
+            {
+                Engine.Renderer.Camera.Move(Engine.Renderer.Camera.Right * (float)(_defaultSpeed * _dA));
+                none = false;
+            }
+
+            if (none)
+            {
+                _wA = 1;
+                _aA = 1;
+                _sA = 1;
+                _dA = 1;
+            }
         }
 
         private static void MouseMove(object sender, MouseEventArgs e)
@@ -176,48 +195,51 @@ namespace Flex.Development.Rendering
                 return;
             }
             Point point = e.GetPosition(_view);
-            if (e.RightButton == MouseButtonState.Pressed)
+            QueueForRenderDispatcher(() =>
             {
-                double deltaDirectionX = point.X - _mousePosition.X;
-                double deltaDirectionY = point.Y - _mousePosition.Y;
-                _renderer.Camera.Pitch((float)-deltaDirectionY / 200f);
-                _renderer.Camera.Yaw((float)-deltaDirectionX / 200f);
-            }
-
-            Ray mouseRay = _renderer.Camera.GetCameraToViewportRay((float)(point.X / _view.ActualWidth), (float)(point.Y / _view.ActualHeight));
-
-            RaySceneQuery mRaySceneQuery = _renderer.Scene.CreateRayQuery(mouseRay);
-
-            RaySceneQueryResult result = mRaySceneQuery.Execute();
-            RaySceneQueryResult.Enumerator itr = (RaySceneQueryResult.Enumerator)(result.GetEnumerator());
-
-            bool found = false;
-            if (itr != null)
-            {
-                while (itr.MoveNext())
+                if (e.RightButton == MouseButtonState.Pressed)
                 {
-                    RaySceneQueryResultEntry entry = itr.Current;
-                    entry.movable.ParentSceneNode.ShowBoundingBox = true;
-                    if (!entry.movable.ParentSceneNode.Equals(_hoverSceneNode))
-                    {
-                        if (_hoverSceneNode != null)
-                        {
-                            _hoverSceneNode.ShowBoundingBox = false;
-                        }
-                        _hoverSceneNode = entry.movable.ParentSceneNode;
-                    }
-                    found = true;
-                    break;
+                    double deltaDirectionX = point.X - _mousePosition.X;
+                    double deltaDirectionY = point.Y - _mousePosition.Y;
+                    _renderer.Camera.Pitch((float)-deltaDirectionY / 200f);
+                    _renderer.Camera.Yaw((float)-deltaDirectionX / 200f);
                 }
-            }
 
-            if (!found && _hoverSceneNode != null)
-            {
-                _hoverSceneNode.ShowBoundingBox = false;
-                _hoverSceneNode = null;
-            }
+                Ray mouseRay = _renderer.Camera.GetCameraToViewportRay((float)(point.X / _view.ActualWidth), (float)(point.Y / _view.ActualHeight));
 
-            _mousePosition = point;
+                RaySceneQuery mRaySceneQuery = _renderer.Scene.CreateRayQuery(mouseRay);
+
+                RaySceneQueryResult result = mRaySceneQuery.Execute();
+                RaySceneQueryResult.Enumerator itr = (RaySceneQueryResult.Enumerator)(result.GetEnumerator());
+
+                bool found = false;
+                if (itr != null)
+                {
+                    while (itr.MoveNext())
+                    {
+                        RaySceneQueryResultEntry entry = itr.Current;
+                        entry.movable.ParentSceneNode.ShowBoundingBox = true;
+                        if (!entry.movable.ParentSceneNode.Equals(_hoverSceneNode))
+                        {
+                            if (_hoverSceneNode != null)
+                            {
+                                _hoverSceneNode.ShowBoundingBox = false;
+                            }
+                            _hoverSceneNode = entry.movable.ParentSceneNode;
+                        }
+                        found = true;
+                        break;
+                    }
+                }
+
+                if (!found && _hoverSceneNode != null)
+                {
+                    _hoverSceneNode.ShowBoundingBox = false;
+                    _hoverSceneNode = null;
+                }
+
+                _mousePosition = point;
+            });
         }
 
         public static void Destroy(PositionedInstance instance)
@@ -226,7 +248,12 @@ namespace Flex.Development.Rendering
             _renderer.Scene.DestroySceneNode(instance.SceneNode);
         }
 
-        public static void RunOnUIThread(System.Action action, bool immediate = false)
+        public static void QueueForRenderDispatcher(System.Action action)
+        {
+            _renderDispatcherActionQueue.Enqueue(action);
+        }
+
+        public static void RunOnUIThread(System.Action action)
         {
             if (_window == null) //pre initialization actions incorrectly calling
             {
@@ -243,25 +270,11 @@ namespace Flex.Development.Rendering
 
             if (Application.Current.Dispatcher.CheckAccess())
             {
-                if (immediate)
-                {
-                    action.Invoke();
-                }
-                else
-                {
-                    _UIDispatcherActionQueue.Enqueue(action);
-                }
+                action.Invoke();
             }
             else
             {
-                if (immediate)
-                {
-                    Application.Current.Dispatcher.Invoke(DispatcherPriority.Normal, action);
-                }
-                else
-                {
-                    _UIDispatcherActionQueue.Enqueue(action);
-                }
+                Application.Current.Dispatcher.Invoke(DispatcherPriority.Normal, action);
             }
         }
 

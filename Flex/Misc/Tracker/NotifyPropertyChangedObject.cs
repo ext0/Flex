@@ -22,7 +22,7 @@ namespace Flex.Misc.Tracker
             {
                 Engine.RunOnUIThread(() =>
                 {
-                    PropertyChanged(this, new PropertyChangedEventArgs(info));
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(info));
                 });
             }
         }

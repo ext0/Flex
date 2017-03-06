@@ -30,10 +30,6 @@ namespace Flex.Modules.Scene.ViewModels
     [Export]
     public class SceneViewModel : Document, ICommandHandler<AddPartCommandDefinition>, ICommandHandler<AddScriptCommandDefinition>, ICommandHandler<ToggleVRCommandDefinition>
     {
-        private static readonly int KeyboardInputPollingFrequency = 16;
-
-        private CancellationToken _keyboardPollCancelToken;
-
         private SceneView _sceneView;
 
         private MogreImage _mogreImage;
