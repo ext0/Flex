@@ -92,9 +92,6 @@ namespace Flex.Development.Rendering
 
             view.BindMogreImage(Renderer.CreateMogreImage(view.GetViewPortSize()));
 
-            CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
-            Task listener = Task.Factory.StartNew(KeyboardTick, cancellationTokenSource.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
-
             Thread thread = new Thread(() =>
             {
                 while (true)
