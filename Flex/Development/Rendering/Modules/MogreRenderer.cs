@@ -65,7 +65,7 @@ namespace Flex.Development.Rendering.Modules
         public void Init()
         {
             _root = new Root("../plugins.cfg", "../ogre.cfg", "../flexrender.log");
-            _root.RenderSystem = _root.GetRenderSystemByName("Direct3D9 Rendering Subsystem");
+            _root.RenderSystem = _root.GetRenderSystemByName("Direct3D9Ex Rendering Subsystem");
             _root.Initialise(false);
 
             ConfigFile file = new ConfigFile();

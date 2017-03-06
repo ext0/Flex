@@ -15,7 +15,6 @@ using Flex.Development.Physics;
 using Flex.Development.Execution.Data;
 using System.Windows.Threading;
 using System.Threading;
-using MOIS;
 using System.Windows.Input;
 using Flex.Modules.Scene.Views;
 
@@ -88,9 +87,6 @@ namespace Flex.Development.Rendering
             _initialized = true;
 
             _view.Render.MouseMove += MouseMove;
-
-            MOIS.InputManager inputManager = MOIS.InputManager.CreateInputSystem((uint)handleSource.Handle);
-            MOIS.Mouse mouse = (MOIS.Mouse)inputManager.CreateInputObject(MOIS.Type.OISMouse, false);
 
             view.BindMogreImage(Renderer.CreateMogreImage(view.GetViewPortSize()));
 

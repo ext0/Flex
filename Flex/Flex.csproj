@@ -80,21 +80,16 @@
       <HintPath>..\packages\JitterPhysics.0.2.0.20\lib\net4\Jitter.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="LionFire.MogreImage">
+      <HintPath>..\Dependencies\bin\MogreImage\LionFire.MogreImage.dll</HintPath>
+    </Reference>
     <Reference Include="MahApps.Metro, Version=1.0.0.0, Culture=neutral, PublicKeyToken=f4fb5a3c4d1e5b4f, processorArchitecture=MSIL">
       <HintPath>..\packages\MahApps.Metro.1.0.0.0\lib\net45\MahApps.Metro.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Mogre">
-      <HintPath>..\..\..\..\Downloads\Plugin_CgProgramManager\Mogre.dll</HintPath>
-    </Reference>
-    <Reference Include="MogreFramework">
-      <HintPath>..\..\..\..\Downloads\Plugin_CgProgramManager\MogreFramework.dll</HintPath>
-    </Reference>
-    <Reference Include="MogreNewt">
-      <HintPath>..\..\..\..\Downloads\Plugin_CgProgramManager\MogreNewt.dll</HintPath>
-    </Reference>
-    <Reference Include="MOIS">
-      <HintPath>..\..\..\..\Downloads\Plugin_CgProgramManager\MOIS.dll</HintPath>
+    <Reference Include="Mogre, Version=1.7.1.0, Culture=neutral, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Dependencies\bin\Mogre\1.7\Release\Mogre.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
@@ -3451,13 +3446,11 @@ xcopy /s /y "$(SolutionDir)packages\ClearScript.V8.5.4.7\tools\native\x86\*.*" "
 if not exist "$(TargetDir)" md "$(TargetDir)"
 xcopy /s /y "$(SolutionDir)packages\ClearScript.V8.5.4.7\tools\native\amd64\*.*" "$(TargetDir)"
 if $(ConfigurationName) == Debug (
-    if EXIST "$(SolutionDir)\packages\Mogre1.7.4.1.0.6\tools\Mogre.Dependencies.Debug\Mogre.dll" (
-        copy "$(SolutionDir)\packages\Mogre1.7.4.1.0.6\tools\Mogre.Dependencies.Debug\*" "$(TargetDir))"
-    ) ELSE (
-        copy "$(SolutionDir)\packages\Mogre1.7.4.1.0.6\tools\Mogre.Dependencies.Release\*" "$(TargetDir)"
-    )
+    copy "$(SolutionDir)\Dependencies\bin\Mogre\1.7\Debug\*" "$(TargetDir)"
+    copy "$(SolutionDir)\Dependencies\bin\Ogre\1.7\Debug\*" "$(TargetDir)"
 ) ELSE (
-    copy "$(SolutionDir)\packages\Mogre1.7.4.1.0.6\tools\Mogre.Dependencies.Release\*" "$(TargetDir)"
+    copy "$(SolutionDir)\Dependencies\bin\Mogre\1.7\Release\*" "$(TargetDir)"
+    copy "$(SolutionDir)\Dependencies\bin\Ogre\1.7\Release\*" "$(TargetDir)"
 )</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
