@@ -29,10 +29,6 @@ namespace Flex.Development.Rendering.Modules
         private TexturePtr _backTexture;
         private RenderTarget _backTarget;
 
-        private double last = 0;
-        private double sum = 0;
-        private int eventCounter = 0;
-
         private Duration lockDuration = new Duration(new TimeSpan(0, 0, 0, 0, 100));
 
         public MogreImage(Root root, Camera camera, uint width, uint height)
@@ -138,7 +134,6 @@ namespace Flex.Development.Rendering.Modules
 #if MOGRECOMPOSITOR
                 _frontTarget.Update();
 #endif
-                eventCounter++;
                 IntPtr surface;
                 _frontTarget.GetCustomAttribute("DDBACKBUFFER", out surface);
                 SetBackBuffer(System.Windows.Interop.D3DResourceType.IDirect3DSurface9, surface);
@@ -173,21 +168,9 @@ namespace Flex.Development.Rendering.Modules
             }
         }
 
-        public void PrepareForRender(float Elapsed)
-        {
-            sum += Elapsed;
-            if (sum - last > 0.5)
-            {
-                last = sum;
-                eventCounter = 0;
-            }
-        }
-
         public void PostRender()
         {
-            System.Diagnostics.Debug.WriteLine("POST!");
             MarkFrameDirty();
-            System.Diagnostics.Debug.WriteLine("POST POST!");
         }
 
         public void MarkFrameDirty()
@@ -198,8 +181,7 @@ namespace Flex.Development.Rendering.Modules
                 IntPtr surface;
                 _frontTarget.GetCustomAttribute("DDBACKBUFFER", out surface);
                 SetBackBuffer(System.Windows.Interop.D3DResourceType.IDirect3DSurface9, surface);
-                System.Diagnostics.Debug.WriteLine(_frontTarget.Width + " " + _frontTarget.Height);
-                AddDirtyRect(new System.Windows.Int32Rect(0, 0, (int)_frontTarget.Width, (int)_frontTarget.Height));
+                AddDirtyRect(new Int32Rect(0, 0, (int)_frontTarget.Width, (int)_frontTarget.Height));
             }
             finally
             {

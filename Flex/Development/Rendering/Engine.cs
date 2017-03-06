@@ -42,6 +42,8 @@ namespace Flex.Development.Rendering
 
         private static double _defaultSpeed = 0.08d * 16;
 
+        private static Queue<System.Action> _UIDispatcherActionQueue = new Queue<System.Action>();
+
         public static MogreRenderer Renderer
         {
             get
@@ -94,9 +96,26 @@ namespace Flex.Development.Rendering
 
             Thread thread = new Thread(() =>
             {
+                Mogre.Timer timer = new Mogre.Timer();
+                int attemptedFrameRate = 60;
                 while (true)
                 {
-                    Thread.Sleep(1000 / 60);
+                    while (_UIDispatcherActionQueue.Count != 0)
+                    {
+                        RunOnUIThread(_UIDispatcherActionQueue.Dequeue(), true);
+                    }
+                    uint elapsed = timer.Milliseconds;
+                    timer.Reset();
+
+                    int wait = (int)((1000 / attemptedFrameRate) - elapsed);
+
+                    System.Diagnostics.Debug.WriteLine(wait);
+
+                    if (wait > 0)
+                    {
+                        Thread.Sleep(wait);
+                    }
+
                     KeyboardTick();
                     PhysicsEngine.Step();
                     _renderer.Loop();
@@ -146,7 +165,7 @@ namespace Flex.Development.Rendering
                     _sA = 1;
                     _dA = 1;
                 }
-            });
+            }, true);
         }
 
         private static void MouseMove(object sender, MouseEventArgs e)
@@ -207,9 +226,9 @@ namespace Flex.Development.Rendering
             _renderer.Scene.DestroySceneNode(instance.SceneNode);
         }
 
-        public static void RunOnUIThread(System.Action action)
+        public static void RunOnUIThread(System.Action action, bool immediate = false)
         {
-            if (_window == null)
+            if (_window == null) //pre initialization actions incorrectly calling
             {
                 if (Application.Current.Dispatcher.CheckAccess())
                 {
@@ -224,11 +243,25 @@ namespace Flex.Development.Rendering
 
             if (Application.Current.Dispatcher.CheckAccess())
             {
-                action.Invoke();
+                if (immediate)
+                {
+                    action.Invoke();
+                }
+                else
+                {
+                    _UIDispatcherActionQueue.Enqueue(action);
+                }
             }
             else
             {
-                Application.Current.Dispatcher.Invoke(DispatcherPriority.Normal, action);
+                if (immediate)
+                {
+                    Application.Current.Dispatcher.Invoke(DispatcherPriority.Normal, action);
+                }
+                else
+                {
+                    _UIDispatcherActionQueue.Enqueue(action);
+                }
             }
         }
 
