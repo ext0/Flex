@@ -94,6 +94,25 @@ namespace Flex.Development.Rendering.Modules
             _renderWindow.IsAutoUpdated = false;
         }
 
+        public void ReinitRenderWindow(String handle, uint width, uint height)
+        {
+            if (_root == null)
+            {
+                return;
+            }
+            NameValuePairList config = new NameValuePairList();
+            config["externalWindowHandle"] = handle;
+            /*
+            config["vsync"] = "False";
+            config["FSAA"] = "2";
+            config["Multithreaded"] = "False";
+            */
+
+            _renderWindow = _root.CreateRenderWindow("Mogre Window", width, height, false, config);
+            _renderWindow.IsAutoUpdated = false;
+            _renderWindow.AddViewport(_viewCamera);
+        }
+
         public Camera Camera
         {
             get

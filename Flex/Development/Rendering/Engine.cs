@@ -230,6 +230,7 @@ namespace Flex.Development.Rendering
         {
             if (_renderer != null)
             {
+                _renderer.ReinitRenderWindow(_panel.Handle.ToString(), (uint)_panel.Width, (uint)_panel.Height);
                 _renderer.OnResize();
             }
         }
