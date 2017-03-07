@@ -80,9 +80,6 @@
       <HintPath>..\packages\JitterPhysics.0.2.0.20\lib\net4\Jitter.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="LionFire.MogreImage">
-      <HintPath>..\Dependencies\bin\MogreImage\LionFire.MogreImage.dll</HintPath>
-    </Reference>
     <Reference Include="MahApps.Metro, Version=1.0.0.0, Culture=neutral, PublicKeyToken=f4fb5a3c4d1e5b4f, processorArchitecture=MSIL">
       <HintPath>..\packages\MahApps.Metro.1.0.0.0\lib\net45\MahApps.Metro.dll</HintPath>
       <Private>True</Private>
