@@ -50,7 +50,7 @@ namespace Flex.Development.Physics
         {
             try
             {
-                _physicsWorld.Step((1 / 12f), true);
+                _physicsWorld.Step((1 / 90f), true);
                 if (ActiveScene.Running)
                 {
                     for (int i = 0; i < _physicsInstances.Count; i++)

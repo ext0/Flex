@@ -27,6 +27,8 @@ namespace Flex.Development.Instances
     public class Part : PhysicsInstance
     {
         private ColorProperty _color;
+
+        [field: NonSerialized]
         private Mogre.MaterialPtr _materialPtr;
 
         public Part() : base()
