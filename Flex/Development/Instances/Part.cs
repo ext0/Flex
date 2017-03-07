@@ -27,6 +27,7 @@ namespace Flex.Development.Instances
     public class Part : PhysicsInstance
     {
         private ColorProperty _color;
+        private Mogre.MaterialPtr _materialPtr;
 
         public Part() : base()
         {
@@ -135,7 +136,7 @@ namespace Flex.Development.Instances
             {
                 if (_initialized)
                 {
-                    _entity.GetSubEntity(0).GetMaterial().SetDiffuse(_color.r / 255f, _color.g / 255f, _color.b / 255f, _color.transparency / 255f);
+                    _materialPtr.SetDiffuse(_color.r / 255f, _color.g / 255f, _color.b / 255f, _color.transparency / 255f);
                 }
             });
             NotifyPropertyChanged("Color");
@@ -304,7 +305,11 @@ namespace Flex.Development.Instances
             _sceneNode.SetPosition(_position.x, _position.y, _position.z);
             _sceneNode.SetScale(_size.x, _size.y, _size.z);
 
-            _entity.GetSubEntity(0).GetMaterial().SetDiffuse(_color.r / 255f, _color.g / 255f, _color.b / 255f, _color.transparency / 255f);
+            _materialPtr = _entity.GetSubEntity(0).GetMaterial().Clone(_UUID + "/material");
+
+            _entity.GetSubEntity(0).SetMaterial(_materialPtr);
+
+            _materialPtr.SetDiffuse(_color.r / 255f, _color.g / 255f, _color.b / 255f, _color.transparency / 255f);
         }
     }
 }
