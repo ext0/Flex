@@ -47,7 +47,6 @@ namespace Flex.Development.Rendering.Modules
     {
         private Root _root;
         private RenderWindow _renderWindow;
-        private MogreImage Image;
 
         private SceneManager _scene;
         private Camera _viewCamera;
@@ -62,7 +61,7 @@ namespace Flex.Development.Rendering.Modules
             }
         }
 
-        public void Init()
+        public void Init(String handle, uint width, uint height)
         {
             _root = new Root("../plugins.cfg", "../ogre.cfg", "../flexrender.log");
             _root.RenderSystem = _root.GetRenderSystemByName("Direct3D9Ex Rendering Subsystem");
@@ -82,17 +81,16 @@ namespace Flex.Development.Rendering.Modules
             }
 
             _timer = new Timer();
-        }
 
-        public void AttachRenderWindow(IntPtr Handle)
-        {
             NameValuePairList config = new NameValuePairList();
-            config["externalWindowHandle"] = Handle.ToString();
+            config["externalWindowHandle"] = handle;
+            /*
             config["vsync"] = "False";
             config["FSAA"] = "2";
             config["Multithreaded"] = "False";
+            */
 
-            _renderWindow = _root.CreateRenderWindow("Mogre Window", 0, 0, false, config);
+            _renderWindow = _root.CreateRenderWindow("Mogre Window", width, height, false, config);
             _renderWindow.IsAutoUpdated = false;
         }
 
@@ -114,7 +112,7 @@ namespace Flex.Development.Rendering.Modules
             return node;
         }
 
-        public void CreateDefaultScene()
+        public void CreateScene()
         {
             _scene = _root.CreateSceneManager(SceneType.ST_GENERIC);
 
@@ -139,29 +137,24 @@ namespace Flex.Development.Rendering.Modules
             _renderWindow.AddViewport(_viewCamera);
         }
 
-        public MogreImage CreateMogreImage(Tuple<uint, uint> Size)
-        {
-            return Image ?? (Image = new MogreImage(_root, _viewCamera, Size.Item1, Size.Item2));
-        }
-
         [HandleProcessCorruptedStateExceptions]
         public void Loop()
         {
-            float elapsed = _timer.Microseconds / 1000000f;
-            _timer.Reset();
-            Engine.RunOnUIThread(() => Image.CompositeToWPF(null, null));
-            try
-            {
-                _root.RenderOneFrame();
-            }
-            catch { }
+            _root.RenderSystem._setViewport(_viewCamera.Viewport);
+            _root.RenderSystem.ClearFrameBuffer((uint)FrameBufferType.FBT_COLOUR | (uint)FrameBufferType.FBT_DEPTH);
 
-            Engine.RunOnUIThread(Image.PostRender);
+            _scene._renderScene(_viewCamera, _viewCamera.Viewport, true);
+            _renderWindow.SwapBuffers(true);
+
+            _root.RenderOneFrame();
         }
 
-        public void ManualRender()
+        public void OnResize()
         {
-            _root.RenderOneFrame();
+            if (_renderWindow != null)
+            {
+                _renderWindow.WindowMovedOrResized();
+            }
         }
 
         public void Shutdown()
@@ -169,8 +162,6 @@ namespace Flex.Development.Rendering.Modules
             _renderWindow.Destroy();
             _renderWindow.Dispose();
             _renderWindow = null;
-
-            System.Windows.Forms.Application.DoEvents();
 
             _root.Shutdown();
             //Commented out to prevent a crash.

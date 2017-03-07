@@ -56,14 +56,19 @@ namespace Flex.Development.Physics
                     for (int i = 0; i < _physicsInstances.Count; i++)
                     {
                         PhysicsInstance instance = _physicsInstances[i];
-                        if ((Math.Abs(instance.RigidBody.Position.X - instance.position.x) > POSITION_EPSILION) ||
+                        if (!instance.anchored)
+                        {
+                            if ((
+                                Math.Abs(instance.RigidBody.Position.X - instance.position.x) > POSITION_EPSILION) ||
                                 Math.Abs(instance.RigidBody.Position.Y - instance.position.y) > POSITION_EPSILION ||
                                 Math.Abs(instance.RigidBody.Position.Z - instance.position.z) > POSITION_EPSILION)
-                        {
-                            instance.position.setToPhysics(instance.RigidBody.Position.X, instance.RigidBody.Position.Y, instance.RigidBody.Position.Z);
-                        }
+                            {
+                                instance.position.setToPhysics(instance.RigidBody.Position.X, instance.RigidBody.Position.Y, instance.RigidBody.Position.Z);
+                            }
 
-                        instance.rotation.setToPhysics(instance.RigidBody.Orientation);
+                            instance.rotation.setToPhysics(instance.RigidBody.Orientation);
+
+                        }
                     }
                 }
             }

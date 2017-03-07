@@ -9,9 +9,7 @@
              xmlns:interop="clr-namespace:System.Windows.Interop;assembly=PresentationCore"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300">
-    <Grid Grid.Row="0">
-        <Image x:Name="Render" Stretch="UniformToFill">
+    <Grid Grid.Row="0" Name="RenderWindow">
 
-        </Image>
     </Grid>
 </UserControl>

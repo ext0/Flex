@@ -32,8 +32,6 @@ namespace Flex.Modules.Scene.ViewModels
     {
         private SceneView _sceneView;
 
-        private MogreImage _mogreImage;
-
         public SceneView View
         {
             get
@@ -55,66 +53,10 @@ namespace Flex.Modules.Scene.ViewModels
         protected override void OnViewLoaded(object view)
         {
             _sceneView = view as SceneView;
-            _sceneView.MouseWheel += SceneViewMouseWheel;
-            _sceneView.KeyDown += SceneViewKeyDown;
-            _sceneView.KeyUp += SceneViewKeyUp;
-
-            _sceneView.Render.SizeChanged += OuterRender_SizeChanged;
 
             Engine.Initialize(this);
         }
 
-        private void OuterRender_SizeChanged(object sender, System.Windows.SizeChangedEventArgs e)
-        {
-            if (_mogreImage != null)
-            {
-                _mogreImage.SetSize((uint)_sceneView.Render.ActualWidth, (uint)_sceneView.Render.ActualHeight);
-            }
-        }
-
-        public void BindMogreImage(MogreImage image)
-        {
-            _sceneView.Render.Source = image;
-            _mogreImage = image;
-        }
-
-        public Tuple<uint, uint> GetViewPortSize()
-        {
-            return new Tuple<uint, uint>((uint)_sceneView.Render.ActualWidth, (uint)_sceneView.Render.ActualHeight);
-        }
-
-        private void SceneViewKeyUp(object sender, KeyEventArgs e)
-        {
-            int key = (int)e.Key;
-            if (ActiveScene.Running)
-            {
-                ActiveScene.RunKeyCallback(KeyAction.KeyUp, key);
-            }
-        }
-
-        private void SceneViewKeyDown(object sender, KeyEventArgs e)
-        {
-            int key = (int)e.Key;
-            if (ActiveScene.Running)
-            {
-                ActiveScene.RunKeyCallback(KeyAction.KeyDown, key);
-            }
-        }
-
-        private void SceneViewMouseWheel(object sender, MouseWheelEventArgs e)
-        {
-            Engine.Renderer.Camera.Move(Engine.Renderer.Camera.Direction * (e.Delta / 10f));
-        }
-
-        private double CameraDeltaCalculation(double value, double minimum, double maximum, double acceleration)
-        {
-            double lowerThreshold = 0.2;
-            double upperThreshold = 0.8;
-
-            double delta = FlexUtility.ConstrainValue((value - minimum) / (maximum - minimum), lowerThreshold, upperThreshold);
-            delta *= delta * acceleration;
-            return FlexUtility.ConstrainValue(value + delta, minimum, maximum);
-        }
 
         private void KeyboardTick()
         {
