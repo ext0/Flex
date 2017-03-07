@@ -3446,11 +3446,11 @@ xcopy /s /y "$(SolutionDir)packages\ClearScript.V8.5.4.7\tools\native\x86\*.*" "
 if not exist "$(TargetDir)" md "$(TargetDir)"
 xcopy /s /y "$(SolutionDir)packages\ClearScript.V8.5.4.7\tools\native\amd64\*.*" "$(TargetDir)"
 if $(ConfigurationName) == Debug (
-    copy "$(SolutionDir)Dependencies\bin\Mogre\1.7\Debug\*" "$(TargetDir)"
-    copy "$(SolutionDir)Dependencies\bin\Ogre\1.7\Debug\*" "$(TargetDir)"
+    copy "$(SolutionDir)Dependencies\bin\Mogre\1.7\DebugDependencies\*" "$(TargetDir)"
+    copy "$(SolutionDir)Dependencies\bin\Ogre\1.7\DebugDependencies\*" "$(TargetDir)"
 ) ELSE (
-    copy "$(SolutionDir)Dependencies\bin\Mogre\1.7\Release\*" "$(TargetDir)"
-    copy "$(SolutionDir)Dependencies\bin\Ogre\1.7\Release\*" "$(TargetDir)"
+    copy "$(SolutionDir)Dependencies\bin\Mogre\1.7\ReleaseDependencies\*" "$(TargetDir)"
+    copy "$(SolutionDir)Dependencies\bin\Ogre\1.7\ReleaseDependencies\*" "$(TargetDir)"
 )</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

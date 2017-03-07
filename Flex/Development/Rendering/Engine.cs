@@ -152,25 +152,25 @@ namespace Flex.Development.Rendering
             });
             if (wDown)
             {
-                Engine.Renderer.Camera.Move(Engine.Renderer.Camera.Direction * (float)(_defaultSpeed * _wA));
+                Engine.Renderer.Camera.Move(Renderer.Camera.Direction * (float)(_defaultSpeed * _wA));
                 none = false;
             }
 
             if (aDown)
             {
-                Engine.Renderer.Camera.Move(-Engine.Renderer.Camera.Right * (float)(_defaultSpeed * _aA));
+                Engine.Renderer.Camera.Move(-Renderer.Camera.Right * (float)(_defaultSpeed * _aA));
                 none = false;
             }
 
             if (sDown)
             {
-                Engine.Renderer.Camera.Move(-Engine.Renderer.Camera.Direction * (float)(_defaultSpeed * _sA));
+                Engine.Renderer.Camera.Move(-Renderer.Camera.Direction * (float)(_defaultSpeed * _sA));
                 none = false;
             }
 
             if (dDown)
             {
-                Engine.Renderer.Camera.Move(Engine.Renderer.Camera.Right * (float)(_defaultSpeed * _dA));
+                Engine.Renderer.Camera.Move(Renderer.Camera.Right * (float)(_defaultSpeed * _dA));
                 none = false;
             }
 
