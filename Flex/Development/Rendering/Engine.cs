@@ -19,38 +19,50 @@ using System.Windows.Input;
 using Flex.Modules.Scene.Views;
 using Gemini.Modules.Output;
 using System.Windows.Forms;
+using Flex.Modules.Explorer;
+using Flex.Misc.Utility;
 
 namespace Flex.Development.Rendering
 {
     static class Engine
     {
         private static MogreRenderer _renderer;
-        private static Window _window;
+        private static System.Windows.Forms.Integration.WindowsFormsHost _host;
 
         private static bool _initialized = false;
 
         private static Queue<System.Action> _preInitializationActions = new Queue<System.Action>();
-
-        private static Point _mousePosition;
-
-        private static SceneView _view;
-        private static SceneNode _hoverSceneNode;
-        private static System.Windows.Forms.Panel _panel;
-
-        private static double _wA = 1;
-        private static double _aA = 1;
-        private static double _sA = 1;
-        private static double _dA = 1;
-
-        private static double _defaultSpeed = 0.08d * 4;
-
         private static Queue<System.Action> _renderDispatcherActionQueue = new Queue<System.Action>();
+
+        private static Panel _panel;
+
+        private static SceneNodeStore _sceneNodeStore;
+        private static KeyboardHandler _keyboardHandler;
+        private static MouseHandler _mouseHandler;
+
+        private static Thread _renderThread;
 
         public static MogreRenderer Renderer
         {
             get
             {
                 return _renderer;
+            }
+        }
+
+        public static SceneNodeStore SceneNodeStore
+        {
+            get
+            {
+                return _sceneNodeStore;
+            }
+        }
+
+        public static MouseHandler MouseHandler
+        {
+            get
+            {
+                return _mouseHandler;
             }
         }
 
@@ -76,26 +88,28 @@ namespace Flex.Development.Rendering
 
         public static void Initialize(SceneViewModel view)
         {
-            _renderer = new MogreRenderer();
-            _view = view.View;
+            _sceneNodeStore = new SceneNodeStore();
+            _host = new System.Windows.Forms.Integration.WindowsFormsHost();
 
-            System.Windows.Forms.Integration.WindowsFormsHost host = new System.Windows.Forms.Integration.WindowsFormsHost();
 
             _panel = new Panel();
             _panel.Name = "MogrePanel";
             _panel.Location = new System.Drawing.Point(0, 0);
-            _panel.Size = new System.Drawing.Size((int)_view.RenderWindow.Width, (int)_view.RenderWindow.Height);
+            _panel.Size = new System.Drawing.Size((int)view.View.RenderWindow.Width, (int)view.View.RenderWindow.Height);
             //_panel.Resize += _panel_Resize;
 
-            host.Child = _panel;
+            _keyboardHandler = new KeyboardHandler(_host, _panel);
+            _mouseHandler = new MouseHandler(_host, _panel);
 
-            _view.RenderWindow.Children.Add(host);
+            _host.Child = _panel;
 
-            new Thread(() =>
+            view.View.RenderWindow.Children.Add(_host);
+
+            FlexUtility.SpawnThread(() =>
             {
                 RunOnUIThread(() =>
                 {
-                    _renderer.Init(_panel.Handle.ToString(), (uint)_panel.Width, (uint)_panel.Height);
+                    _renderer = new MogreRenderer(_panel.Handle.ToString(), (uint)_panel.Width, (uint)_panel.Height);
 
                     _renderer.CreateScene();
 
@@ -103,25 +117,30 @@ namespace Flex.Development.Rendering
                     {
                         _preInitializationActions.Dequeue().Invoke();
                     }
+
+                    _mouseHandler.Initialize();
+                    _keyboardHandler.Initialize();
+
                     _initialized = true;
 
-                    _panel.MouseMove += _panel_MouseMove;
-                    _panel.MouseWheel += _panel_MouseWheel;
-
-                    host.KeyDown += Host_KeyDown;
-                    host.KeyUp += Host_KeyUp;
-
-                    Thread thread = new Thread(() =>
+                    FlexUtility.SpawnThread(() =>
                     {
+                        _renderThread = Thread.CurrentThread;
                         Mogre.Timer timer = new Mogre.Timer();
                         int attemptedFrameRate = 90;
+                        bool physicsRender = true;
                         while (true)
                         {
-                            lock (_renderDispatcherActionQueue)
+                            while (_renderDispatcherActionQueue.Count != 0)
                             {
-                                while (_renderDispatcherActionQueue.Count != 0)
+                                System.Action action;
+                                lock (_renderDispatcherActionQueue)
                                 {
-                                    _renderDispatcherActionQueue.Dequeue()?.Invoke();
+                                    action = _renderDispatcherActionQueue.Dequeue();
+                                }
+                                if (action != null)
+                                {
+                                    action.Invoke();
                                 }
                             }
                             uint elapsed = timer.Milliseconds;
@@ -134,96 +153,17 @@ namespace Flex.Development.Rendering
                                 Thread.Sleep(wait);
                             }
 
-                            KeyboardTick();
-                            PhysicsEngine.Step();
+                            _keyboardHandler.KeyboardTick();
+                            if (physicsRender)
+                            {
+                                PhysicsEngine.Step();
+                            }
+                            physicsRender = !physicsRender;
                             Renderer.Loop();
                         }
                     });
-
-                    thread.Start();
                 });
-            }).Start();
-        }
-
-        private static void _panel_MouseWheel(object sender, System.Windows.Forms.MouseEventArgs e)
-        {
-            if (e.Delta != 0)
-            {
-                _renderer.Camera.Move(_renderer.Camera.Direction * (e.Delta / 10f));
-            }
-        }
-
-        private static void _panel_MouseMove(object sender, System.Windows.Forms.MouseEventArgs e)
-        {
-            if (_mousePosition == null)
-            {
-                _mousePosition = new Point(e.X, e.Y);
-                return;
-            }
-            Point point = new Point(e.X, e.Y);
-            QueueForRenderDispatcher(() =>
-            {
-                if (e.Button == MouseButtons.Right)
-                {
-                    double deltaDirectionX = point.X - _mousePosition.X;
-                    double deltaDirectionY = point.Y - _mousePosition.Y;
-                    _renderer.Camera.Pitch((float)-deltaDirectionY / 200f);
-                    _renderer.Camera.Yaw((float)-deltaDirectionX / 200f);
-                }
-
-                Ray mouseRay = _renderer.Camera.GetCameraToViewportRay((float)(point.X / _view.ActualWidth), (float)(point.Y / _view.ActualHeight));
-
-                RaySceneQuery mRaySceneQuery = _renderer.Scene.CreateRayQuery(mouseRay);
-
-                RaySceneQueryResult result = mRaySceneQuery.Execute();
-                RaySceneQueryResult.Enumerator itr = (RaySceneQueryResult.Enumerator)(result.GetEnumerator());
-
-                bool found = false;
-                if (itr != null)
-                {
-                    while (itr.MoveNext())
-                    {
-                        RaySceneQueryResultEntry entry = itr.Current;
-                        entry.movable.ParentSceneNode.ShowBoundingBox = true;
-                        if (!entry.movable.ParentSceneNode.Equals(_hoverSceneNode))
-                        {
-                            if (_hoverSceneNode != null)
-                            {
-                                _hoverSceneNode.ShowBoundingBox = false;
-                            }
-                            _hoverSceneNode = entry.movable.ParentSceneNode;
-                        }
-                        found = true;
-                        break;
-                    }
-                }
-
-                if (!found && _hoverSceneNode != null)
-                {
-                    _hoverSceneNode.ShowBoundingBox = false;
-                    _hoverSceneNode = null;
-                }
-
-                _mousePosition = point;
             });
-        }
-
-        private static void Host_KeyUp(object sender, System.Windows.Input.KeyEventArgs e)
-        {
-            int key = (int)e.Key;
-            if (ActiveScene.Running)
-            {
-                ActiveScene.RunKeyCallback(KeyAction.KeyUp, key);
-            }
-        }
-
-        private static void Host_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
-        {
-            int key = (int)e.Key;
-            if (ActiveScene.Running)
-            {
-                ActiveScene.RunKeyCallback(KeyAction.KeyDown, key);
-            }
         }
 
         private static void _panel_Resize(object sender, EventArgs e)
@@ -235,72 +175,9 @@ namespace Flex.Development.Rendering
             }
         }
 
-        private static void KeyboardTick()
-        {
-            foreach (int key in ActiveScene.GetRegisteredKeyPressKeys())
-            {
-                bool down = false;
-                RunOnUIThread(() =>
-                {
-                    down = Keyboard.IsKeyDown((Key)key);
-                });
-                if (down)
-                {
-                    ActiveScene.RunKeyCallback(KeyAction.KeyPress, key);
-                }
-            }
-
-            bool none = true;
-
-            bool aDown = false;
-            bool wDown = false;
-            bool sDown = false;
-            bool dDown = false;
-            double shiftMultiplier = 1.0d;
-
-            RunOnUIThread(() =>
-            {
-                wDown = Keyboard.IsKeyDown(Key.W);
-                aDown = Keyboard.IsKeyDown(Key.A);
-                sDown = Keyboard.IsKeyDown(Key.S);
-                dDown = Keyboard.IsKeyDown(Key.D);
-                shiftMultiplier = Keyboard.IsKeyDown(Key.LeftShift) ? 2.0d : shiftMultiplier;
-            });
-            if (wDown)
-            {
-                _renderer.Camera.Move(_renderer.Camera.Direction * (float)(_defaultSpeed * _wA * shiftMultiplier));
-                none = false;
-            }
-
-            if (aDown)
-            {
-                _renderer.Camera.Move(-_renderer.Camera.Right * (float)(_defaultSpeed * _aA * shiftMultiplier));
-                none = false;
-            }
-
-            if (sDown)
-            {
-                _renderer.Camera.Move(-_renderer.Camera.Direction * (float)(_defaultSpeed * _sA * shiftMultiplier));
-                none = false;
-            }
-
-            if (dDown)
-            {
-                _renderer.Camera.Move(_renderer.Camera.Right * (float)(_defaultSpeed * _dA * shiftMultiplier));
-                none = false;
-            }
-
-            if (none)
-            {
-                _wA = 1;
-                _aA = 1;
-                _sA = 1;
-                _dA = 1;
-            }
-        }
-
         public static void Destroy(PositionedInstance instance)
         {
+            SceneNodeStore.RemoveSceneNode(instance.SceneNode);
             instance.SceneNode.RemoveAndDestroyAllChildren();
             _renderer.Scene.DestroySceneNode(instance.SceneNode);
         }
@@ -309,25 +186,16 @@ namespace Flex.Development.Rendering
         {
             lock (_renderDispatcherActionQueue)
             {
+                if (_renderThread != null && _renderThread.Equals(Thread.CurrentThread))
+                {
+                    action.Invoke();
+                }
                 _renderDispatcherActionQueue.Enqueue(action);
             }
         }
 
         public static void RunOnUIThread(System.Action action)
         {
-            if (_window == null) //pre initialization actions incorrectly calling
-            {
-                if (System.Windows.Application.Current.Dispatcher.CheckAccess())
-                {
-                    action.Invoke();
-                }
-                else
-                {
-                    System.Windows.Application.Current.Dispatcher.Invoke(DispatcherPriority.Normal, action);
-                }
-                return;
-            }
-
             if (System.Windows.Application.Current.Dispatcher.CheckAccess())
             {
                 action.Invoke();

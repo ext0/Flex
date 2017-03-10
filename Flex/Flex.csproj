@@ -86,7 +86,7 @@
     </Reference>
     <Reference Include="Mogre, Version=1.7.1.0, Culture=neutral, processorArchitecture=x86">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\Dependencies\bin\Mogre\1.7\ReleaseDependencies\Mogre.dll</HintPath>
+      <HintPath>..\Dependencies\bin\Mogre\1.7\DebugDependencies\Mogre.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
@@ -161,6 +161,9 @@
     <Compile Include="Development\Execution\Data\ActiveWorld.cs" />
     <Compile Include="Development\Execution\Data\DataContext.cs" />
     <Compile Include="Development\Execution\Data\KeyAction.cs" />
+    <Compile Include="Development\Rendering\Modules\KeyboardHandler.cs" />
+    <Compile Include="Development\Rendering\Modules\MouseHandler.cs" />
+    <Compile Include="Development\Rendering\Modules\SceneNodeStore.cs" />
     <Compile Include="Development\Execution\Data\States\ObjectSave.cs" />
     <Compile Include="Development\Execution\Runtime\EngineJS.cs" />
     <Compile Include="Development\Execution\Runtime\KeyJS.cs" />
@@ -182,6 +185,7 @@
     <Compile Include="Development\Physics\PhysicsEngine.cs" />
     <Compile Include="Development\Rendering\Engine.cs" />
     <Compile Include="Development\Rendering\Modules\MogreRenderer.cs" />
+    <Compile Include="Development\Rendering\Modules\MogreSelectionHandler.cs" />
     <Compile Include="Misc\Tracker\NotifyPropertyChangedObject.cs" />
     <Compile Include="Misc\Utility\FlexUtility.cs" />
     <Compile Include="Commands\Global\OpenFileCommandHandler.cs" />

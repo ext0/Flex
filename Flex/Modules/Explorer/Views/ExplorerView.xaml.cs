@@ -45,7 +45,10 @@ namespace Flex.Modules.Explorer.Views
             PositionedInstance positioned = e.NewValue as PositionedInstance;
             if (positioned != null && !(positioned is Camera))
             {
-                //Engine.SelectInstance(positioned);
+                Engine.QueueForRenderDispatcher(() =>
+                {
+                    Engine.MouseHandler.SetActiveSelectedNode(positioned.SceneNode);
+                });
             }
             /*
             foreach (PropertyItem prop in _propertyGrid)

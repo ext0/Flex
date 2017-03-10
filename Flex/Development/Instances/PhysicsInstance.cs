@@ -1,4 +1,5 @@
-﻿using Flex.Development.Execution.Data.States;
+﻿using Flex.Development.Execution.Data;
+using Flex.Development.Execution.Data.States;
 using Flex.Development.Physics;
 using Flex.Misc.Tracker;
 using Jitter.Collision.Shapes;
@@ -32,7 +33,7 @@ namespace Flex.Development.Instances
 
         protected void LoadPhysicsInstance()
         {
-            _shape = new BoxShape((float)_size.x, (float)_size.y, (float)_size.z);
+            _shape = new BoxShape(_size.x, _size.y, _size.z);
             _rigidBody = new RigidBody(_shape);
             _rigidBody.Position = new Jitter.LinearMath.JVector(_position.x, _position.y, _position.z);
             _rigidBody.IsActive = !_anchored;
@@ -42,7 +43,7 @@ namespace Flex.Development.Instances
 
         protected void ReloadPhysicsInstance()
         {
-            _shape = new BoxShape((float)_size.x, (float)_size.y, (float)_size.z);
+            _shape = new BoxShape(_size.x, _size.y, _size.z);
             _rigidBody = new RigidBody(_shape);
             _rigidBody.Position = new Jitter.LinearMath.JVector(_position.x, _position.y, _position.z);
             _rigidBody.IsActive = !_anchored;

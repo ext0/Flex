@@ -7,6 +7,7 @@ using System.Reflection;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -130,6 +131,11 @@ namespace Flex.Misc.Utility
                 i++;
             }
             return null;
+        }
+
+        public static void SpawnThread(Action action)
+        {
+            (new Thread(action.Invoke)).Start();
         }
 
         public static String CutLastDelimiter(String str, String delimiter)

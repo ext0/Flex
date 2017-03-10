@@ -8,6 +8,7 @@ using Flex.Misc.Tracker;
 using Flex.Misc.Utility;
 using Jitter.Collision.Shapes;
 using Microsoft.ClearScript;
+using Mogre;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -63,13 +64,13 @@ namespace Flex.Development.Instances
 
         public override void Initialize()
         {
-            _position = new Vector3(0, 0, 0);
+            _position = new Properties.Vector3(0, 0, 0);
             _position.PropertyChanged += PositionPropertyChanged;
 
             _rotation = new Rotation();
             _rotation.PropertyChanged += RotationPropertyChanged;
 
-            _size = new Vector3(8, 4, 4);
+            _size = new Properties.Vector3(8, 4, 4);
             _size.PropertyChanged += SizePropertyChanged;
 
             _color = new ColorProperty(Colors.Green);
@@ -95,6 +96,12 @@ namespace Flex.Development.Instances
                         return;
                     }
                     _rigidBody.Position = new Jitter.LinearMath.JVector(position.x, position.y, position.z);
+
+                    if (_showingBoundingBox)
+                    {
+                        AxisAlignedBox box = _entity.GetWorldBoundingBox();
+                        _wireBoundingBox.SetupBoundingBox(box);
+                    }
                 }
             });
             NotifyPropertyChanged("Position");
@@ -106,12 +113,18 @@ namespace Flex.Development.Instances
             {
                 if (_initialized)
                 {
-                    Quaternion quaternion = rotation.Quaternion;
+                    System.Windows.Media.Media3D.Quaternion quaternion = rotation.Quaternion;
                     _sceneNode.SetOrientation((float)quaternion.W, (float)quaternion.X, (float)quaternion.Y, (float)quaternion.Z);
 
                     if (e.PropertyName.Equals("NOPHYSICS"))
                     {
                         _rigidBody.Orientation = rotation.JMatrix;
+                    }
+
+                    if (_showingBoundingBox)
+                    {
+                        AxisAlignedBox box = _entity.GetWorldBoundingBox();
+                        _wireBoundingBox.SetupBoundingBox(box);
                     }
                 }
             });
@@ -127,6 +140,12 @@ namespace Flex.Development.Instances
                     _sceneNode.SetScale(_size.x, _size.y, _size.z);
                     _shape = new BoxShape(_size.x, _size.y, _size.z);
                     _rigidBody.Shape = _shape;
+
+                    if (_showingBoundingBox)
+                    {
+                        AxisAlignedBox box = _entity.GetWorldBoundingBox();
+                        _wireBoundingBox.SetupBoundingBox(box);
+                    }
                 }
             });
             NotifyPropertyChanged("Size");
@@ -196,15 +215,6 @@ namespace Flex.Development.Instances
             }
         }
 
-        [Browsable(false)]
-        internal Material Material
-        {
-            get
-            {
-                return new DiffuseMaterial(new SolidColorBrush(_color.color));
-            }
-        }
-
         public override string name
         {
             get
@@ -250,7 +260,7 @@ namespace Flex.Development.Instances
             }
         }
 
-        public override Vector3 position
+        public override Properties.Vector3 position
         {
             get
             {
@@ -284,7 +294,7 @@ namespace Flex.Development.Instances
             }
         }
 
-        public override Vector3 size
+        public override Properties.Vector3 size
         {
             get
             {
@@ -303,7 +313,7 @@ namespace Flex.Development.Instances
 
         protected override void InitializeVisual()
         {
-            _sceneNode = Engine.Renderer.CreateEntity(out _entity, "box.mesh");
+            _sceneNode = Engine.Renderer.CreateEntity(out _entity, "box.mesh", this);
             _sceneNode.SetPosition(_position.x, _position.y, _position.z);
             _sceneNode.SetScale(_size.x, _size.y, _size.z);
 

@@ -1,4 +1,5 @@
 ﻿using Flex.Development.Execution.Data;
+using Flex.Development.Instances;
 using Mogre;
 using System;
 using System.Collections.Generic;
@@ -49,7 +50,7 @@ namespace Flex.Development.Rendering.Modules
         private RenderWindow _renderWindow;
 
         private SceneManager _scene;
-        private Camera _viewCamera;
+        private Mogre.Camera _viewCamera;
 
         private Timer _timer;
 
@@ -61,7 +62,7 @@ namespace Flex.Development.Rendering.Modules
             }
         }
 
-        public void Init(String handle, uint width, uint height)
+        public MogreRenderer(String handle, uint width, uint height)
         {
             _root = new Root("../plugins.cfg", "../ogre.cfg", "../flexrender.log");
             _root.RenderSystem = _root.GetRenderSystemByName("Direct3D9Ex Rendering Subsystem");
@@ -113,7 +114,7 @@ namespace Flex.Development.Rendering.Modules
             _renderWindow.AddViewport(_viewCamera);
         }
 
-        public Camera Camera
+        public Mogre.Camera Camera
         {
             get
             {
@@ -121,13 +122,14 @@ namespace Flex.Development.Rendering.Modules
             }
         }
 
-        public SceneNode CreateEntity(out Entity entity, String entityMesh)
+        public SceneNode CreateEntity(out Entity entity, String entityMesh, PositionedInstance instance)
         {
             entity = _scene.CreateEntity(entityMesh);
             entity.CastShadows = true;
             SceneNode node = _scene.CreateSceneNode();
             node.AttachObject(entity);
             _scene.RootSceneNode.AddChild(node);
+            Engine.SceneNodeStore.AddSceneNode(node, instance);
             return node;
         }
 
