@@ -14,7 +14,7 @@ namespace Flex.Development.Rendering.Modules
 
         public PositionedInstance GetInstance(SceneNode node)
         {
-            return _instances[node];
+            return _instances.ContainsKey(node) ? _instances[node] : null;
         }
 
         public void AddSceneNode(SceneNode node, PositionedInstance instance)

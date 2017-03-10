@@ -14,36 +14,6 @@ using System.Threading.Tasks;
 
 namespace Flex.Development.Rendering.Modules
 {
-    public static class Vector3Extension
-    {
-        public static Vector3 SphericalUniformToCartesian(this Vector3 Value)
-        {
-            Vector3 Result = Vector3.ZERO;
-
-            Result.x = Value.x * Mogre.Math.Sin(Value.y * Mogre.Math.PI) * Mogre.Math.Cos(Value.z * Mogre.Math.PI);
-            Result.z = Value.x * Mogre.Math.Sin(Value.y * Mogre.Math.PI) * Mogre.Math.Sin(Value.z * Mogre.Math.PI);
-            Result.y = Value.x * Mogre.Math.Cos(Value.y * Mogre.Math.PI);
-
-            return Result;
-        }
-
-        public static Vector3 RangeTrimSphericalUniform(this Vector3 Value)
-        {
-            //Uniform coordinate z should be between 0 & 2.0 and y should be between 0 and +0.5.
-            if (Value.z > 2.0f)
-                Value.z = Value.z % 2.0f;
-            else if (Value.z < 0)
-                Value.z = 2.0f + (Value.z % 2.0f);
-
-            if (Value.y > 0.99f)
-                Value.y = 0.99f;
-            else if (Value.y < 0.01)
-                Value.y = 0.01f;
-
-            return Value;
-        }
-    }
-
     public class MogreRenderer
     {
         private Root _root;
@@ -126,10 +96,20 @@ namespace Flex.Development.Rendering.Modules
         {
             entity = _scene.CreateEntity(entityMesh);
             entity.CastShadows = true;
+            entity.QueryFlags = (uint)QueryFlags.INSTANCE_ENTITY;
             SceneNode node = _scene.CreateSceneNode();
             node.AttachObject(entity);
             _scene.RootSceneNode.AddChild(node);
             Engine.SceneNodeStore.AddSceneNode(node, instance);
+            return node;
+        }
+
+        public SceneNode CreateEntity(out Entity entity, String entityMesh)
+        {
+            entity = _scene.CreateEntity(entityMesh);
+            entity.QueryFlags = (uint)QueryFlags.NON_INSTANCE_ENTITY;
+            SceneNode node = _scene.CreateSceneNode();
+            node.AttachObject(entity);
             return node;
         }
 

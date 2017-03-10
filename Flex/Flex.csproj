@@ -163,6 +163,7 @@
     <Compile Include="Development\Execution\Data\KeyAction.cs" />
     <Compile Include="Development\Rendering\Modules\KeyboardHandler.cs" />
     <Compile Include="Development\Rendering\Modules\MouseHandler.cs" />
+    <Compile Include="Development\Rendering\Modules\RenderQueryMasks.cs" />
     <Compile Include="Development\Rendering\Modules\SceneNodeStore.cs" />
     <Compile Include="Development\Execution\Data\States\ObjectSave.cs" />
     <Compile Include="Development\Execution\Runtime\EngineJS.cs" />
