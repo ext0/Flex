@@ -1,0 +1,237 @@
+
+material BaseRedLine
+{
+	technique
+	{
+		pass
+		{
+			scene_blend alpha_blend
+			depth_check off
+			texture_unit
+			{
+				colour_op_ex source1 src_manual src_current 1 0 0
+				alpha_op_ex source1 src_manual src_current 0.65
+			}
+		}
+	}
+}
+
+material BaseBlueLine
+{
+	technique
+	{
+		pass
+		{
+			scene_blend alpha_blend
+			depth_check off
+			texture_unit
+			{
+				colour_op_ex source1 src_manual src_current 0 0 1
+				alpha_op_ex source1 src_manual src_current 0.65
+			}
+		}
+	}
+}
+
+material BaseGreenLine
+{
+	technique
+	{
+		pass
+		{
+			scene_blend alpha_blend
+			depth_check off
+			texture_unit
+			{
+				colour_op_ex source1 src_manual src_current 0 1 0
+				alpha_op_ex source1 src_manual src_current 0.65
+			}
+		}
+	}
+}
+
+material BaseYellowLine
+{
+	technique
+	{
+		pass
+		{
+			scene_blend alpha_blend
+			depth_check off
+			cull_hardware none
+			texture_unit
+			{
+				colour_op_ex source1 src_manual src_current 1 1 0
+				alpha_op_ex source1 src_manual src_current 0.50
+			}
+		}
+	}
+}
+
+material YellowLine
+{
+	technique
+	{
+		pass
+		{
+			scene_blend alpha_blend
+			depth_check off
+			texture_unit
+			{
+				texture RingYellow.png
+				env_map spherical
+			}
+		}
+	}
+}
+
+material RedLine
+{
+	technique
+	{
+		pass
+		{
+			scene_blend alpha_blend
+			depth_check off
+			texture_unit
+			{
+				texture RingRed.png
+				env_map spherical
+			}
+		}
+	}
+}
+
+material BlueLine
+{
+technique
+  {
+    pass
+    {
+	scene_blend alpha_blend
+        depth_check off
+ 		texture_unit
+        {
+      		texture RingBlue.png
+			env_map spherical
+		}
+    }
+  }
+}
+
+material GreenLine
+{
+	technique
+	{
+		pass
+		{
+			scene_blend alpha_blend
+			depth_check off
+			texture_unit
+			{
+				texture RingGreen.png
+				env_map spherical
+			}
+		}
+	}
+}
+
+material WhiteLine
+{
+	technique
+	{
+		pass
+		{
+			scene_blend alpha_blend
+			depth_check off
+			texture_unit
+			{
+				texture RingWhite.png
+				env_map spherical
+			}
+		}
+	}
+}
+
+material WhiteLine
+{
+	technique
+	{
+		pass
+		{
+			scene_blend alpha_blend
+			depth_check off
+			texture_unit
+			{
+				texture RingWhite.png
+				env_map spherical
+			}
+		}
+	}
+}
+ 
+material White
+{
+	technique
+	{
+		pass
+		{
+			scene_blend alpha_blend
+			depth_check off
+			texture_unit
+			{
+				colour_op_ex source1 src_manual src_current 1 1 1
+     			alpha_op_ex source1 src_manual src_current 0.6
+			}
+		}
+	}
+}
+
+material TransRed
+{
+	technique
+	{
+		pass
+		{
+			scene_blend alpha_blend
+			depth_check off
+			texture_unit
+			{
+				colour_op_ex source1 src_manual src_current 1 0 0
+     			alpha_op_ex source1 src_manual src_current 0.6
+			}
+		}
+	}
+}
+
+material Select
+{
+	technique
+	{
+		pass
+		{
+			scene_blend alpha_blend
+			depth_check off
+			texture_unit
+			{
+				colour_op_ex source1 src_manual src_current 0 0 0.6
+				alpha_op_ex source1 src_manual src_current 0.4
+			}
+		}
+	}
+}
+
+material Ring
+{
+	receive_shadows on
+	technique
+	{
+		pass
+		{
+			ambient 0.500000 0.500000 0.500000 1.000000
+			diffuse 0.640000 0.640000 0.640000 1.000000
+			specular 0.500000 0.500000 0.500000 1.000000 12.500000
+			emissive 0.000000 0.000000 0.000000 1.000000
+		}
+	}
+}
