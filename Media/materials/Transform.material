@@ -1,0 +1,38 @@
+material Transform/X
+{
+	technique
+	{
+		pass
+		{
+			ambient 1 0 0
+			diffuse 1 0 0
+			emissive 1 0 0
+		}
+	}
+}
+
+material Transform/Y
+{
+	technique
+	{
+		pass
+		{
+			ambient 0 0 1
+			diffuse 0 0 1
+			emissive 0 0 1
+		}
+	}
+}
+
+material Transform/Z
+{
+	technique
+	{
+		pass
+		{
+			ambient 0 1 0
+			diffuse 0 1 0
+			emissive 0 1 0
+		}
+	}
+}
