@@ -36,7 +36,7 @@ namespace Flex.Development.Execution.Data.States
                     if (property.PropertyType.IsValueType || property.PropertyType.Equals(typeof(String))) //String check because the String datatype is a special snowflake...
                     {
                         ScriptMemberAttribute scriptMemberAttribute = property.GetCustomAttribute<ScriptMemberAttribute>();
-                        if (property.CanWrite)
+                        if (property.CanWrite && ((scriptMemberAttribute == null) || (scriptMemberAttribute != null && scriptMemberAttribute.Access.HasFlag(ScriptAccess.Full))))
                         {
                             if (_subProperty == null)
                             {
@@ -65,7 +65,7 @@ namespace Flex.Development.Execution.Data.States
                             continue;
                         }
                         ScriptMemberAttribute scriptMemberAttribute = property.GetCustomAttribute<ScriptMemberAttribute>();
-                        if (!property.CanWrite || scriptMemberAttribute != null && scriptMemberAttribute.Access.HasFlag(ScriptAccess.None | ScriptAccess.ReadOnly))
+                        if (!property.CanWrite || (scriptMemberAttribute != null && scriptMemberAttribute.Access.HasFlag(ScriptAccess.None | ScriptAccess.ReadOnly)))
                         {
                             continue;
                         }

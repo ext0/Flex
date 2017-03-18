@@ -1,6 +1,9 @@
 ﻿using Caliburn.Micro;
+using Flex.Development.Execution.Data;
 using Flex.Development.Instances;
+using Flex.Development.Physics;
 using Flex.Modules.Explorer;
+using Jitter.Collision;
 using Mogre;
 using System;
 using System.Collections.Generic;
@@ -31,7 +34,8 @@ namespace Flex.Development.Rendering.Modules
             NONE
         }
 
-        private static readonly int MAX_TRANSFORM_DRAG_DISTANCE = 100;
+        private static readonly int MAX_TRANSFORM_DRAG_DISTANCE = 256;
+        private static readonly int TRANSFORM_DRAG_THRESHOLD = 1;
 
         private SceneNode _transformNode;
 
@@ -50,9 +54,12 @@ namespace Flex.Development.Rendering.Modules
 
         private Dictionary<SelectionType, List<SceneNode>> _boundingBoxes;
 
+        private bool _transformFreeDragging;
+
         public MouseHandler(System.Windows.Forms.Integration.WindowsFormsHost host, Panel panel)
         {
             _boundingBoxes = new Dictionary<SelectionType, List<SceneNode>>();
+            _transformFreeDragging = false;
             _panel = panel;
             _host = host;
         }
@@ -271,6 +278,10 @@ namespace Flex.Development.Rendering.Modules
         private void _panel_MouseUp(object sender, MouseEventArgs e)
         {
             _transformDragging = TransformDragging.NONE;
+            if (_transformFreeDragging)
+            {
+                _transformFreeDragging = false;
+            }
         }
 
         private void _panel_MouseDown(object sender, MouseEventArgs e)
@@ -383,19 +394,23 @@ namespace Flex.Development.Rendering.Modules
             return itr;
         }
 
-        private static bool GetRaySceneLocationWithPlane(double x, double y, Plane plane, out Vector3 vector)
+        private static bool GetRaySceneLocationWithPlane(double x, double y, Plane plane, out Vector3 vector, SceneNode ignore)
         {
             float width = Engine.Renderer.Camera.Viewport.ActualWidth;
             float height = Engine.Renderer.Camera.Viewport.ActualHeight;
 
             Ray mouseRay = Engine.Renderer.Camera.GetCameraToViewportRay((float)((x - 1) / width), (float)((y - 1) / height));
 
-            Pair<bool, float> d = mouseRay.Intersects(plane);
+            Plane inverse = new Plane(-plane.normal, -plane.d);
+
+            Pair<bool, float> d0 = mouseRay.Intersects(plane);
+            Pair<bool, float> d1 = mouseRay.Intersects(inverse);
 
             RaySceneQuery mRaySceneQuery = Engine.Renderer.Scene.CreateRayQuery(mouseRay);
 
             mRaySceneQuery.SetSortByDistance(true, 1);
-            mRaySceneQuery.QueryTypeMask = SceneManager.ENTITY_TYPE_MASK;
+            mRaySceneQuery.QueryMask = (uint)QueryFlags.INSTANCE_ENTITY;
+            //mRaySceneQuery.QueryTypeMask = SceneManager.ENTITY_TYPE_MASK;
 
 
             RaySceneQueryResult result = mRaySceneQuery.Execute();
@@ -405,20 +420,28 @@ namespace Flex.Development.Rendering.Modules
             if (itr != null)
             {
                 RaySceneQueryResultEntry entry = null;
-                if (itr.MoveNext())
+                while (itr.MoveNext())
                 {
                     entry = itr.Current;
+                    if (entry != null && !entry.movable.ParentSceneNode.Equals(ignore))
+                    {
+                        vector = mouseRay.GetPoint(entry.distance);
+                        return true;
+                    }
                 }
-
-                if (entry != null && entry.movable.QueryFlags == (uint)QueryFlags.NON_INSTANCE_ENTITY)
+                //System.Diagnostics.Trace.WriteLine("Not found!" + d.first);
+                if (d0.first)
                 {
-                    vector = mouseRay.GetPoint(entry.distance);
-                    return true;
+                    Vector3 planePoint = mouseRay.GetPoint(d0.second);
+                    if ((Engine.Renderer.Camera.Position - planePoint).Length < MAX_TRANSFORM_DRAG_DISTANCE)
+                    {
+                        vector = planePoint;
+                        return true;
+                    }
                 }
-
-                if (d.first)
+                if (d1.first)
                 {
-                    Vector3 planePoint = mouseRay.GetPoint(d.second);
+                    Vector3 planePoint = mouseRay.GetPoint(d1.second);
                     if ((Engine.Renderer.Camera.Position - planePoint).Length < MAX_TRANSFORM_DRAG_DISTANCE)
                     {
                         vector = planePoint;
@@ -447,7 +470,7 @@ namespace Flex.Development.Rendering.Modules
         {
             if (e.Delta != 0)
             {
-                Engine.Renderer.Camera.Move(Engine.Renderer.Camera.Direction * (e.Delta / 10f));
+                ActiveScene.Context.ActiveWorld.Camera.move(Engine.Renderer.Camera.Direction * (e.Delta / 10f));
             }
         }
 
@@ -461,60 +484,91 @@ namespace Flex.Development.Rendering.Modules
             Point point = new Point(e.X, e.Y);
             Engine.QueueForRenderDispatcher(() =>
             {
-                if (e.Button == MouseButtons.Right)
+                double deltaDirectionX = point.X - _oldMousePosition.X;
+                double deltaDirectionY = point.Y - _oldMousePosition.Y;
+
+                if (e.Button.HasFlag(MouseButtons.Right))
                 {
-                    double deltaDirectionX = point.X - _oldMousePosition.X;
-                    double deltaDirectionY = point.Y - _oldMousePosition.Y;
-                    Engine.Renderer.Camera.Pitch((float)-deltaDirectionY / 200f);
-                    Engine.Renderer.Camera.Yaw((float)-deltaDirectionX / 200f);
+                    ActiveScene.Context.ActiveWorld.Camera.pitch(new Radian((float)-deltaDirectionY / 200f).ValueDegrees);
+                    ActiveScene.Context.ActiveWorld.Camera.yaw(new Radian((float)-deltaDirectionX / 200f).ValueDegrees);
+                }
+
+                IEnumerable<SceneNode> selected = GetSelectedNode();
+                SceneNode selectedNode = null;
+                if (selected != null)
+                {
+                    selectedNode = selected.FirstOrDefault();
                 }
 
                 if (_transformDragging != TransformDragging.NONE)
                 {
-                    Plane plane = new Plane();
-                    if (_transformDragging == TransformDragging.X)
+                    if (selectedNode != null)
                     {
-                        plane.normal = Vector3.UNIT_Y;
-                        plane.d = _transformNode.Position.y;
-                    }
-                    else if (_transformDragging == TransformDragging.Y)
-                    {
-                        plane.normal = (_transformNode.Position - Engine.Renderer.Camera.Position).NormalisedCopy;
-                        plane.d = _transformNode.Position.x;
-                    }
-                    else if (_transformDragging == TransformDragging.Z)
-                    {
-                        plane.normal = Vector3.UNIT_Y;
-                        plane.d = _transformNode.Position.y;
-                    }
-
-                    Vector3 transformVector;
-                    if (GetRaySceneLocationWithPlane(point.X, point.Y, plane, out transformVector))
-                    {
-                        IEnumerable<SceneNode> selected = GetSelectedNode();
-                        if (selected != null)
+                        Plane plane = new Plane();
+                        if (_transformDragging == TransformDragging.X)
                         {
-                            SceneNode node = selected.FirstOrDefault();
-                            if (node != null)
+                            Vector3 normal = Vector3.UNIT_Y;
+                            plane = new Plane(normal, selectedNode.Position);
+                        }
+                        else if (_transformDragging == TransformDragging.Y)
+                        {
+                            Vector3 normal = (Engine.Renderer.Camera.Position - selectedNode.Position).NormalisedCopy;
+                            normal.y = 0;
+                            plane = new Plane(normal, selectedNode.Position);
+                        }
+                        else if (_transformDragging == TransformDragging.Z)
+                        {
+                            Vector3 normal = Vector3.UNIT_Y;
+                            plane = new Plane(normal, selectedNode.Position);
+                        }
+
+                        Vector3 transformVector;
+                        if (GetRaySceneLocationWithPlane(point.X, point.Y, plane, out transformVector, selectedNode))
+                        {
+                            PositionedInstance instance = Engine.SceneNodeStore.GetInstance(selectedNode);
+
+                            transformVector -= _transformDragDifference;
+
+                            if (_transformDragging == TransformDragging.X)
                             {
-                                PositionedInstance instance = Engine.SceneNodeStore.GetInstance(node);
-
-                                transformVector -= _transformDragDifference;
-
-                                if (_transformDragging == TransformDragging.X)
-                                {
-                                    instance.position.x = (float)System.Math.Round(transformVector.x);
-                                }
-                                else if (_transformDragging == TransformDragging.Y)
-                                {
-                                    instance.position.y = (float)System.Math.Round(transformVector.y);
-                                }
-                                else if (_transformDragging == TransformDragging.Z)
-                                {
-                                    instance.position.z = (float)System.Math.Round(transformVector.z);
-                                }
+                                instance.position.x = (float)System.Math.Round(transformVector.x);
+                                PhysicsEngine.GetCollisionVectorResolvement(instance as PhysicsInstance);
+                            }
+                            else if (_transformDragging == TransformDragging.Y)
+                            {
+                                instance.position.y = (float)System.Math.Round(transformVector.y);
+                                PhysicsEngine.GetCollisionVectorResolvement(instance as PhysicsInstance);
+                            }
+                            else if (_transformDragging == TransformDragging.Z)
+                            {
+                                instance.position.z = (float)System.Math.Round(transformVector.z);
+                                PhysicsEngine.GetCollisionVectorResolvement(instance as PhysicsInstance);
                             }
                         }
+                    }
+                }
+                Cursor cursor = null;
+                if (_transformFreeDragging)
+                {
+                    if (selectedNode != null)
+                    {
+                        Plane plane = new Plane(Vector3.UNIT_Y, Engine.Renderer.Camera.Position.y - 16);
+
+                        Vector3 vector;
+                        if (GetRaySceneLocationWithPlane(point.X, point.Y, plane, out vector, selectedNode))
+                        {
+                            PositionedInstance instance = Engine.SceneNodeStore.GetInstance(selectedNode);
+
+                            instance.position.x = (float)System.Math.Round(vector.x);
+                            instance.position.y = (float)System.Math.Round(vector.y);
+                            instance.position.z = (float)System.Math.Round(vector.z);
+                        }
+
+                        cursor = Cursors.NoMove2D;
+                    }
+                    else
+                    {
+                        _transformFreeDragging = false;
                     }
                 }
 
@@ -530,21 +584,46 @@ namespace Flex.Development.Rendering.Modules
                         if (entry.movable.QueryFlags == (uint)QueryFlags.INSTANCE_ENTITY)
                         {
                             SceneNode parentNode = entry.movable.ParentSceneNode;
-                            AddToHoverNode(parentNode);
+                            if (selectedNode != null && selectedNode.Equals(parentNode) && e.Button.HasFlag(MouseButtons.Left) && _transformDragging == TransformDragging.NONE)
+                            {
+                                if (System.Math.Abs(deltaDirectionX) >= TRANSFORM_DRAG_THRESHOLD || System.Math.Abs(deltaDirectionY) >= TRANSFORM_DRAG_THRESHOLD)
+                                {
+                                    _transformFreeDragging = true;
+                                }
+                            }
+                            if (!IsAlreadyHovered(parentNode))
+                            {
+                                IEnumerable<SceneNode> hovered = GetHoveredNodes();
+                                if (hovered != null)
+                                {
+                                    foreach (SceneNode node in hovered)
+                                    {
+                                        if (!IsSelectedNode(node))
+                                        {
+                                            PositionedInstance oldInstance = Engine.SceneNodeStore.GetInstance(node);
+                                            if (oldInstance != null)
+                                            {
+                                                oldInstance.IsBoundingBoxEnabled = false;
+                                            }
+                                        }
+                                    }
+                                    ClearHovered();
+                                }
+                                AddToHoverNode(parentNode);
+                            }
                         }
                         nothing = false;
                     }
-                    if (!nothing)
-                    {
-                        System.Windows.Application.Current.Dispatcher.InvokeAsync(() => _panel.Cursor = Cursors.Hand, DispatcherPriority.Background);
-                    }
                     if (nothing)
                     {
-                        System.Windows.Application.Current.Dispatcher.InvokeAsync(() => _panel.Cursor = Cursors.Default, DispatcherPriority.Background);
+                        if (cursor == null)
+                        {
+                            cursor = Cursors.Default;
+                        }
                         IEnumerable<SceneNode> hovered = GetHoveredNodes();
                         if (hovered != null)
                         {
-                            foreach (SceneNode node in GetHoveredNodes())
+                            foreach (SceneNode node in hovered)
                             {
                                 if (!IsSelectedNode(node))
                                 {
@@ -558,8 +637,18 @@ namespace Flex.Development.Rendering.Modules
                             ClearHovered();
                         }
                     }
+                    else
+                    {
+                        if (cursor == null)
+                        {
+                            cursor = Cursors.Hand;
+                        }
+                    }
                 }
-
+                if (cursor != null)
+                {
+                    System.Windows.Application.Current.Dispatcher.InvokeAsync(() => _panel.Cursor = cursor, DispatcherPriority.Background);
+                }
                 _oldMousePosition = point;
             });
         }

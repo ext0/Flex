@@ -4,6 +4,7 @@ using Flex.Development.Rendering;
 using Flex.Misc.Tracker;
 using Flex.Misc.Utility;
 using Microsoft.ClearScript;
+using Mogre;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -17,6 +18,9 @@ namespace Flex.Development.Instances
     [Serializable]
     public class Camera : PositionedInstance
     {
+        [field: NonSerialized]
+        private Mogre.Camera _viewCamera;
+
         internal Camera(bool flag) : base()
         {
             _displayName = "Camera";
@@ -32,27 +36,37 @@ namespace Flex.Development.Instances
             Initialize();
         }
 
-        public override void Initialize()
+        [Browsable(false)]
+        public Mogre.Camera MogreCamera
         {
-            _position = new Vector3(0, 0, 0);
-            _position.PropertyChanged += PositionPropertyChanged;
-
-            _rotation = new Rotation();
-            _rotation.PropertyChanged += RotationPropertyChanged;
-
-            _initialized = true;
+            get
+            {
+                return _viewCamera;
+            }
         }
 
-        private void RotationPropertyChanged(object sender, PropertyChangedEventArgs e)
+        public override void Initialize()
         {
-            Engine.QueueForRenderDispatcher(() =>
+            _position = new Properties.Vector3(0, 0, 0);
+            _position.PropertyChanged += PositionPropertyChanged;
+
+            Engine.QueueInitializationAction(() =>
             {
-                if (_initialized)
-                {
-                    //Engine.Renderer.Camera.SetDirection(rotation.x, rotation.y, rotation.z);
-                }
+                _viewCamera = Engine.Renderer.Scene.CreateCamera("ViewPoint");
+                _viewCamera.ProjectionType = ProjectionType.PT_PERSPECTIVE;
+
+                _viewCamera.Position = Mogre.Vector3.ZERO;
+                _viewCamera.LookAt(Mogre.Vector3.ZERO);
+                _viewCamera.NearClipDistance = 0.01f;
+                _viewCamera.FarClipDistance = 1000.0f;
+                _viewCamera.FOVy = new Degree(100f);
+                _viewCamera.AutoAspectRatio = true;
+
+                Engine.Renderer.Camera = _viewCamera;
+                Engine.Renderer.RenderWindow.AddViewport(_viewCamera);
+
+                _initialized = true;
             });
-            NotifyPropertyChanged("Rotation");
         }
 
         private void PositionPropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -61,10 +75,51 @@ namespace Flex.Development.Instances
             {
                 if (_initialized)
                 {
-                    _sceneNode.SetPosition(position.x, position.y, position.z);
+                    _viewCamera.SetPosition(position.x, position.y, position.z);
                 }
             });
             NotifyPropertyChanged("Position");
+        }
+
+        [ScriptMember(ScriptAccess.ReadOnly)]
+        public void move(Mogre.Vector3 direction, float distance)
+        {
+            _viewCamera.Move(direction * distance);
+        }
+
+        [ScriptMember(ScriptAccess.ReadOnly)]
+        public void move(Mogre.Vector3 vector)
+        {
+            move(vector, 1);
+        }
+
+        [ScriptMember(ScriptAccess.ReadOnly)]
+        public void pitch(float n)
+        {
+            _viewCamera.Pitch(new Degree(n));
+        }
+
+        [ScriptMember(ScriptAccess.ReadOnly)]
+        public void roll(float n)
+        {
+            _viewCamera.Roll(new Degree(n));
+        }
+
+        [ScriptMember(ScriptAccess.ReadOnly)]
+        public void yaw(float n)
+        {
+            _viewCamera.Yaw(new Degree(n));
+        }
+
+        [ScriptMember(ScriptAccess.ReadOnly)]
+        [Browsable(false)]
+        public Properties.Vector3 direction
+        {
+            get
+            {
+                Mogre.Vector3 direction = _viewCamera.Direction;
+                return new Properties.Vector3(direction.x, direction.y, direction.z);
+            }
         }
 
         [ScriptMember(ScriptAccess.None)]
@@ -127,37 +182,45 @@ namespace Flex.Development.Instances
             }
         }
 
-        public override Vector3 position
+        [ScriptMember(ScriptAccess.Full)]
+        public override Properties.Vector3 position
         {
             get
             {
-                return _position;
+                if (_viewCamera != null)
+                {
+                    Mogre.Vector3 position = _viewCamera.Position;
+                    return new Properties.Vector3(position.x, position.y, position.z);
+                }
+                else
+                {
+                    return new Properties.Vector3(0);
+                }
             }
 
             set
             {
-                if (_position == value) return;
-                _position.PropertyChanged -= PositionPropertyChanged;
-                _position = value;
-                _position.PropertyChanged += PositionPropertyChanged;
-                PositionPropertyChanged(this, null);
+                if (value != null)
+                {
+                    _viewCamera.SetPosition(value.x, value.y, value.z);
+                    PositionPropertyChanged(this, null);
+                }
             }
         }
 
+        [ScriptMember(ScriptAccess.None)]
+        [Browsable(false)]
         public override Rotation rotation
         {
             get
             {
-                return _rotation;
+                return new Rotation(0);
+                //throw new InvalidOperationException("Cannot access rotation on Camera instance, use 'camera.direction' instead.");
             }
 
             set
             {
-                if (_rotation == value) return;
-                _rotation.PropertyChanged -= RotationPropertyChanged;
-                _rotation = value;
-                _rotation.PropertyChanged += RotationPropertyChanged;
-                RotationPropertyChanged(this, null);
+                throw new InvalidOperationException("Cannot access rotation on Camera instance, use 'camera.direction' instead.");
             }
         }
 

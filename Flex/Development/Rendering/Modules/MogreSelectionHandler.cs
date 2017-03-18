@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Flex.Development.Rendering.Modules
 {
-    public class MogreSelectionHandler
-    {
-    }
+	public class MogreSelectionHandler
+	{
+	}
 }

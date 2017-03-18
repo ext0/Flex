@@ -63,22 +63,22 @@ namespace Flex.Development.Rendering.Modules
             });
             if (wDown)
             {
-                Engine.Renderer.Camera.Move(Engine.Renderer.Camera.Direction * (float)(_defaultSpeed * _wA * shiftMultiplier));
+                ActiveScene.Context.ActiveWorld.Camera.move(Engine.Renderer.Camera.Direction * (float)(_defaultSpeed * _wA * shiftMultiplier));
                 none = false;
             }
             if (aDown)
             {
-                Engine.Renderer.Camera.Move(-Engine.Renderer.Camera.Right * (float)(_defaultSpeed * _aA * shiftMultiplier));
+                ActiveScene.Context.ActiveWorld.Camera.move(-Engine.Renderer.Camera.Right * (float)(_defaultSpeed * _aA * shiftMultiplier));
                 none = false;
             }
             if (sDown)
             {
-                Engine.Renderer.Camera.Move(-Engine.Renderer.Camera.Direction * (float)(_defaultSpeed * _sA * shiftMultiplier));
+                ActiveScene.Context.ActiveWorld.Camera.move(-Engine.Renderer.Camera.Direction * (float)(_defaultSpeed * _sA * shiftMultiplier));
                 none = false;
             }
             if (dDown)
             {
-                Engine.Renderer.Camera.Move(Engine.Renderer.Camera.Right * (float)(_defaultSpeed * _dA * shiftMultiplier));
+                ActiveScene.Context.ActiveWorld.Camera.move(Engine.Renderer.Camera.Right * (float)(_defaultSpeed * _dA * shiftMultiplier));
                 none = false;
             }
             if (none)

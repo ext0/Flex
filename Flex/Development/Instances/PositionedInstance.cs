@@ -24,7 +24,7 @@ namespace Flex.Development.Instances
         protected SceneNode _sceneNode;
 
         [NonSerialized()]
-        private SceneNode _boundingBox;
+        protected SceneNode _boundingBox;
 
         [NonSerialized()]
         protected Entity _entity;
@@ -68,6 +68,7 @@ namespace Flex.Development.Instances
             _wireBoundingBox.SetMaterial("BoundingBox/BlueLight");
         }
 
+        [Browsable(false)]
         public bool IsSelected
         {
             get
@@ -91,6 +92,7 @@ namespace Flex.Development.Instances
             }
         }
 
+        [Browsable(false)]
         public bool IsBoundingBoxEnabled
         {
             get

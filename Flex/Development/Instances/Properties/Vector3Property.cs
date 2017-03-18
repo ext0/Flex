@@ -52,6 +52,13 @@ namespace Flex.Development.Instances.Properties
             _z = (float)point.Z;
         }
 
+        internal Vector3(Mogre.Vector3 vector)
+        {
+            _x = vector.x;
+            _y = vector.y;
+            _z = vector.z;
+        }
+
         internal Vector3(float x, float y, float z)
         {
             _x = x;
@@ -230,6 +237,13 @@ namespace Flex.Development.Instances.Properties
         public Vector3 divide(float other)
         {
             return (this / other);
+        }
+
+        internal Mogre.Vector2 GetLargestValues()
+        {
+            float largest = Math.Max(x, Math.Max(y, z));
+            float secondLargest = (x == largest) ? ((y >= z) ? y : z) : (y == largest) ? ((z >= x) ? z : z) : (y >= x) ? y : x;
+            return new Mogre.Vector2(largest, secondLargest);
         }
 
         [ScriptMember(ScriptAccess.Full)]

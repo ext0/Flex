@@ -32,6 +32,9 @@ namespace Flex.Development.Instances
         [field: NonSerialized]
         private Mogre.MaterialPtr _materialPtr;
 
+        private int _textureXNormalScale = 16;
+        private int _textureYNormalScale = 16;
+
         public Part() : base()
         {
             _displayName = "Part";
@@ -73,7 +76,7 @@ namespace Flex.Development.Instances
             _size = new Properties.Vector3(8, 4, 4);
             _size.PropertyChanged += SizePropertyChanged;
 
-            _color = new ColorProperty(Colors.Green);
+            _color = new ColorProperty(Colors.White);
             _color.PropertyChanged += ColorPropertyChanged;
 
             Engine.QueueForRenderDispatcher(() =>
@@ -99,8 +102,11 @@ namespace Flex.Development.Instances
 
                     if (_showingBoundingBox)
                     {
-                        AxisAlignedBox box = _entity.GetWorldBoundingBox();
-                        _wireBoundingBox.SetupBoundingBox(box);
+                        Engine.QueueForNextRenderDispatcher(() =>
+                        {
+                            AxisAlignedBox box = _entity.GetWorldBoundingBox();
+                            _wireBoundingBox.SetupBoundingBox(box);
+                        });
                     }
                 }
             });
@@ -146,6 +152,9 @@ namespace Flex.Development.Instances
                         AxisAlignedBox box = _entity.GetWorldBoundingBox();
                         _wireBoundingBox.SetupBoundingBox(box);
                     }
+
+                    Vector2 vector = _size.GetLargestValues();
+                    _materialPtr.GetTechnique(0).GetPass(0).GetTextureUnitState(0).SetTextureScale(_textureXNormalScale / vector.x, _textureYNormalScale / vector.y);
                 }
             });
             NotifyPropertyChanged("Size");
@@ -317,10 +326,14 @@ namespace Flex.Development.Instances
             _sceneNode.SetPosition(_position.x, _position.y, _position.z);
             _sceneNode.SetScale(_size.x, _size.y, _size.z);
 
+            _entity.SetMaterialName("Part/Grass");
+
             _materialPtr = _entity.GetSubEntity(0).GetMaterial().Clone(_UUID + "/material");
 
             _entity.GetSubEntity(0).SetMaterial(_materialPtr);
 
+            Vector2 vector = _size.GetLargestValues();
+            _materialPtr.GetTechnique(0).GetPass(0).GetTextureUnitState(0).SetTextureScale(_textureXNormalScale / vector.x, _textureYNormalScale / vector.y);
             _materialPtr.SetDiffuse(_color.r / 255f, _color.g / 255f, _color.b / 255f, _color.transparency / 255f);
         }
     }

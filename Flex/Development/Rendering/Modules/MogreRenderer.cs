@@ -32,6 +32,14 @@ namespace Flex.Development.Rendering.Modules
             }
         }
 
+        internal RenderWindow RenderWindow
+        {
+            get
+            {
+                return _renderWindow;
+            }
+        }
+
         public MogreRenderer(String handle, uint width, uint height)
         {
             _root = new Root("../plugins.cfg", "../ogre.cfg", "../flexrender.log");
@@ -90,6 +98,10 @@ namespace Flex.Development.Rendering.Modules
             {
                 return _viewCamera;
             }
+            internal set
+            {
+                _viewCamera = value;
+            }
         }
 
         public SceneNode CreateEntity(out Entity entity, String entityMesh, PositionedInstance instance)
@@ -124,23 +136,15 @@ namespace Flex.Development.Rendering.Modules
 
             _scene.SetSkyBox(true, "Skyboxes/Default", 500);
             _scene.ShadowTechnique = ShadowTechnique.SHADOWTYPE_STENCIL_MODULATIVE;
-
-            _viewCamera = _scene.CreateCamera("ViewPoint");
-            _viewCamera.ProjectionType = ProjectionType.PT_PERSPECTIVE;
-
-            _viewCamera.Position = Vector3.ZERO;
-            _viewCamera.LookAt(Vector3.ZERO);
-            _viewCamera.NearClipDistance = 0.01f;
-            _viewCamera.FarClipDistance = 1000.0f;
-            _viewCamera.FOVy = new Degree(100f);
-            _viewCamera.AutoAspectRatio = true;
-
-            _renderWindow.AddViewport(_viewCamera);
         }
 
         [HandleProcessCorruptedStateExceptions]
         public void Loop()
         {
+            if (_viewCamera == null)
+            {
+                return;
+            }
             _root.RenderSystem._setViewport(_viewCamera.Viewport);
             _root.RenderSystem.ClearFrameBuffer((uint)FrameBufferType.FBT_COLOUR | (uint)FrameBufferType.FBT_DEPTH);
 

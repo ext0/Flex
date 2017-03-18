@@ -33,6 +33,7 @@ namespace Flex.Development.Rendering
 
         private static Queue<System.Action> _preInitializationActions = new Queue<System.Action>();
         private static Queue<System.Action> _renderDispatcherActionQueue = new Queue<System.Action>();
+        private static Queue<System.Action> _renderNextDispatcherActionQueue = new Queue<System.Action>();
 
         private static Panel _panel;
 
@@ -143,6 +144,16 @@ namespace Flex.Development.Rendering
                                     action.Invoke();
                                 }
                             }
+                            lock (_renderNextDispatcherActionQueue)
+                            {
+                                lock (_renderDispatcherActionQueue)
+                                {
+                                    while (_renderNextDispatcherActionQueue.Count != 0)
+                                    {
+                                        _renderDispatcherActionQueue.Enqueue(_renderNextDispatcherActionQueue.Dequeue());
+                                    }
+                                }
+                            }
                             uint elapsed = timer.Milliseconds;
                             timer.Reset();
 
@@ -191,6 +202,18 @@ namespace Flex.Development.Rendering
                     action.Invoke();
                 }
                 _renderDispatcherActionQueue.Enqueue(action);
+            }
+        }
+
+        public static void QueueForNextRenderDispatcher(System.Action action)
+        {
+            lock (_renderNextDispatcherActionQueue)
+            {
+                if (_renderThread != null && _renderThread.Equals(Thread.CurrentThread))
+                {
+                    action.Invoke();
+                }
+                _renderNextDispatcherActionQueue.Enqueue(action);
             }
         }
 
