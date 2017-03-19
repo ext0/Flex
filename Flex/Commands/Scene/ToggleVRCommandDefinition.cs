@@ -35,6 +35,6 @@ namespace Flex.Commands.Scene
         }
 
         [Export]
-        public static CommandKeyboardShortcut KeyGesture = new CommandKeyboardShortcut<AddScriptCommandDefinition>(new KeyGesture(Key.V, ModifierKeys.Alt));
+        public static CommandKeyboardShortcut KeyGesture = new CommandKeyboardShortcut<ToggleVRCommandDefinition>(new KeyGesture(Key.V, ModifierKeys.Alt));
     }
 }

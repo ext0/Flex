@@ -3,7 +3,8 @@ using Flex.Development.Execution.Data;
 using Flex.Development.Instances;
 using Flex.Development.Physics;
 using Flex.Modules.Explorer;
-using Jitter.Collision;
+using Flex.Modules.Scene.ViewModels;
+using Gemini.Framework.Services;
 using Mogre;
 using System;
 using System.Collections.Generic;
@@ -130,7 +131,7 @@ namespace Flex.Development.Rendering.Modules
             return _boundingBoxes.ContainsKey(SelectionType.HOVER) ? _boundingBoxes[SelectionType.HOVER] : null;
         }
 
-        private bool IsAlreadyHovered(SceneNode node)
+        public bool IsAlreadyHovered(SceneNode node)
         {
             IEnumerable<SceneNode> selected = GetHoveredNodes();
             return (selected != null) ? selected.Contains(node) : false;
@@ -145,7 +146,7 @@ namespace Flex.Development.Rendering.Modules
             _boundingBoxes[SelectionType.HOVER].Add(input);
         }
 
-        private void ClearHovered()
+        public void ClearHovered()
         {
             if (_boundingBoxes.ContainsKey(SelectionType.HOVER))
             {
@@ -181,7 +182,7 @@ namespace Flex.Development.Rendering.Modules
             }
         }
 
-        private bool IsSelectedNode(SceneNode node)
+        public bool IsSelectedNode(SceneNode node)
         {
             IEnumerable<SceneNode> selected = GetSelectedNode();
             if (selected == null)
@@ -207,7 +208,7 @@ namespace Flex.Development.Rendering.Modules
             _boundingBoxes[SelectionType.SELECT].Add(node);
         }
 
-        private void ClearSelectedNode()
+        public void ClearSelectedNode()
         {
             SceneNode node = null;
             if (_boundingBoxes.ContainsKey(SelectionType.SELECT))
@@ -247,6 +248,7 @@ namespace Flex.Development.Rendering.Modules
                     instance.IsBoundingBoxEnabled = true;
                     instance.IsSelected = true;
                     SetSelectedNode(newNode);
+
                     newNode.AddChild(_transformNode);
                 }
             }
@@ -255,6 +257,7 @@ namespace Flex.Development.Rendering.Modules
                 instance.IsBoundingBoxEnabled = true;
                 instance.IsSelected = true;
                 SetSelectedNode(newNode);
+
                 newNode.AddChild(_transformNode);
             }
         }
@@ -352,6 +355,8 @@ namespace Flex.Development.Rendering.Modules
                                     IoC.Get<IExplorer>().SelectInstance(instance);
                                 });
 
+                                ActiveScene.SelectedInstance = instance;
+
                                 SetActiveSelectedNode(parentNode);
                             }
                         }
@@ -383,7 +388,7 @@ namespace Flex.Development.Rendering.Modules
             Ray mouseRay = Engine.Renderer.Camera.GetCameraToViewportRay((float)((x - 1) / width), (float)((y - 1) / height));
 
             RaySceneQuery mRaySceneQuery = Engine.Renderer.Scene.CreateRayQuery(mouseRay);
-            mRaySceneQuery.SetSortByDistance(true, 1);
+            mRaySceneQuery.SetSortByDistance(true, 16);
             mRaySceneQuery.QueryTypeMask = SceneManager.ENTITY_TYPE_MASK;
 
             RaySceneQueryResult result = mRaySceneQuery.Execute();
@@ -408,7 +413,7 @@ namespace Flex.Development.Rendering.Modules
 
             RaySceneQuery mRaySceneQuery = Engine.Renderer.Scene.CreateRayQuery(mouseRay);
 
-            mRaySceneQuery.SetSortByDistance(true, 1);
+            mRaySceneQuery.SetSortByDistance(true, 16);
             mRaySceneQuery.QueryMask = (uint)QueryFlags.INSTANCE_ENTITY;
             //mRaySceneQuery.QueryTypeMask = SceneManager.ENTITY_TYPE_MASK;
 
@@ -429,7 +434,6 @@ namespace Flex.Development.Rendering.Modules
                         return true;
                     }
                 }
-                //System.Diagnostics.Trace.WriteLine("Not found!" + d.first);
                 if (d0.first)
                 {
                     Vector3 planePoint = mouseRay.GetPoint(d0.second);
@@ -531,18 +535,18 @@ namespace Flex.Development.Rendering.Modules
 
                             if (_transformDragging == TransformDragging.X)
                             {
-                                instance.position.x = (float)System.Math.Round(transformVector.x);
-                                PhysicsEngine.GetCollisionVectorResolvement(instance as PhysicsInstance);
+                                instance.position.x = (float)System.Math.Round(transformVector.x - (selectedNode.GetScale().x / 2));
+                                //PhysicsEngine.GetCollisionVectorResolvement(instance as PhysicsInstance);
                             }
                             else if (_transformDragging == TransformDragging.Y)
                             {
-                                instance.position.y = (float)System.Math.Round(transformVector.y);
-                                PhysicsEngine.GetCollisionVectorResolvement(instance as PhysicsInstance);
+                                instance.position.y = (float)System.Math.Round(transformVector.y - (selectedNode.GetScale().y / 2));
+                                //PhysicsEngine.GetCollisionVectorResolvement(instance as PhysicsInstance);
                             }
                             else if (_transformDragging == TransformDragging.Z)
                             {
-                                instance.position.z = (float)System.Math.Round(transformVector.z);
-                                PhysicsEngine.GetCollisionVectorResolvement(instance as PhysicsInstance);
+                                instance.position.z = (float)System.Math.Round(transformVector.z - (selectedNode.GetScale().z / 2));
+                                //PhysicsEngine.GetCollisionVectorResolvement(instance as PhysicsInstance);
                             }
                         }
                     }
@@ -559,9 +563,9 @@ namespace Flex.Development.Rendering.Modules
                         {
                             PositionedInstance instance = Engine.SceneNodeStore.GetInstance(selectedNode);
 
-                            instance.position.x = (float)System.Math.Round(vector.x);
-                            instance.position.y = (float)System.Math.Round(vector.y);
-                            instance.position.z = (float)System.Math.Round(vector.z);
+                            instance.position.x = (float)System.Math.Round(vector.x - (selectedNode.GetScale().x / 2));
+                            instance.position.y = (float)System.Math.Round(vector.y - (selectedNode.GetScale().y / 2));
+                            instance.position.z = (float)System.Math.Round(vector.z - (selectedNode.GetScale().z / 2));
                         }
 
                         cursor = Cursors.NoMove2D;

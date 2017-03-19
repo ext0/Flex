@@ -182,6 +182,10 @@ namespace Flex.Development.Instances
         [ScriptMember(ScriptAccess.ReadOnly)]
         public void remove()
         {
+            foreach (Instance instance in getChildren())
+            {
+                instance.remove();
+            }
             Cleanup();
         }
 

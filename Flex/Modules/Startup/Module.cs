@@ -1,5 +1,6 @@
 ﻿using Caliburn.Micro;
 using Flex.Commands.Scene;
+using Flex.Development.Instances.Properties;
 using Flex.Modules.Explorer;
 using Flex.Modules.Explorer.ViewModels;
 using Flex.Modules.Explorer.Views;
@@ -12,8 +13,10 @@ using Gemini.Modules.PropertyGrid.ViewModels;
 using Gemini.Modules.PropertyGrid.Views;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.Composition;
 using System.Drawing;
+using System.Drawing.Design;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;

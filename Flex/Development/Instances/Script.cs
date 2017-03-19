@@ -1,5 +1,6 @@
 ﻿using Flex.Development.Execution.Data;
 using Flex.Development.Execution.Data.States;
+using Flex.Development.Execution.Runtime;
 using Flex.Misc.Tracker;
 using Flex.Misc.Utility;
 using Microsoft.ClearScript;
@@ -17,6 +18,9 @@ namespace Flex.Development.Instances
     public class Script : Instance
     {
         private String _source;
+
+        [field: NonSerialized]
+        private EngineJS _executionEnvironment;
 
         public Script() : base()
         {
@@ -46,6 +50,11 @@ namespace Flex.Development.Instances
             NotifyPropertyChanged("Instances");
         }
 
+        internal void SetExecutionEnvironment(EngineJS engine)
+        {
+            _executionEnvironment = engine;
+        }
+
         public override void Initialize()
         {
             _initialized = true;
@@ -53,6 +62,7 @@ namespace Flex.Development.Instances
 
         public override void Cleanup()
         {
+            _executionEnvironment.KillChildrenThreads();
             RemoveFromParent();
         }
 

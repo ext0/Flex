@@ -118,7 +118,7 @@ namespace Flex.Development.Instances
 
         private void ShowBoundingBox()
         {
-            if (_showingBoundingBox)
+            if (_showingBoundingBox || _wireBoundingBox == null || _entity == null || _boundingBox == null)
             {
                 return;
             }
@@ -132,7 +132,7 @@ namespace Flex.Development.Instances
 
         private void HideBoundingBox()
         {
-            if (!_showingBoundingBox)
+            if (!_showingBoundingBox || _wireBoundingBox == null || _entity == null || _boundingBox == null)
             {
                 return;
             }

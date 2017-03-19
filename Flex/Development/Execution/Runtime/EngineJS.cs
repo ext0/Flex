@@ -49,7 +49,12 @@ namespace Flex.Development.Execution.Runtime
         private void delay(dynamic obj, double time)
         {
             CancellationTokenSource token = new CancellationTokenSource();
-            _childrenThreads.Add(token);
+
+            lock (_childrenThreads)
+            {
+                _childrenThreads.Add(token);
+            }
+
             Thread thread = new Thread(new ThreadStart(() =>
             {
                 Thread currentThread = Thread.CurrentThread;
@@ -84,7 +89,12 @@ namespace Flex.Development.Execution.Runtime
         private void spawn(dynamic obj)
         {
             CancellationTokenSource token = new CancellationTokenSource();
-            _childrenThreads.Add(token);
+
+            lock (_childrenThreads)
+            {
+                _childrenThreads.Add(token);
+            }
+
             Thread thread = new Thread(new ThreadStart(() =>
             {
                 Thread currentThread = Thread.CurrentThread;
@@ -118,7 +128,12 @@ namespace Flex.Development.Execution.Runtime
         private void loop(dynamic obj, double interval)
         {
             CancellationTokenSource token = new CancellationTokenSource();
-            _childrenThreads.Add(token);
+
+            lock (_childrenThreads)
+            {
+                _childrenThreads.Add(token);
+            }
+
             Thread thread = new Thread(new ThreadStart(() =>
             {
                 Thread currentThread = Thread.CurrentThread;
@@ -152,7 +167,12 @@ namespace Flex.Development.Execution.Runtime
         private void forLoop(dynamic obj, int max, double interval)
         {
             CancellationTokenSource token = new CancellationTokenSource();
-            _childrenThreads.Add(token);
+
+            lock (_childrenThreads)
+            {
+                _childrenThreads.Add(token);
+            }
+
             Thread thread = new Thread(new ThreadStart(() =>
             {
                 Thread currentThread = Thread.CurrentThread;
@@ -201,21 +221,77 @@ namespace Flex.Development.Execution.Runtime
 
         private void onKeyPress(int key, dynamic obj)
         {
-            ActiveScene.RegisterKeyCallback(KeyAction.KeyPress, key, () => obj());
+            ActiveScene.RegisterKeyCallback(KeyAction.KeyPress, key, () =>
+            {
+                try
+                {
+                    obj();
+                }
+                catch (ThreadAbortException)
+                {
+                    //Ignore
+                }
+                catch (ScriptEngineException e)
+                {
+                    _output.AppendLine(e.ErrorDetails);
+                }
+                catch (Exception e)
+                {
+                    _output.AppendLine("[external error] " + e.Message);
+                }
+            });
         }
 
         private void onKeyDown(int key, dynamic obj)
         {
-            ActiveScene.RegisterKeyCallback(KeyAction.KeyDown, key, () => obj());
+            ActiveScene.RegisterKeyCallback(KeyAction.KeyDown, key, () =>
+            {
+                try
+                {
+                    obj();
+                }
+                catch (ThreadAbortException)
+                {
+                    //Ignore
+                }
+                catch (ScriptEngineException e)
+                {
+                    _output.AppendLine(e.ErrorDetails);
+                }
+                catch (Exception e)
+                {
+                    _output.AppendLine("[external error] " + e.Message);
+                }
+            });
         }
 
         private void onKeyUp(int key, dynamic obj)
         {
-            ActiveScene.RegisterKeyCallback(KeyAction.KeyUp, key, () => obj());
+            ActiveScene.RegisterKeyCallback(KeyAction.KeyUp, key, () =>
+            {
+                try
+                {
+                    obj();
+                }
+                catch (ThreadAbortException)
+                {
+                    //Ignore
+                }
+                catch (ScriptEngineException e)
+                {
+                    _output.AppendLine(e.ErrorDetails);
+                }
+                catch (Exception e)
+                {
+                    _output.AppendLine("[external error] " + e.Message);
+                }
+            });
         }
 
         public void Execute(Script script)
         {
+            script.SetExecutionEnvironment(this);
+
             _engine.AddHostObject("script", script);
             _engine.AddHostObject("world", ActiveWorld.Active.World);
             _engine.AddHostObject("sky", ActiveWorld.Active.Sky);
@@ -282,9 +358,13 @@ namespace Flex.Development.Execution.Runtime
 
         public void KillChildrenThreads()
         {
-            foreach (CancellationTokenSource source in _childrenThreads)
+            lock (_childrenThreads)
             {
-                source.Cancel();
+                foreach (CancellationTokenSource source in _childrenThreads)
+                {
+                    source.Cancel();
+                }
+                _childrenThreads.Clear();
             }
         }
     }

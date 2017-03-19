@@ -2,9 +2,8 @@
 using Flex.Development.Execution.Data.States;
 using Flex.Development.Physics;
 using Flex.Misc.Tracker;
-using Jitter.Collision.Shapes;
-using Jitter.Dynamics;
 using Microsoft.ClearScript;
+using MogreNewt;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -18,10 +17,10 @@ namespace Flex.Development.Instances
     public abstract class PhysicsInstance : SizedInstance
     {
         [NonSerialized()]
-        protected Shape _shape;
+        protected ConvexCollision _shape;
 
         [NonSerialized()]
-        protected RigidBody _rigidBody;
+        protected Body _rigidBody;
 
         protected bool _anchored;
         protected bool _collisions;
@@ -31,40 +30,7 @@ namespace Flex.Development.Instances
 
         }
 
-        protected void LoadPhysicsInstance()
-        {
-            _shape = new BoxShape(_size.x, _size.y, _size.z);
-            _rigidBody = new RigidBody(_shape);
-            _rigidBody.Position = new Jitter.LinearMath.JVector(_position.x, _position.y, _position.z);
-            _rigidBody.IsActive = !_anchored;
-            _rigidBody.IsStatic = anchored;
-            PhysicsEngine.AddVisualInstance(this);
-        }
-
-        protected void ReloadPhysicsInstance()
-        {
-            _shape = new BoxShape(_size.x, _size.y, _size.z);
-            _rigidBody = new RigidBody(_shape);
-            _rigidBody.Position = new Jitter.LinearMath.JVector(_position.x, _position.y, _position.z);
-            _rigidBody.IsActive = !_anchored;
-            _rigidBody.IsStatic = anchored;
-            PhysicsEngine.ReloadVisualInstance(this);
-        }
-
-        protected void UnloadPhysicsInstance()
-        {
-            PhysicsEngine.RemoveVisualInstance(this);
-        }
-
-        [Browsable(false)]
-        [ScriptMember(ScriptAccess.None)]
-        internal RigidBody RigidBody
-        {
-            get
-            {
-                return _rigidBody;
-            }
-        }
+        protected abstract void LoadPhysicsInstance();
 
         [Category("3D")]
         [DisplayName("Collidable")]
@@ -84,7 +50,6 @@ namespace Flex.Development.Instances
             }
         }
 
-
         [Category("3D")]
         [DisplayName("Anchored")]
         [Description("Whether or not this object is affected by physics")]
@@ -101,8 +66,7 @@ namespace Flex.Development.Instances
                 _anchored = value;
                 if (_rigidBody != null)
                 {
-                    _rigidBody.IsActive = !_anchored;
-                    _rigidBody.IsStatic = anchored;
+                    LoadPhysicsInstance();
                 }
                 NotifyPropertyChanged("Anchored");
             }

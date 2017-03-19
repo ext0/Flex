@@ -1,3 +1,17 @@
+material Part/Plain
+ {
+    technique
+    {
+       pass
+        {
+          texture_unit
+          {
+            
+          }
+       }   
+    }
+ }
+
 material Part/Grass
  {
     technique
@@ -7,6 +21,161 @@ material Part/Grass
           texture_unit
           {
             texture grass.png
+          }
+       }   
+    }
+ }
+
+material Part/Bricks
+ {
+    technique
+    {
+       pass
+        {
+          texture_unit
+          {
+            texture brick.png
+          }
+       }   
+    }
+ }
+
+material Part/Cobblestone
+ {
+    technique
+    {
+       pass
+        {
+          texture_unit
+          {
+            texture cobblestone.jpg
+          }
+       }   
+    }
+ }
+
+material Part/Concrete
+ {
+    technique
+    {
+       pass
+        {
+          texture_unit
+          {
+            texture concrete.jpg
+          }
+       }   
+    }
+ }
+
+material Part/CorrodedMetal
+ {
+    technique
+    {
+       pass
+        {
+          texture_unit
+          {
+            texture corrodedmetal.png
+          }
+       }   
+    }
+ }
+
+material Part/Dirt
+ {
+    technique
+    {
+       pass
+        {
+          texture_unit
+          {
+            texture dirt.png
+          }
+       }   
+    }
+ }
+
+material Part/Ice
+ {
+    technique
+    {
+       pass
+        {
+          texture_unit
+          {
+            texture ice.png
+          }
+       }   
+    }
+ }
+
+material Part/Metal
+ {
+    technique
+    {
+       pass
+        {
+          texture_unit
+          {
+            texture metal.png
+          }
+       }   
+    }
+ }
+
+material Part/Rock
+ {
+    technique
+    {
+       pass
+        {
+          texture_unit
+          {
+            texture rock.jpg
+          }
+       }   
+    }
+ }
+
+material Part/Sand
+ {
+    technique
+    {
+       pass
+        {
+          texture_unit
+          {
+            texture sand.png
+          }
+       }   
+    }
+ }
+
+material Part/Water
+ {
+    technique
+    {
+       pass
+        {
+          texture_unit
+          {
+            texture water.jpg
+          }
+       }   
+    }
+ }
+
+
+material Part/WoodPlanks
+ {
+    technique
+    {
+       pass
+        {
+          texture_unit
+          {
+            texture wood.png
           }
        }   
     }

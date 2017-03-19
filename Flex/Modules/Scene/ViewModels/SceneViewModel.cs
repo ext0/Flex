@@ -28,7 +28,7 @@ namespace Flex.Modules.Scene.ViewModels
 {
     [DisplayName("Scene View Model")]
     [Export]
-    public class SceneViewModel : Document, ICommandHandler<AddPartCommandDefinition>, ICommandHandler<AddScriptCommandDefinition>, ICommandHandler<ToggleVRCommandDefinition>
+    public class SceneViewModel : Document, ICommandHandler<AddPartCommandDefinition>, ICommandHandler<AddScriptCommandDefinition>, ICommandHandler<ToggleVRCommandDefinition>, ICommandHandler<CopyInstanceCommandDefinition>, ICommandHandler<PasteInstanceCommandDefinition>, ICommandHandler<DeleteInstanceCommandDefinition>
     {
         private SceneView _sceneView;
 
@@ -118,6 +118,67 @@ namespace Flex.Modules.Scene.ViewModels
 
             IoC.Get<IShell>().OpenDocument(new ScriptViewModel(script));
 
+            return TaskUtility.Completed;
+        }
+
+        void ICommandHandler<CopyInstanceCommandDefinition>.Update(Command command)
+        {
+
+        }
+
+        Task ICommandHandler<CopyInstanceCommandDefinition>.Run(Command command)
+        {
+            Instance selected = ActiveScene.SelectedInstance;
+            if (selected != null)
+            {
+                ActiveScene.CopiedInstance = selected;
+            }
+            return TaskUtility.Completed;
+        }
+
+        void ICommandHandler<PasteInstanceCommandDefinition>.Update(Command command)
+        {
+
+        }
+
+        Task ICommandHandler<PasteInstanceCommandDefinition>.Run(Command command)
+        {
+            if (ActiveScene.CopiedInstance != null)
+            {
+                Instance instance = ActiveScene.CopiedInstance.clone();
+                SizedInstance positioned = instance as SizedInstance;
+                if (positioned != null)
+                {
+                    Vector3 vector = Engine.GetBestLocationFromYDown(new Vector3(positioned.position.x, positioned.position.y, positioned.position.z), positioned.position.y + (positioned.size.y / 2), positioned.size.y / 2);
+                    positioned.position.y = vector.y;
+                }
+            }
+            return TaskUtility.Completed;
+        }
+
+        void ICommandHandler<DeleteInstanceCommandDefinition>.Update(Command command)
+        {
+
+        }
+
+        Task ICommandHandler<DeleteInstanceCommandDefinition>.Run(Command command)
+        {
+            Instance selected = ActiveScene.SelectedInstance;
+            if (selected != null)
+            {
+                try
+                {
+                    selected.remove();
+                }
+                catch
+                {
+
+                }
+                finally
+                {
+                    ActiveScene.SelectedInstance = null;
+                }
+            }
             return TaskUtility.Completed;
         }
     }

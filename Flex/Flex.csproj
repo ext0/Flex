@@ -16,6 +16,7 @@
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -27,21 +28,41 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
+    <PlatformTarget>x86</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>FlexVRBanner.ico</ApplicationIcon>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'CustomFlex|AnyCPU'">
     <OutputPath>bin\CustomFlex\</OutputPath>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+    <OutputPath>bin\x86\Debug\</OutputPath>
+    <PlatformTarget>x86</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+    <OutputPath>bin\x86\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'CustomFlex|x86'">
+    <OutputPath>bin\x86\CustomFlex\</OutputPath>
+    <PlatformTarget>x86</PlatformTarget>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Caliburn.Micro, Version=2.0.2.0, Culture=neutral, PublicKeyToken=8e5891231f2ed21f, processorArchitecture=MSIL">
@@ -76,17 +97,17 @@
       <HintPath>..\packages\AvalonEdit.5.0.2\lib\Net40\ICSharpCode.AvalonEdit.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Jitter, Version=0.2.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\JitterPhysics.0.2.0.20\lib\net4\Jitter.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="MahApps.Metro, Version=1.0.0.0, Culture=neutral, PublicKeyToken=f4fb5a3c4d1e5b4f, processorArchitecture=MSIL">
       <HintPath>..\packages\MahApps.Metro.1.0.0.0\lib\net45\MahApps.Metro.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Mogre, Version=1.7.1.0, Culture=neutral, processorArchitecture=x86">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\Dependencies\bin\Mogre\1.7\DebugDependencies\Mogre.dll</HintPath>
+      <HintPath>..\Dependencies\bin\Interop\1.7.4\ReleaseDependencies\Mogre.dll</HintPath>
+    </Reference>
+    <Reference Include="MogreNewt, Version=2.25.0.0, Culture=neutral, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Dependencies\bin\Interop\1.7.4\ReleaseDependencies\MogreNewt.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
@@ -154,6 +175,9 @@
     <Compile Include="Commands\Global\RunSceneCommandDefinition.cs" />
     <Compile Include="Commands\Global\StopSceneCommandDefinition.cs" />
     <Compile Include="Commands\Global\StopSceneCommandHandler.cs" />
+    <Compile Include="Commands\Scene\DeleteInstanceCommandDefinition.cs" />
+    <Compile Include="Commands\Scene\PasteInstanceCommandDefinition.cs" />
+    <Compile Include="Commands\Scene\CopyInstanceCommandDefinition.cs" />
     <Compile Include="Commands\Scene\AddScriptCommandDefinition.cs" />
     <Compile Include="Commands\Scene\AddPartCommandDefinition.cs" />
     <Compile Include="Commands\Scene\ToggleVRCommandDefinition.cs" />
@@ -161,6 +185,7 @@
     <Compile Include="Development\Execution\Data\ActiveWorld.cs" />
     <Compile Include="Development\Execution\Data\DataContext.cs" />
     <Compile Include="Development\Execution\Data\KeyAction.cs" />
+    <Compile Include="Development\Instances\Properties\Material.cs" />
     <Compile Include="Development\Rendering\Modules\KeyboardHandler.cs" />
     <Compile Include="Development\Rendering\Modules\MouseHandler.cs" />
     <Compile Include="Development\Rendering\Modules\RenderQueryMasks.cs" />
@@ -186,7 +211,6 @@
     <Compile Include="Development\Physics\PhysicsEngine.cs" />
     <Compile Include="Development\Rendering\Engine.cs" />
     <Compile Include="Development\Rendering\Modules\MogreRenderer.cs" />
-    <Compile Include="Development\Rendering\Modules\MogreSelectionHandler.cs" />
     <Compile Include="Misc\Tracker\NotifyPropertyChangedObject.cs" />
     <Compile Include="Misc\Utility\FlexUtility.cs" />
     <Compile Include="Commands\Global\OpenFileCommandHandler.cs" />
@@ -3450,8 +3474,7 @@ if $(ConfigurationName) == Debug (
     copy "$(SolutionDir)Dependencies\bin\Mogre\1.7\DebugDependencies\*" "$(TargetDir)"
     copy "$(SolutionDir)Dependencies\bin\Ogre\1.7\DebugDependencies\*" "$(TargetDir)"
 ) ELSE (
-    copy "$(SolutionDir)Dependencies\bin\Mogre\1.7\ReleaseDependencies\*" "$(TargetDir)"
-    copy "$(SolutionDir)Dependencies\bin\Ogre\1.7\ReleaseDependencies\*" "$(TargetDir)"
+    copy "$(SolutionDir)Dependencies\bin\Interop\1.7.4\ReleaseDependencies\*" "$(TargetDir)"
 )</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

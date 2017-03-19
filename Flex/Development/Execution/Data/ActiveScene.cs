@@ -63,6 +63,10 @@ namespace Flex.Development.Execution.Data
 
         private static byte[] _savedState;
 
+        private static Instance _selected;
+
+        private static Instance _copied;
+
         static ActiveScene()
         {
             _currentEngine = null;
@@ -70,6 +74,30 @@ namespace Flex.Development.Execution.Data
             _activeTasks = new List<CancellationTokenSource>();
             _runtimeKeybinds = new Dictionary<KeyAction, Dictionary<int, List<System.Action>>>();
             _viewModel = null;
+        }
+
+        public static Instance CopiedInstance
+        {
+            get
+            {
+                return _copied;
+            }
+            set
+            {
+                _copied = value;
+            }
+        }
+
+        public static Instance SelectedInstance
+        {
+            get
+            {
+                return _selected;
+            }
+            set
+            {
+                _selected = value;
+            }
         }
 
         public static void RegisterKeyCallback(KeyAction keyAction, int key, System.Action action)

@@ -177,6 +177,35 @@ namespace Flex.Development.Rendering
             });
         }
 
+        public static Vector3 GetBestLocationFromYDown(Vector3 vector, float fallbackY, float sizeY)
+        {
+            Ray ray = new Ray(vector + new Vector3(0, (float.MaxValue), 0), Vector3.NEGATIVE_UNIT_Y);
+
+            RaySceneQuery mRaySceneQuery = Engine.Renderer.Scene.CreateRayQuery(ray);
+            mRaySceneQuery.SetSortByDistance(true, 64);
+            mRaySceneQuery.QueryTypeMask = SceneManager.ENTITY_TYPE_MASK;
+            mRaySceneQuery.QueryMask = (uint)QueryFlags.INSTANCE_ENTITY;
+
+            RaySceneQueryResult result = mRaySceneQuery.Execute();
+            RaySceneQueryResult.Enumerator itr = (RaySceneQueryResult.Enumerator)(result.GetEnumerator());
+
+            Vector3 max = new Vector3(vector.x, fallbackY, vector.z);
+            if (itr != null)
+            {
+                while (itr.MoveNext())
+                {
+                    RaySceneQueryResultEntry entry = itr.Current;
+                    SceneNode parentNode = entry.movable.ParentSceneNode;
+                    Vector3 current = new Vector3(vector.x, parentNode.Position.y + sizeY, vector.z);
+                    if (current.y > max.y)
+                    {
+                        max = current;
+                    }
+                }
+            }
+            return max;
+        }
+
         private static void _panel_Resize(object sender, EventArgs e)
         {
             if (_renderer != null)
@@ -188,8 +217,16 @@ namespace Flex.Development.Rendering
 
         public static void Destroy(PositionedInstance instance)
         {
+            if (MouseHandler.IsSelectedNode(instance.SceneNode))
+            {
+                MouseHandler.ClearSelectedNode();
+            }
+            if (MouseHandler.IsAlreadyHovered(instance.SceneNode))
+            {
+                MouseHandler.ClearHovered();
+            }
             SceneNodeStore.RemoveSceneNode(instance.SceneNode);
-            instance.SceneNode.RemoveAndDestroyAllChildren();
+            instance.SceneNode.RemoveAllChildren();
             _renderer.Scene.DestroySceneNode(instance.SceneNode);
         }
 

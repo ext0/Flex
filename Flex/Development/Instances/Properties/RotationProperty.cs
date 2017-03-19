@@ -1,5 +1,4 @@
 ﻿using Flex.Misc.Tracker;
-using Jitter.LinearMath;
 using Microsoft.ClearScript;
 using System;
 using System.Collections.Generic;
@@ -98,72 +97,47 @@ namespace Flex.Development.Instances.Properties
             }
         }
 
-        private Matrix3D MatrixFromEulerAngles(float x, float y, float z)
+        public void LoadFromMatrix(Mogre.Matrix3 matrix)
         {
-            Matrix3D matrix = new Matrix3D();
+            _matrix.M11 = matrix.m00;
+            _matrix.M12 = matrix.m01;
+            _matrix.M13 = matrix.m02;
+            _matrix.M21 = matrix.m10;
+            _matrix.M22 = matrix.m11;
+            _matrix.M23 = matrix.m12;
+            _matrix.M31 = matrix.m20;
+            _matrix.M32 = matrix.m21;
+            _matrix.M33 = matrix.m22;
 
-            matrix.Rotate(new System.Windows.Media.Media3D.Quaternion(new Vector3D(1, 0, 0), x));
-            matrix.Rotate(new System.Windows.Media.Media3D.Quaternion(new Vector3D(0, 1, 0) * matrix, y));
-            matrix.Rotate(new System.Windows.Media.Media3D.Quaternion(new Vector3D(0, 0, 1) * matrix, z));
-
-            return matrix;
-        }
-
-        [ScriptMember(ScriptAccess.None)]
-        [Browsable(false)]
-        public JMatrix JMatrix
-        {
-            get
-            {
-                return new JMatrix(
-                    (float)_matrix.M11, (float)_matrix.M12, (float)_matrix.M13,
-                    (float)_matrix.M21, (float)_matrix.M22, (float)_matrix.M23,
-                    (float)_matrix.M31, (float)_matrix.M32, (float)_matrix.M33
-                );
-            }
-        }
-
-        [ScriptMember(ScriptAccess.None)]
-        public void setTo(JMatrix matrix)
-        {
-            InternalMatrixConversion(matrix);
-            NotifyPropertyChanged("XYZ");
-        }
-
-        private void InternalMatrixConversion(JMatrix matrix)
-        {
-            _matrix.M11 = matrix.M11;
-            _matrix.M12 = matrix.M12;
-            _matrix.M13 = matrix.M13;
-            _matrix.M21 = matrix.M21;
-            _matrix.M22 = matrix.M22;
-            _matrix.M23 = matrix.M23;
-            _matrix.M31 = matrix.M31;
-            _matrix.M32 = matrix.M32;
-            _matrix.M33 = matrix.M33;
-
-            double sy = Math.Sqrt((matrix.M11 * matrix.M11) + (matrix.M21 * matrix.M21));
+            double sy = Math.Sqrt((_matrix.M11 * _matrix.M11) + (_matrix.M21 * _matrix.M21));
 
             bool singular = sy < 1e-6;
 
             if (!singular)
             {
-                _x = Mogre.Math.RadiansToDegrees((float)Math.Atan2(matrix.M32, matrix.M33));
-                _y = Mogre.Math.RadiansToDegrees((float)Math.Atan2(-matrix.M31, sy));
-                _z = Mogre.Math.RadiansToDegrees((float)Math.Atan2(matrix.M21, matrix.M11));
+                _x = Mogre.Math.RadiansToDegrees((float)Math.Atan2(_matrix.M32, _matrix.M33));
+                _y = Mogre.Math.RadiansToDegrees((float)Math.Atan2(-_matrix.M31, sy));
+                _z = Mogre.Math.RadiansToDegrees((float)Math.Atan2(_matrix.M21, _matrix.M11));
             }
             else
             {
-                _x = Mogre.Math.RadiansToDegrees((float)Math.Atan2(-matrix.M23, matrix.M22));
-                _y = Mogre.Math.RadiansToDegrees((float)Math.Atan2(-matrix.M31, sy));
+                _x = Mogre.Math.RadiansToDegrees((float)Math.Atan2(-_matrix.M23, _matrix.M22));
+                _y = Mogre.Math.RadiansToDegrees((float)Math.Atan2(-_matrix.M31, sy));
                 _z = 0;
             }
+
+            NotifyPropertyChanged("NOPHYSICS");
         }
 
-        public void setToPhysics(JMatrix matrix)
+        private Matrix3D MatrixFromEulerAngles(float x, float y, float z)
         {
-            InternalMatrixConversion(matrix);
-            NotifyPropertyChanged("NOPHYSICS");
+            Matrix3D matrix = new Matrix3D();
+
+            matrix.Rotate(new Quaternion(new Vector3D(1, 0, 0), x));
+            matrix.Rotate(new Quaternion(new Vector3D(0, 1, 0) * matrix, y));
+            matrix.Rotate(new Quaternion(new Vector3D(0, 0, 1) * matrix, z));
+
+            return matrix;
         }
 
         [ScriptMember(ScriptAccess.Full)]
