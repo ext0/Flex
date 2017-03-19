@@ -118,7 +118,7 @@ namespace Flex.Development.Instances
 
         private void ShowBoundingBox()
         {
-            if (_showingBoundingBox || _wireBoundingBox == null || _entity == null || _boundingBox == null)
+            if (_showingBoundingBox || _wireBoundingBox == null || _entity == null)
             {
                 return;
             }
