@@ -53,5 +53,25 @@ namespace Flex.Modules
         [Export]
         public static ToolBarItemDefinition ToggleVRToolBarItem = new CommandToolBarItemDefinition<ToggleVRCommandDefinition>(
            VRToolBarGroup, 2);
+
+        [Export]
+        public static ToolBarDefinition GizmoToolBar = new ToolBarDefinition(0, "Gizmo");
+
+        [Export]
+        public static ToolBarItemGroupDefinition GizmoToolBarGroup = new ToolBarItemGroupDefinition(
+            GizmoToolBar, 8);
+
+        [Export]
+        public static ToolBarItemDefinition SelectPointerToolBarItem = new CommandToolBarItemDefinition<SelectPointerGizmoCommandDefinition>(
+            GizmoToolBarGroup, 1);
+        [Export]
+        public static ToolBarItemDefinition SelectTranslateToolBarItem = new CommandToolBarItemDefinition<SelectTranslateGizmoCommandDefinition>(
+            GizmoToolBarGroup, 2);
+        [Export]
+        public static ToolBarItemDefinition SelectScaleToolBarItem = new CommandToolBarItemDefinition<SelectScaleGizmoCommandDefinition>(
+            GizmoToolBarGroup, 3);
+        [Export]
+        public static ToolBarItemDefinition SelectRotateToolBarItem = new CommandToolBarItemDefinition<SelectRotateGizmoCommandDefinition>(
+            GizmoToolBarGroup, 4);
     }
 }

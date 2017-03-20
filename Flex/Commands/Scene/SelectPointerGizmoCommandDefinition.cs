@@ -7,12 +7,12 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 
-namespace Flex.Commands.Global
+namespace Flex.Commands.Scene
 {
     [CommandDefinition]
-    public class RunSceneCommandDefinition : CommandDefinition
+    public class SelectPointerGizmoCommandDefinition : CommandDefinition
     {
-        public const string CommandName = "Scene.Run";
+        public const string CommandName = "Gizmo.SelectPointer";
 
         public override string Name
         {
@@ -21,20 +21,17 @@ namespace Flex.Commands.Global
 
         public override string Text
         {
-            get { return "_Run"; }
+            get { return "_SelectPointer"; }
         }
 
         public override string ToolTip
         {
-            get { return "Run Scene"; }
+            get { return "Select Pointer"; }
         }
 
         public override Uri IconSource
         {
-            get { return new Uri("pack://application:,,,/Flex;component/Resources/Icons/16/world-go.png"); }
+            get { return new Uri("pack://application:,,,/Flex;component/Resources/Icons/Legacy/cursor.png"); }
         }
-
-        [Export]
-        public static CommandKeyboardShortcut KeyGesture = new CommandKeyboardShortcut<RunSceneCommandDefinition>(new KeyGesture(Key.I, ModifierKeys.Control));
     }
 }

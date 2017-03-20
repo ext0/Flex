@@ -35,18 +35,59 @@ namespace Flex.Development.Rendering.Modules
             NONE
         }
 
-        private static readonly int MAX_TRANSFORM_DRAG_DISTANCE = 256;
-        private static readonly int TRANSFORM_DRAG_THRESHOLD = 1;
+        private enum DirectionalTransformDragging
+        {
+            XA,
+            XB,
+            YA,
+            YB,
+            ZA,
+            ZB,
+            NONE
+        }
 
-        private SceneNode _transformNode;
+        private static readonly int MAX_TRANSLATE_DRAG_DISTANCE = 256;
+        private static readonly int TRANSLATE_DRAG_THRESHOLD = 1;
 
-        private Vector3 _transformDragDifference;
+        private SceneNode _gizmoNode;
 
-        private SceneNode _xArrowNode;
-        private SceneNode _yArrowNode;
-        private SceneNode _zArrowNode;
+        private SceneNode _pointerNode;
 
-        private TransformDragging _transformDragging;
+        private SceneNode _translateNode;
+
+        private Vector3 _translateDragDifference;
+
+        private SceneNode _xArrowNodeA;
+        private SceneNode _yArrowNodeA;
+        private SceneNode _zArrowNodeA;
+
+        private SceneNode _xArrowNodeB;
+        private SceneNode _yArrowNodeB;
+        private SceneNode _zArrowNodeB;
+
+        private TransformDragging _translateDragging;
+
+        private static readonly Vector3 SCALE_HANDLE_SCALE = new Vector3(2, 2, 2);
+
+        private SceneNode _scaleNode;
+
+        private Vector3 _scaleDragDifference;
+
+        private SceneNode _xScaleNodeA;
+        private SceneNode _yScaleNodeA;
+        private SceneNode _zScaleNodeA;
+
+        private SceneNode _xScaleNodeB;
+        private SceneNode _yScaleNodeB;
+        private SceneNode _zScaleNodeB;
+
+        private float _previousScalarDeltaX = 0;
+        private float _previousScalarDeltaY = 0;
+        private float _previousScalarDeltaZ = 0;
+
+        private DirectionalTransformDragging _scaleDragging;
+
+        private SceneNode _rotateNode;
 
         private System.Windows.Forms.Integration.WindowsFormsHost _host;
         private Panel _panel;
@@ -55,12 +96,12 @@ namespace Flex.Development.Rendering.Modules
 
         private Dictionary<SelectionType, List<SceneNode>> _boundingBoxes;
 
-        private bool _transformFreeDragging;
+        private bool _translateFreeDragging;
 
         public MouseHandler(System.Windows.Forms.Integration.WindowsFormsHost host, Panel panel)
         {
             _boundingBoxes = new Dictionary<SelectionType, List<SceneNode>>();
-            _transformFreeDragging = false;
+            _translateFreeDragging = false;
             _panel = panel;
             _host = host;
         }
@@ -73,56 +114,229 @@ namespace Flex.Development.Rendering.Modules
             _panel.MouseDown += _panel_MouseDown;
             _panel.MouseUp += _panel_MouseUp;
 
-            CreateTransformEntity();
+            CreatePointerEntity();
+            CreateTranslateEntity();
+            CreateScaleEntity();
+            CreateRotateEntity();
+
+            ActiveScene.GizmoChanged += ActiveScene_GizmoChanged;
+
+            ActiveScene_GizmoChanged(null, null);
         }
 
-        private void CreateTransformEntity()
+        private void ActiveScene_GizmoChanged(object sender, EventArgs e)
         {
-            _transformNode = Engine.Renderer.Scene.CreateSceneNode();
+            SceneNode node;
+            if (ExistsSelectedNode(out node))
+            {
+                node.RemoveChild(_gizmoNode);
+            }
 
-            Entity xArrowEntity;
-            _xArrowNode = Engine.Renderer.CreateEntity(out xArrowEntity, "Arrow.mesh");
-            _xArrowNode.Rotate(Vector3.UNIT_Y, new Degree(90f), Node.TransformSpace.TS_WORLD);
-            xArrowEntity.SetMaterialName("Transform/X");
-            _xArrowNode.InheritScale = false;
-            _xArrowNode.InheritOrientation = false;
+            switch (ActiveScene.ActiveGizmoType)
+            {
+                case Misc.Runtime.GizmoType.POINTER:
+                    _gizmoNode = _pointerNode;
+                    break;
+                case Misc.Runtime.GizmoType.TRANSLATE:
+                    _gizmoNode = _translateNode;
+                    break;
+                case Misc.Runtime.GizmoType.SCALE:
+                    _gizmoNode = _scaleNode;
+                    break;
+                case Misc.Runtime.GizmoType.ROTATE:
+                    _gizmoNode = _rotateNode;
+                    break;
+            }
 
-            Entity yArrowEntity;
-            _yArrowNode = Engine.Renderer.CreateEntity(out yArrowEntity, "Arrow.mesh");
-            _yArrowNode.Rotate(Vector3.UNIT_X, new Degree(-90f), Node.TransformSpace.TS_WORLD);
-            yArrowEntity.SetMaterialName("Transform/Y");
-            _yArrowNode.InheritScale = false;
-            _yArrowNode.InheritOrientation = false;
-
-            Entity zArrowEntity;
-            _zArrowNode = Engine.Renderer.CreateEntity(out zArrowEntity, "Arrow.mesh");
-            zArrowEntity.SetMaterialName("Transform/Z");
-            _zArrowNode.InheritScale = false;
-            _zArrowNode.InheritOrientation = false;
-
-            _transformNode.AddChild(_xArrowNode);
-            _transformNode.AddChild(_yArrowNode);
-            _transformNode.AddChild(_zArrowNode);
+            if (ExistsSelectedNode(out node))
+            {
+                node.AddChild(_gizmoNode);
+            }
         }
 
-        private bool IsTransformClick(SceneNode checking, out TransformDragging transformDragging)
+        private void CreatePointerEntity()
         {
-            if (checking.Equals(_xArrowNode))
+            _pointerNode = Engine.Renderer.Scene.CreateSceneNode();
+        }
+
+        private void CreateTranslateEntity()
+        {
+            _translateNode = Engine.Renderer.Scene.CreateSceneNode();
+
+            Entity xArrowEntityA;
+            _xArrowNodeA = Engine.Renderer.CreateEntity(out xArrowEntityA, "arrow.mesh");
+            _xArrowNodeA.Rotate(Vector3.UNIT_Y, new Degree(90f), Node.TransformSpace.TS_WORLD);
+            xArrowEntityA.SetMaterialName("Translate/X");
+            _xArrowNodeA.InheritScale = false;
+            _xArrowNodeA.InheritOrientation = false;
+
+            Entity yArrowEntityA;
+            _yArrowNodeA = Engine.Renderer.CreateEntity(out yArrowEntityA, "arrow.mesh");
+            _yArrowNodeA.Rotate(Vector3.UNIT_X, new Degree(-90f), Node.TransformSpace.TS_WORLD);
+            yArrowEntityA.SetMaterialName("Translate/Y");
+            _yArrowNodeA.InheritScale = false;
+            _yArrowNodeA.InheritOrientation = false;
+
+            Entity zArrowEntityA;
+            _zArrowNodeA = Engine.Renderer.CreateEntity(out zArrowEntityA, "arrow.mesh");
+            zArrowEntityA.SetMaterialName("Translate/Z");
+            _zArrowNodeA.InheritScale = false;
+            _zArrowNodeA.InheritOrientation = false;
+
+            Entity xArrowEntityB;
+            _xArrowNodeB = Engine.Renderer.CreateEntity(out xArrowEntityB, "arrow.mesh");
+            _xArrowNodeB.Rotate(Vector3.UNIT_Y, new Degree(-90f), Node.TransformSpace.TS_WORLD);
+            xArrowEntityB.SetMaterialName("Translate/X");
+            _xArrowNodeB.InheritScale = false;
+            _xArrowNodeB.InheritOrientation = false;
+
+            Entity yArrowEntityB;
+            _yArrowNodeB = Engine.Renderer.CreateEntity(out yArrowEntityB, "arrow.mesh");
+            _yArrowNodeB.Rotate(Vector3.UNIT_X, new Degree(90f), Node.TransformSpace.TS_WORLD);
+            yArrowEntityB.SetMaterialName("Translate/Y");
+            _yArrowNodeB.InheritScale = false;
+            _yArrowNodeB.InheritOrientation = false;
+
+            Entity zArrowEntityB;
+            _zArrowNodeB = Engine.Renderer.CreateEntity(out zArrowEntityB, "arrow.mesh");
+            zArrowEntityB.SetMaterialName("Translate/Z");
+            _zArrowNodeB.Rotate(Vector3.UNIT_Y, new Degree(180f), Node.TransformSpace.TS_WORLD);
+            _zArrowNodeB.InheritScale = false;
+            _zArrowNodeB.InheritOrientation = false;
+
+            _translateNode.AddChild(_xArrowNodeA);
+            _translateNode.AddChild(_yArrowNodeA);
+            _translateNode.AddChild(_zArrowNodeA);
+
+            _translateNode.AddChild(_xArrowNodeB);
+            _translateNode.AddChild(_yArrowNodeB);
+            _translateNode.AddChild(_zArrowNodeB);
+
+            _xArrowNodeA._setDerivedPosition(new Vector3(0.5f, 0, 0));
+            _yArrowNodeA._setDerivedPosition(new Vector3(0, 0.5f, 0));
+            _zArrowNodeA._setDerivedPosition(new Vector3(0, 0, 0.5f));
+
+            _xArrowNodeB._setDerivedPosition(new Vector3(-0.5f, 0, 0));
+            _yArrowNodeB._setDerivedPosition(new Vector3(0, -0.5f, 0));
+            _zArrowNodeB._setDerivedPosition(new Vector3(0, 0, -0.5f));
+        }
+
+        private void CreateScaleEntity()
+        {
+            _scaleNode = Engine.Renderer.Scene.CreateSceneNode();
+
+            Entity xScaleEntityA;
+            _xScaleNodeA = Engine.Renderer.CreateEntity(out xScaleEntityA, "scaleSphereXA.mesh");
+            xScaleEntityA.SetMaterialName("Scale/X");
+            _xScaleNodeA.InheritScale = false;
+            _xScaleNodeA.SetScale(SCALE_HANDLE_SCALE);
+
+            Entity yScaleEntityA;
+            _yScaleNodeA = Engine.Renderer.CreateEntity(out yScaleEntityA, "scaleSphereYA.mesh");
+            yScaleEntityA.SetMaterialName("Scale/Y");
+            _yScaleNodeA.InheritScale = false;
+            _yScaleNodeA.SetScale(SCALE_HANDLE_SCALE);
+
+            Entity zScaleEntityA;
+            _zScaleNodeA = Engine.Renderer.CreateEntity(out zScaleEntityA, "scaleSphereZA.mesh");
+            zScaleEntityA.SetMaterialName("Scale/Z");
+            _zScaleNodeA.InheritScale = false;
+            _zScaleNodeA.SetScale(SCALE_HANDLE_SCALE);
+
+            Entity xScaleEntityB;
+            _xScaleNodeB = Engine.Renderer.CreateEntity(out xScaleEntityB, "scaleSphereXB.mesh");
+            xScaleEntityB.SetMaterialName("Scale/X");
+            _xScaleNodeB.InheritScale = false;
+            _xScaleNodeB.SetScale(SCALE_HANDLE_SCALE);
+
+            Entity yScaleEntityB;
+            _yScaleNodeB = Engine.Renderer.CreateEntity(out yScaleEntityB, "scaleSphereYB.mesh");
+            yScaleEntityB.SetMaterialName("Scale/Y");
+            _yScaleNodeB.InheritScale = false;
+            _yScaleNodeB.SetScale(SCALE_HANDLE_SCALE);
+
+            Entity zScaleEntityB;
+            _zScaleNodeB = Engine.Renderer.CreateEntity(out zScaleEntityB, "scaleSphereZB.mesh");
+            zScaleEntityB.SetMaterialName("Scale/Z");
+            _zScaleNodeB.InheritScale = false;
+            _zScaleNodeB.SetScale(SCALE_HANDLE_SCALE);
+
+            _scaleNode.AddChild(_xScaleNodeA);
+            _scaleNode.AddChild(_yScaleNodeA);
+            _scaleNode.AddChild(_zScaleNodeA);
+
+            _scaleNode.AddChild(_xScaleNodeB);
+            _scaleNode.AddChild(_yScaleNodeB);
+            _scaleNode.AddChild(_zScaleNodeB);
+
+            _xScaleNodeA._setDerivedPosition(new Vector3(0.5f, 0, 0));
+            _yScaleNodeA._setDerivedPosition(new Vector3(0, 0.5f, 0));
+            _zScaleNodeA._setDerivedPosition(new Vector3(0, 0, 0.5f));
+
+            _xScaleNodeB._setDerivedPosition(new Vector3(-0.5f, 0, 0));
+            _yScaleNodeB._setDerivedPosition(new Vector3(0, -0.5f, 0));
+            _zScaleNodeB._setDerivedPosition(new Vector3(0, 0, -0.5f));
+        }
+
+        private void CreateRotateEntity()
+        {
+            _rotateNode = Engine.Renderer.Scene.CreateSceneNode();
+        }
+
+        private bool IsTranslateClick(SceneNode checking, out TransformDragging translateDragging)
+        {
+            if (checking.Equals(_xArrowNodeA) || checking.Equals(_xArrowNodeB))
             {
-                transformDragging = TransformDragging.X;
+                translateDragging = TransformDragging.X;
                 return true;
             }
-            else if (checking.Equals(_yArrowNode))
+            else if (checking.Equals(_yArrowNodeA) || checking.Equals(_yArrowNodeB))
             {
-                transformDragging = TransformDragging.Y;
+                translateDragging = TransformDragging.Y;
                 return true;
             }
-            else if (checking.Equals(_zArrowNode))
+            else if (checking.Equals(_zArrowNodeA) || checking.Equals(_zArrowNodeB))
             {
-                transformDragging = TransformDragging.Z;
+                translateDragging = TransformDragging.Z;
                 return true;
             }
-            transformDragging = TransformDragging.NONE;
+            translateDragging = TransformDragging.NONE;
+            return false;
+        }
+
+        private bool IsScaleClick(SceneNode checking, out DirectionalTransformDragging scaleDragging)
+        {
+            if (checking.Equals(_xScaleNodeA))
+            {
+                scaleDragging = DirectionalTransformDragging.XA;
+                return true;
+            }
+            else if (checking.Equals(_xScaleNodeB))
+            {
+                scaleDragging = DirectionalTransformDragging.XB;
+                return true;
+            }
+            else if (checking.Equals(_yScaleNodeA))
+            {
+                scaleDragging = DirectionalTransformDragging.YA;
+                return true;
+            }
+            else if (checking.Equals(_yScaleNodeB))
+            {
+                scaleDragging = DirectionalTransformDragging.YB;
+                return true;
+            }
+            else if (checking.Equals(_zScaleNodeA))
+            {
+                scaleDragging = DirectionalTransformDragging.ZA;
+                return true;
+            }
+            else if (checking.Equals(_zScaleNodeB))
+            {
+                scaleDragging = DirectionalTransformDragging.ZB;
+                return true;
+            }
+            scaleDragging = DirectionalTransformDragging.NONE;
             return false;
         }
 
@@ -242,14 +456,14 @@ namespace Flex.Development.Rendering.Modules
                     {
                         oldInstance.IsSelected = false;
                         oldInstance.IsBoundingBoxEnabled = false;
-                        node.RemoveChild(_transformNode);
+                        node.RemoveChild(_gizmoNode);
                         ClearSelectedNode();
                     }
                     instance.IsBoundingBoxEnabled = true;
                     instance.IsSelected = true;
                     SetSelectedNode(newNode);
 
-                    newNode.AddChild(_transformNode);
+                    newNode.AddChild(_gizmoNode);
                 }
             }
             else
@@ -258,7 +472,7 @@ namespace Flex.Development.Rendering.Modules
                 instance.IsSelected = true;
                 SetSelectedNode(newNode);
 
-                newNode.AddChild(_transformNode);
+                newNode.AddChild(_gizmoNode);
             }
         }
 
@@ -280,10 +494,11 @@ namespace Flex.Development.Rendering.Modules
 
         private void _panel_MouseUp(object sender, MouseEventArgs e)
         {
-            _transformDragging = TransformDragging.NONE;
-            if (_transformFreeDragging)
+            _translateDragging = TransformDragging.NONE;
+            _scaleDragging = DirectionalTransformDragging.NONE;
+            if (_translateFreeDragging)
             {
-                _transformFreeDragging = false;
+                _translateFreeDragging = false;
             }
         }
 
@@ -305,23 +520,38 @@ namespace Flex.Development.Rendering.Modules
                             SceneNode parentNode = entry.movable.ParentSceneNode;
 
                             TransformDragging dragging;
-                            if (IsTransformClick(parentNode, out dragging))
+                            DirectionalTransformDragging directionalDragging;
+                            if (IsTranslateClick(parentNode, out dragging))
                             {
-                                _transformDragging = dragging;
+                                _translateDragging = dragging;
                                 IEnumerable<SceneNode> selected = GetSelectedNode();
                                 if (selected != null)
                                 {
                                     SceneNode node = selected.FirstOrDefault();
                                     if (node != null)
                                     {
-                                        _transformDragDifference = ray.GetPoint(entry.distance) - node.Position;
+                                        _translateDragDifference = ray.GetPoint(entry.distance) - node.Position;
+                                    }
+                                }
+                                return;
+                            }
+                            else if (IsScaleClick(parentNode, out directionalDragging))
+                            {
+                                _scaleDragging = directionalDragging;
+                                IEnumerable<SceneNode> selected = GetSelectedNode();
+                                if (selected != null)
+                                {
+                                    SceneNode node = selected.FirstOrDefault();
+                                    if (node != null)
+                                    {
+                                        _scaleDragDifference = ray.GetPoint(entry.distance) - node.Position;
                                     }
                                 }
                                 return;
                             }
                             else
                             {
-                                _transformDragging = TransformDragging.NONE;
+                                _translateDragging = TransformDragging.NONE;
                             }
                         }
                     }
@@ -371,7 +601,10 @@ namespace Flex.Development.Rendering.Modules
                                     oldInstance.IsSelected = false;
                                     oldInstance.IsBoundingBoxEnabled = false;
                                 }
-                                node.RemoveChild(_transformNode);
+
+                                ActiveScene.SelectedInstance = null;
+
+                                node.RemoveChild(_gizmoNode);
                                 ClearSelectedNode();
                             }
                         }
@@ -437,7 +670,7 @@ namespace Flex.Development.Rendering.Modules
                 if (d0.first)
                 {
                     Vector3 planePoint = mouseRay.GetPoint(d0.second);
-                    if ((Engine.Renderer.Camera.Position - planePoint).Length < MAX_TRANSFORM_DRAG_DISTANCE)
+                    if ((Engine.Renderer.Camera.Position - planePoint).Length < MAX_TRANSLATE_DRAG_DISTANCE)
                     {
                         vector = planePoint;
                         return true;
@@ -446,7 +679,7 @@ namespace Flex.Development.Rendering.Modules
                 if (d1.first)
                 {
                     Vector3 planePoint = mouseRay.GetPoint(d1.second);
-                    if ((Engine.Renderer.Camera.Position - planePoint).Length < MAX_TRANSFORM_DRAG_DISTANCE)
+                    if ((Engine.Renderer.Camera.Position - planePoint).Length < MAX_TRANSLATE_DRAG_DISTANCE)
                     {
                         vector = planePoint;
                         return true;
@@ -504,55 +737,130 @@ namespace Flex.Development.Rendering.Modules
                     selectedNode = selected.FirstOrDefault();
                 }
 
-                if (_transformDragging != TransformDragging.NONE)
+                if (_translateDragging != TransformDragging.NONE && ActiveScene.ActiveGizmoType == Misc.Runtime.GizmoType.TRANSLATE)
                 {
                     if (selectedNode != null)
                     {
                         Plane plane = new Plane();
-                        if (_transformDragging == TransformDragging.X)
+                        if (_translateDragging == TransformDragging.X)
                         {
                             Vector3 normal = Vector3.UNIT_Y;
                             plane = new Plane(normal, selectedNode.Position);
                         }
-                        else if (_transformDragging == TransformDragging.Y)
+                        else if (_translateDragging == TransformDragging.Y)
                         {
                             Vector3 normal = (Engine.Renderer.Camera.Position - selectedNode.Position).NormalisedCopy;
                             normal.y = 0;
                             plane = new Plane(normal, selectedNode.Position);
                         }
-                        else if (_transformDragging == TransformDragging.Z)
+                        else if (_translateDragging == TransformDragging.Z)
                         {
                             Vector3 normal = Vector3.UNIT_Y;
                             plane = new Plane(normal, selectedNode.Position);
                         }
 
-                        Vector3 transformVector;
-                        if (GetRaySceneLocationWithPlane(point.X, point.Y, plane, out transformVector, selectedNode))
+                        Vector3 translateVector;
+                        if (GetRaySceneLocationWithPlane(point.X, point.Y, plane, out translateVector, selectedNode))
                         {
                             PositionedInstance instance = Engine.SceneNodeStore.GetInstance(selectedNode);
 
-                            transformVector -= _transformDragDifference;
+                            translateVector -= _translateDragDifference;
 
-                            if (_transformDragging == TransformDragging.X)
+                            if (_translateDragging == TransformDragging.X)
                             {
-                                instance.position.x = (float)System.Math.Round(transformVector.x - (selectedNode.GetScale().x / 2));
+                                instance.position.x = (float)System.Math.Round(translateVector.x - (selectedNode.GetScale().x / 2));
                                 //PhysicsEngine.GetCollisionVectorResolvement(instance as PhysicsInstance);
                             }
-                            else if (_transformDragging == TransformDragging.Y)
+                            else if (_translateDragging == TransformDragging.Y)
                             {
-                                instance.position.y = (float)System.Math.Round(transformVector.y - (selectedNode.GetScale().y / 2));
+                                instance.position.y = (float)System.Math.Round(translateVector.y - (selectedNode.GetScale().y / 2));
                                 //PhysicsEngine.GetCollisionVectorResolvement(instance as PhysicsInstance);
                             }
-                            else if (_transformDragging == TransformDragging.Z)
+                            else if (_translateDragging == TransformDragging.Z)
                             {
-                                instance.position.z = (float)System.Math.Round(transformVector.z - (selectedNode.GetScale().z / 2));
+                                instance.position.z = (float)System.Math.Round(translateVector.z - (selectedNode.GetScale().z / 2));
                                 //PhysicsEngine.GetCollisionVectorResolvement(instance as PhysicsInstance);
                             }
                         }
                     }
                 }
+                else if (_scaleDragging != DirectionalTransformDragging.NONE && ActiveScene.ActiveGizmoType == Misc.Runtime.GizmoType.SCALE)
+                {
+                    if (selectedNode != null)
+                    {
+                        Plane plane = new Plane();
+                        if (_scaleDragging == DirectionalTransformDragging.XA || _scaleDragging == DirectionalTransformDragging.XB)
+                        {
+                            Vector3 normal = Vector3.UNIT_Y;
+                            plane = new Plane(normal, selectedNode.Position);
+                        }
+                        else if (_scaleDragging == DirectionalTransformDragging.YA || _scaleDragging == DirectionalTransformDragging.YB)
+                        {
+                            Vector3 normal = (Engine.Renderer.Camera.Position - selectedNode.Position).NormalisedCopy;
+                            normal.y = 0;
+                            plane = new Plane(normal, selectedNode.Position);
+                        }
+                        else if (_scaleDragging == DirectionalTransformDragging.ZA || _scaleDragging == DirectionalTransformDragging.ZB)
+                        {
+                            Vector3 normal = Vector3.UNIT_Y;
+                            plane = new Plane(normal, selectedNode.Position);
+                        }
+
+                        Vector3 scaleVector;
+                        if (GetRaySceneLocationWithPlane(point.X, point.Y, plane, out scaleVector, selectedNode))
+                        {
+                            PositionedInstance instance = Engine.SceneNodeStore.GetInstance(selectedNode);
+
+                            SizedInstance sized = instance as SizedInstance;
+
+                            if (sized != null)
+                            {
+                                int magicOffsetA = 2;
+                                int magicOffsetB = 5;
+
+                                if (_scaleDragging == DirectionalTransformDragging.XA)
+                                {
+                                    sized.size.x = System.Math.Max(1, (float)System.Math.Round(scaleVector.x - (sized.position.x) - magicOffsetA));
+                                }
+                                else if (_scaleDragging == DirectionalTransformDragging.YA)
+                                {
+                                    sized.size.y = System.Math.Max(1, (float)System.Math.Round(scaleVector.y - (sized.position.y) - magicOffsetA));
+                                }
+                                else if (_scaleDragging == DirectionalTransformDragging.ZA)
+                                {
+                                    sized.size.z = System.Math.Max(1, (float)System.Math.Round(scaleVector.z - (sized.position.z) - magicOffsetA));
+                                }
+                                else if (_scaleDragging == DirectionalTransformDragging.XB)
+                                {
+                                    float newX = (float)System.Math.Round(scaleVector.x + (sized.size.x / 2) + _scaleDragDifference.x + magicOffsetB); //wtf?
+                                    float delta = (sized.position.x - newX);
+
+                                    sized.position.x -= delta;
+                                    sized.size.x += delta;
+
+                                    /*
+                                    if (delta > sized.size.x)
+                                    {
+                                        sized.position.x -= delta;
+                                        sized.size.x += delta;
+                                    }
+                                    */
+                                }
+                                else if (_scaleDragging == DirectionalTransformDragging.YB)
+                                {
+
+                                }
+                                else if (_scaleDragging == DirectionalTransformDragging.ZB)
+                                {
+
+                                }
+                            }
+                        }
+                    }
+                }
+
                 Cursor cursor = null;
-                if (_transformFreeDragging)
+                if (_translateFreeDragging && _scaleDragging == DirectionalTransformDragging.NONE && _translateDragging == TransformDragging.NONE)
                 {
                     if (selectedNode != null)
                     {
@@ -572,7 +880,7 @@ namespace Flex.Development.Rendering.Modules
                     }
                     else
                     {
-                        _transformFreeDragging = false;
+                        _translateFreeDragging = false;
                     }
                 }
 
@@ -588,11 +896,11 @@ namespace Flex.Development.Rendering.Modules
                         if (entry.movable.QueryFlags == (uint)QueryFlags.INSTANCE_ENTITY)
                         {
                             SceneNode parentNode = entry.movable.ParentSceneNode;
-                            if (selectedNode != null && selectedNode.Equals(parentNode) && e.Button.HasFlag(MouseButtons.Left) && _transformDragging == TransformDragging.NONE)
+                            if (selectedNode != null && selectedNode.Equals(parentNode) && e.Button.HasFlag(MouseButtons.Left) && _translateDragging == TransformDragging.NONE)
                             {
-                                if (System.Math.Abs(deltaDirectionX) >= TRANSFORM_DRAG_THRESHOLD || System.Math.Abs(deltaDirectionY) >= TRANSFORM_DRAG_THRESHOLD)
+                                if (System.Math.Abs(deltaDirectionX) >= TRANSLATE_DRAG_THRESHOLD || System.Math.Abs(deltaDirectionY) >= TRANSLATE_DRAG_THRESHOLD)
                                 {
-                                    _transformFreeDragging = true;
+                                    _translateFreeDragging = true;
                                 }
                             }
                             if (!IsAlreadyHovered(parentNode))

@@ -3,6 +3,7 @@ using Flex.Development.Execution.Data.States;
 using Flex.Development.Execution.Runtime;
 using Flex.Development.Instances;
 using Flex.Development.Rendering;
+using Flex.Misc.Runtime;
 using Flex.Misc.Utility;
 using Flex.Modules.Scene.ViewModels;
 using Gemini.Framework;
@@ -59,11 +60,15 @@ namespace Flex.Development.Execution.Data
 
         public static event EventHandler RunningChanged;
 
+        public static event EventHandler GizmoChanged;
+
         private static Dictionary<KeyAction, Dictionary<int, List<System.Action>>> _runtimeKeybinds;
 
         private static byte[] _savedState;
 
         private static Instance _selected;
+
+        private static GizmoType _activeGizmo = GizmoType.POINTER;
 
         private static Instance _copied;
 
@@ -85,6 +90,20 @@ namespace Flex.Development.Execution.Data
             set
             {
                 _copied = value;
+            }
+        }
+
+        public static GizmoType ActiveGizmoType
+        {
+            get
+            {
+                return _activeGizmo;
+            }
+            set
+            {
+                if (_activeGizmo == value) return;
+                _activeGizmo = value;
+                GizmoChanged?.Invoke(null, null);
             }
         }
 
@@ -199,10 +218,7 @@ namespace Flex.Development.Execution.Data
         {
             _activeTasks.Clear();
             _context.IsRunning = true;
-            if (RunningChanged != null)
-            {
-                RunningChanged(null, new EventArgs());
-            }
+            RunningChanged?.Invoke(null, new EventArgs());
             Save();
             //Output.Out.AddLine("Saved cached copy of current state: " + _savedState.Length);
             _currentEngine = new EngineJS();
@@ -235,10 +251,7 @@ namespace Flex.Development.Execution.Data
 
         public static void NotifyRenderStep()
         {
-            if (OnRenderStep != null)
-            {
-                OnRenderStep(null, null);
-            }
+            OnRenderStep?.Invoke(null, null);
         }
 
         public static void MainLoop()
@@ -246,10 +259,7 @@ namespace Flex.Development.Execution.Data
             while (Running)
             {
                 Thread.Sleep(1000 / 60);
-                if (OnStep != null)
-                {
-                    OnStep(null, null);
-                }
+                OnStep?.Invoke(null, null);
             }
         }
 
@@ -265,10 +275,7 @@ namespace Flex.Development.Execution.Data
             }
             Reset();
             _context.IsRunning = false;
-            if (RunningChanged != null)
-            {
-                RunningChanged(null, new EventArgs());
-            }
+            RunningChanged?.Invoke(null, new EventArgs());
 
             OnStep = null;
             OnRenderStep = null;
@@ -324,6 +331,15 @@ namespace Flex.Development.Execution.Data
             {
                 ObjectSave save = new ObjectSave(instancePair.Old, instancePair.Current, instancePair.Current.GetType());
                 save.Reset();
+                try
+                {
+                    InstancePair oldParent = correspondings.Where(x => x.Old.equals(instancePair.Old.parent)).FirstOrDefault();
+                    if (oldParent != null && oldParent.Current != null)
+                    {
+                        instancePair.Current.parent = oldParent.Current;
+                    }
+                }
+                catch { }
                 instancePair.Current.Reload();
             }
 

@@ -20,6 +20,7 @@ material BoundingBox/BlueDark
 			ambient 0.145 0.292 1
 			diffuse 0.145 0.292 1
 			emissive 0.145 0.292 1
+			depth_bias 1000
 		}
 	}
 }

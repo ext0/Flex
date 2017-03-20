@@ -164,8 +164,8 @@ namespace Flex.Development.Instances
                 {
                     if (!e.PropertyName.Equals("NOPHYSICS"))
                     {
-                        System.Windows.Media.Media3D.Quaternion quaternion = rotation.Quaternion;
-                        _sceneNode.SetOrientation((float)quaternion.W, (float)quaternion.X, (float)quaternion.Y, (float)quaternion.Z);
+                        Mogre.Quaternion quaternion = new Mogre.Quaternion(_rotation.Matrix);
+                        _sceneNode.SetOrientation((float)quaternion.w, (float)quaternion.x, (float)quaternion.y, (float)quaternion.z);
                         _rigidBody.SetPositionOrientation(new Mogre.Vector3(position.x + (size.x / 2), position.y + (size.y / 2), position.z + (size.z / 2)), _sceneNode.Orientation);
                     }
 
@@ -232,13 +232,6 @@ namespace Flex.Development.Instances
             _rigidBody.Velocity = Mogre.Vector3.ZERO;
             _rigidBody.Torque = Mogre.Vector3.ZERO;
             _rigidBody.Omega = Mogre.Vector3.ZERO;
-
-            Mogre.Quaternion orientation = new Mogre.Quaternion();
-            System.Windows.Media.Media3D.Quaternion rotationQuaternion = rotation.Quaternion;
-            orientation.w = (float)rotationQuaternion.W;
-            orientation.x = (float)rotationQuaternion.X;
-            orientation.y = (float)rotationQuaternion.Y;
-            orientation.z = (float)rotationQuaternion.Z;
 
             _sceneNode.SetPosition(position.x + (size.x / 2), position.y + (size.y / 2), position.z + (size.z / 2));
             _rigidBody.SetPositionOrientation(new Mogre.Vector3(position.x + (size.x / 2), position.y + (size.y / 2), position.z + (size.z / 2)), _sceneNode.Orientation);

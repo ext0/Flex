@@ -11,9 +11,9 @@ using System.Windows.Input;
 namespace Flex.Commands.Scene
 {
     [CommandDefinition]
-    public class PasteInstanceCommandDefinition : CommandDefinition
+    public class RotatePartYCommandDefinition : CommandDefinition
     {
-        public const string CommandName = "Instance.PasteInstance";
+        public const string CommandName = "Instance.RotatePartY";
 
         public override string Name
         {
@@ -22,15 +22,15 @@ namespace Flex.Commands.Scene
 
         public override string Text
         {
-            get { return "_Paste"; }
+            get { return "_RotatePartY"; }
         }
 
         public override string ToolTip
         {
-            get { return "Paste Instance"; }
+            get { return "Rotate Part (Y Axis)"; }
         }
 
         [Export]
-        public static CommandKeyboardShortcut KeyGesture = new CommandKeyboardShortcut<PasteInstanceCommandDefinition>(new KeyGesture(Key.V, ModifierKeys.Control));
+        public static CommandKeyboardShortcut KeyGesture = new CommandKeyboardShortcut<RotatePartYCommandDefinition>(new KeyGesture(Key.R, ModifierKeys.Control));
     }
 }

@@ -30,11 +30,6 @@ namespace Flex.Commands.Scene
             get { return "Copy Instance"; }
         }
 
-        public override Uri IconSource
-        {
-            get { return new Uri("pack://application:,,,/Flex;component/Resources/Icons/16/brick-add.png"); }
-        }
-
         [Export]
         public static CommandKeyboardShortcut KeyGesture = new CommandKeyboardShortcut<CopyInstanceCommandDefinition>(new KeyGesture(Key.C, ModifierKeys.Control));
     }

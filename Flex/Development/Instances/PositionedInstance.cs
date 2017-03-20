@@ -38,6 +38,9 @@ namespace Flex.Development.Instances
         [NonSerialized()]
         private bool _isSelected;
 
+        [NonSerialized()]
+        private bool _visualizedFlag;
+
         protected abstract void InitializeVisual();
 
         protected PositionedInstance() : base()
@@ -127,6 +130,7 @@ namespace Flex.Development.Instances
             _boundingBox.AttachObject(_wireBoundingBox);
             _sceneNode.AddChild(_boundingBox);
             _showingBoundingBox = true;
+            _visualizedFlag = true;
             SetHover();
         }
 

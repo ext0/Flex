@@ -1,0 +1,96 @@
+material Translate/X
+{
+	technique
+	{
+		pass
+		{
+			ambient 1 0 0 0.7
+			diffuse 1 0 0 0.7
+			emissive 1 0 0 0.7
+
+                        scene_blend alpha_blend
+                        depth_write off
+		}
+	}
+}
+
+material Translate/Y
+{
+	technique
+	{
+		pass
+		{
+			ambient 0 1 0 0.7
+			diffuse 0 1 0 0.7
+			emissive 0 1 0 0.7
+
+                        scene_blend alpha_blend
+                        depth_write off
+		}
+	}
+}
+
+material Translate/Z
+{
+	technique
+	{
+		pass
+		{
+			ambient 0 0 1 0.7
+			diffuse 0 0 1 0.7
+			emissive 0 0 1 0.7
+
+                        scene_blend alpha_blend
+                        depth_write off
+		}
+	}
+}
+
+material Scale/X 
+{
+	technique
+	{
+		pass
+		{
+			ambient 1 0 0 0.7
+			diffuse 1 0 0 0.7
+			emissive 1 0 0 0.7
+
+                        scene_blend alpha_blend
+                        depth_write off
+		}
+	}
+}
+
+material Scale/Y
+{
+	technique
+	{
+		pass
+		{
+			ambient 0 1 0 0.7
+			diffuse 0 1 0 0.7
+			emissive 0 1 0 0.7
+
+                        scene_blend alpha_blend
+                        depth_write off
+		}
+	}
+}
+
+
+material Scale/Z
+{
+	technique
+	{
+		pass
+		{
+			ambient 0 0 1 0.7
+			diffuse 0 0 1 0.7
+			emissive 0 0 1 0.7
+
+                        scene_blend alpha_blend
+                        depth_write off
+		}
+	}
+}

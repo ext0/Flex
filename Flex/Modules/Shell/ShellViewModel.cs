@@ -41,7 +41,11 @@ namespace Flex.Modules.Shell
 
                 result = MessageBox.Show("Are you sure you want to exit?", "Confirm", MessageBoxButton.YesNo);
 
-                Completed(this, new ResultCompletionEventArgs { WasCancelled = (result != System.Windows.MessageBoxResult.Yes) });
+                if (result == System.Windows.MessageBoxResult.Yes)
+                {
+                    Completed(this, new ResultCompletionEventArgs { WasCancelled = (result != System.Windows.MessageBoxResult.Yes) });
+                    Application.Current.Shutdown(0);
+                }
             }
         }
     }

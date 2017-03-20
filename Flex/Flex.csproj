@@ -175,11 +175,16 @@
     <Compile Include="Commands\Global\RunSceneCommandDefinition.cs" />
     <Compile Include="Commands\Global\StopSceneCommandDefinition.cs" />
     <Compile Include="Commands\Global\StopSceneCommandHandler.cs" />
+    <Compile Include="Commands\Scene\RotatePartYCommandDefinition.cs" />
     <Compile Include="Commands\Scene\DeleteInstanceCommandDefinition.cs" />
     <Compile Include="Commands\Scene\PasteInstanceCommandDefinition.cs" />
     <Compile Include="Commands\Scene\CopyInstanceCommandDefinition.cs" />
     <Compile Include="Commands\Scene\AddScriptCommandDefinition.cs" />
     <Compile Include="Commands\Scene\AddPartCommandDefinition.cs" />
+    <Compile Include="Commands\Scene\SelectPointerGizmoCommandDefinition.cs" />
+    <Compile Include="Commands\Scene\SelectRotateGizmoCommandDefinition.cs" />
+    <Compile Include="Commands\Scene\SelectScaleGizmoCommandDefinition.cs" />
+    <Compile Include="Commands\Scene\SelectTranslateGizmoCommandDefinition.cs" />
     <Compile Include="Commands\Scene\ToggleVRCommandDefinition.cs" />
     <Compile Include="Development\Execution\Data\ActiveScene.cs" />
     <Compile Include="Development\Execution\Data\ActiveWorld.cs" />
@@ -211,6 +216,7 @@
     <Compile Include="Development\Physics\PhysicsEngine.cs" />
     <Compile Include="Development\Rendering\Engine.cs" />
     <Compile Include="Development\Rendering\Modules\MogreRenderer.cs" />
+    <Compile Include="Misc\Runtime\GizmoType.cs" />
     <Compile Include="Misc\Tracker\NotifyPropertyChangedObject.cs" />
     <Compile Include="Misc\Utility\FlexUtility.cs" />
     <Compile Include="Commands\Global\OpenFileCommandHandler.cs" />
@@ -3416,7 +3422,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Actions\" />
-    <Folder Include="Misc\Runtime\" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="FlexVRBanner.ico" />

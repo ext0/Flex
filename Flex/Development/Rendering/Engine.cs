@@ -246,16 +246,16 @@ namespace Flex.Development.Rendering
         {
             lock (_renderNextDispatcherActionQueue)
             {
-                if (_renderThread != null && _renderThread.Equals(Thread.CurrentThread))
-                {
-                    action.Invoke();
-                }
                 _renderNextDispatcherActionQueue.Enqueue(action);
             }
         }
 
         public static void RunOnUIThread(System.Action action)
         {
+            if (System.Windows.Application.Current == null)
+            {
+                return;
+            }
             if (System.Windows.Application.Current.Dispatcher.CheckAccess())
             {
                 action.Invoke();

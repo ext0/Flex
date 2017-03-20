@@ -35,6 +35,6 @@ namespace Flex.Commands.Global
         }
 
         [Export]
-        public static CommandKeyboardShortcut KeyGesture = new CommandKeyboardShortcut<StopSceneCommandDefinition>(new KeyGesture(Key.T, ModifierKeys.Control));
+        public static CommandKeyboardShortcut KeyGesture = new CommandKeyboardShortcut<StopSceneCommandDefinition>(new KeyGesture(Key.O, ModifierKeys.Control));
     }
 }
