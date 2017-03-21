@@ -103,6 +103,13 @@ namespace Flex.Development.Instances.Properties
         public void LoadFromMatrix(Matrix3 matrix)
         {
             _matrix = matrix;
+            Radian x;
+            Radian y;
+            Radian z;
+            _matrix.ToEulerAnglesXYZ(out x, out y, out z);
+            _x = x.ValueDegrees;
+            _y = y.ValueDegrees;
+            _z = z.ValueDegrees;
             NotifyPropertyChanged("NOPHYSICS");
         }
 
