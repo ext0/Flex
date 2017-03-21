@@ -228,5 +228,10 @@ namespace Flex.Development.Instances
         {
 
         }
+
+        protected override void ReloadGizmo()
+        {
+            throw new InvalidOperationException("Cannot use a Gizmo on a Camera instance!");
+        }
     }
 }

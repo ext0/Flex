@@ -242,7 +242,7 @@ namespace Flex.Development.Instances.Properties
         internal Mogre.Vector2 GetLargestValues()
         {
             float largest = Math.Max(x, Math.Max(y, z));
-            float secondLargest = (x == largest) ? ((y >= z) ? y : z) : (y == largest) ? ((z >= x) ? z : z) : (y >= x) ? y : x;
+            float secondLargest = (x == largest) ? ((y >= z) ? y : z) : (y == largest) ? ((z >= x) ? z : x) : (y >= x) ? y : x;
             return new Mogre.Vector2(largest, secondLargest);
         }
 

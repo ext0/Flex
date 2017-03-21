@@ -104,9 +104,9 @@ namespace Flex.Development.Rendering.Modules
             }
         }
 
-        public SceneNode CreateEntity(out Entity entity, String entityMesh, PositionedInstance instance)
+        public SceneNode CreateEntity(out Entity entity, MeshPtr mesh, PositionedInstance instance)
         {
-            entity = _scene.CreateEntity(entityMesh);
+            entity = _scene.CreateEntity(mesh.Name);
             entity.CastShadows = true;
             entity.QueryFlags = (uint)QueryFlags.INSTANCE_ENTITY;
             SceneNode node = _scene.CreateSceneNode();
@@ -116,11 +116,24 @@ namespace Flex.Development.Rendering.Modules
             return node;
         }
 
-        public SceneNode CreateEntity(out Entity entity, String entityMesh)
+        public Entity CreateEntity(MeshPtr mesh, PositionedInstance instance)
+        {
+            Entity entity = _scene.CreateEntity(mesh.Name);
+            entity.CastShadows = true;
+            entity.QueryFlags = (uint)QueryFlags.INSTANCE_ENTITY;
+            return entity;
+        }
+
+        public SceneNode CreateEntity(out Entity entity, String entityMesh, String customIdentifier = null)
         {
             entity = _scene.CreateEntity(entityMesh);
             entity.QueryFlags = (uint)QueryFlags.NON_INSTANCE_ENTITY;
+
             SceneNode node = _scene.CreateSceneNode();
+            if (customIdentifier != null)
+            {
+                Engine.SceneNodeStore.AddSceneNodeMetadata(node, customIdentifier);
+            }
             node.AttachObject(entity);
             return node;
         }
@@ -135,7 +148,8 @@ namespace Flex.Development.Rendering.Modules
                 ActiveScene.Context.ActiveWorld.Sky.ambient.B / 255f);
 
             _scene.SetSkyBox(true, "Skyboxes/Default", 500);
-            _scene.ShadowTechnique = ShadowTechnique.SHADOWTYPE_STENCIL_MODULATIVE;
+            _scene.ShadowTechnique = ShadowTechnique.SHADOWTYPE_TEXTURE_ADDITIVE;
+            _scene.SetShadowCameraSetup(new ShadowCameraSetupPtr(new FocusedShadowCameraSetup()));
         }
 
         [HandleProcessCorruptedStateExceptions]
@@ -146,7 +160,7 @@ namespace Flex.Development.Rendering.Modules
                 return;
             }
             _root.RenderSystem._setViewport(_viewCamera.Viewport);
-            _root.RenderSystem.ClearFrameBuffer((uint)FrameBufferType.FBT_COLOUR | (uint)FrameBufferType.FBT_DEPTH);
+            _root.RenderSystem.ClearFrameBuffer((uint)FrameBufferType.FBT_COLOUR | (uint)FrameBufferType.FBT_DEPTH | (uint)FrameBufferType.FBT_STENCIL);
 
             _scene._renderScene(_viewCamera, _viewCamera.Viewport, true);
             _renderWindow.SwapBuffers(true);

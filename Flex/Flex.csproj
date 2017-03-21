@@ -170,9 +170,12 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Commands\Global\SaveFileCommandHandler.cs" />
+    <Compile Include="Commands\Global\OpenProjectCommandDefinition.cs" />
+    <Compile Include="Commands\Global\OpenProjectCommandHandler.cs" />
+    <Compile Include="Commands\Global\SaveProjectCommandHandler.cs" />
     <Compile Include="Commands\Global\RunSceneCommandHandler.cs" />
     <Compile Include="Commands\Global\RunSceneCommandDefinition.cs" />
+    <Compile Include="Commands\Global\SaveProjectCommandDefinition.cs" />
     <Compile Include="Commands\Global\StopSceneCommandDefinition.cs" />
     <Compile Include="Commands\Global\StopSceneCommandHandler.cs" />
     <Compile Include="Commands\Scene\RotatePartYCommandDefinition.cs" />
@@ -189,8 +192,12 @@
     <Compile Include="Development\Execution\Data\ActiveScene.cs" />
     <Compile Include="Development\Execution\Data\ActiveWorld.cs" />
     <Compile Include="Development\Execution\Data\DataContext.cs" />
+    <Compile Include="Development\Execution\Data\Data\InstancePair.cs" />
     <Compile Include="Development\Execution\Data\KeyAction.cs" />
     <Compile Include="Development\Instances\Properties\Material.cs" />
+    <Compile Include="Development\Rendering\Modules\Enum\RenderEnums.cs" />
+    <Compile Include="Development\Rendering\Modules\GizmoVisual.cs" />
+    <Compile Include="Development\Rendering\Manual\MeshGenerator.cs" />
     <Compile Include="Development\Rendering\Modules\KeyboardHandler.cs" />
     <Compile Include="Development\Rendering\Modules\MouseHandler.cs" />
     <Compile Include="Development\Rendering\Modules\RenderQueryMasks.cs" />
@@ -219,7 +226,6 @@
     <Compile Include="Misc\Runtime\GizmoType.cs" />
     <Compile Include="Misc\Tracker\NotifyPropertyChangedObject.cs" />
     <Compile Include="Misc\Utility\FlexUtility.cs" />
-    <Compile Include="Commands\Global\OpenFileCommandHandler.cs" />
     <Compile Include="Misc\Utility\UISafeObservableCollection.cs" />
     <Compile Include="Modules\Explorer\IExplorer.cs" />
     <Compile Include="Modules\Explorer\Views\ExplorerView.xaml.cs">

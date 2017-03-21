@@ -1,4 +1,5 @@
 ﻿using Caliburn.Micro;
+using Flex.Development.Execution.Data.Data;
 using Flex.Development.Execution.Data.States;
 using Flex.Development.Execution.Runtime;
 using Flex.Development.Instances;
@@ -21,34 +22,6 @@ namespace Flex.Development.Execution.Data
 {
     public static class ActiveScene
     {
-        internal class InstancePair
-        {
-            private Instance _old;
-            private Instance _current;
-
-            public InstancePair(Instance old, Instance current)
-            {
-                _old = old;
-                _current = current;
-            }
-
-            public Instance Old
-            {
-                get
-                {
-                    return _old;
-                }
-            }
-
-            public Instance Current
-            {
-                get
-                {
-                    return _current;
-                }
-            }
-        }
-
         private static DataContext _context;
         private static List<CancellationTokenSource> _activeTasks;
         private static EngineJS _currentEngine;

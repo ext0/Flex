@@ -12,6 +12,20 @@ material Part/Plain
     }
  }
 
+material Part/Placeholder
+ {
+    technique
+    {
+       pass
+        {
+          texture_unit
+          {
+            texture missing.png
+          }
+       }   
+    }
+ }
+
 material Part/Grass
  {
     technique

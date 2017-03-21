@@ -35,6 +35,7 @@ namespace Flex.Modules.External.Commands
         {
             OpenFileDialog dialog = new OpenFileDialog();
             dialog.Multiselect = false;
+            dialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
             dialog.Filter = "flex scripts (*.flexscript)|*.flexscript|All files (*.*)|*.*";
             dialog.FilterIndex = 0;
 

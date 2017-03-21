@@ -1,5 +1,6 @@
 ﻿using Flex.Development.Instances.Properties;
 using Flex.Development.Rendering;
+using Flex.Development.Rendering.Modules;
 using Flex.Misc.Tracker;
 using Microsoft.ClearScript;
 using Mogre;
@@ -30,6 +31,9 @@ namespace Flex.Development.Instances
         protected Entity _entity;
 
         [NonSerialized()]
+        protected GizmoVisual _gizmoVisual;
+
+        [NonSerialized()]
         protected WireBoundingBox _wireBoundingBox;
 
         [NonSerialized()]
@@ -43,6 +47,8 @@ namespace Flex.Development.Instances
 
         protected abstract void InitializeVisual();
 
+        protected abstract void ReloadGizmo();
+
         protected PositionedInstance() : base()
         {
             Engine.QueueForRenderDispatcher(() =>
@@ -51,6 +57,22 @@ namespace Flex.Development.Instances
                 _showingBoundingBox = false;
                 _isSelected = false;
             });
+        }
+
+        public void SetGizmoVisual(GizmoVisual visual)
+        {
+            _sceneNode.AddChild(visual.Base);
+            _gizmoVisual = visual;
+            ReloadGizmo();
+        }
+
+        public void RemoveGizmoVisual()
+        {
+            if (_gizmoVisual != null)
+            {
+                _sceneNode.RemoveChild(_gizmoVisual.Base);
+            }
+            _gizmoVisual = null;
         }
 
         private void SetSelected()

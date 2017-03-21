@@ -1,7 +1,10 @@
-﻿using Flex.Modules.Explorer.Commands;
+﻿using Flex.Commands.Global;
+using Flex.Modules.Explorer.Commands;
 using Flex.Modules.External.Commands;
 using Flex.Properties;
+using Gemini.Framework.Commands;
 using Gemini.Framework.Menus;
+using Gemini.Modules.Shell.Commands;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
@@ -15,6 +18,24 @@ namespace Flex.Modules.External
     {
         [Export]
         public static ExcludeMenuItemGroupDefinition ExcludeToolsOptionsMenuItemGroup = new ExcludeMenuItemGroupDefinition(Gemini.Modules.MainMenu.MenuDefinitions.ViewPropertiesMenuGroup);
+
+        [Export]
+        public static ExcludeMenuItemGroupDefinition ExcludeFileNewMenuItemGroup = new ExcludeMenuItemGroupDefinition(Gemini.Modules.MainMenu.MenuDefinitions.FileNewOpenMenuGroup);
+
+        [Export]
+        public static ExcludeMenuItemGroupDefinition ExcludeFileSaveMenuItemGroup = new ExcludeMenuItemGroupDefinition(Gemini.Modules.MainMenu.MenuDefinitions.FileSaveMenuGroup);
+
+        [Export]
+        public static ExcludeMenuItemGroupDefinition ExcludeFileCloseMenuItemGroup = new ExcludeMenuItemGroupDefinition(Gemini.Modules.MainMenu.MenuDefinitions.FileCloseMenuGroup);
+
+        [Export]
+        public static MenuItemGroupDefinition FileNewMenuItemGroup = new MenuItemGroupDefinition(Gemini.Modules.MainMenu.MenuDefinitions.FileMenu, 0);
+
+        [Export]
+        public static MenuItemDefinition OpenProjectMenuItem = new CommandMenuItemDefinition<OpenProjectCommandDefinition>(FileNewMenuItemGroup, 0);
+
+        [Export]
+        public static MenuItemDefinition SaveProjectMenuItem = new CommandMenuItemDefinition<SaveProjectCommandDefinition>(FileNewMenuItemGroup, 1);
 
         [Export]
         public static MenuItemDefinition ViewPropertyGridMenuItem = new CommandMenuItemDefinition<ViewPropertyGridCommandDefinition>(

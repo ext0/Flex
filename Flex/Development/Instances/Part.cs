@@ -4,6 +4,7 @@ using Flex.Development.Execution.Runtime;
 using Flex.Development.Instances.Properties;
 using Flex.Development.Physics;
 using Flex.Development.Rendering;
+using Flex.Development.Rendering.Manual;
 using Flex.Misc.Tracker;
 using Flex.Misc.Utility;
 using Microsoft.ClearScript;
@@ -33,7 +34,25 @@ namespace Flex.Development.Instances
         private Properties.Material _material;
 
         [field: NonSerialized]
-        private MaterialPtr _materialPtr;
+        private MaterialPtr _baseMaterialPtr;
+
+        [field: NonSerialized]
+        private MaterialPtr _frontMaterialPtr;
+
+        [field: NonSerialized]
+        private MaterialPtr _backMaterialPtr;
+
+        [field: NonSerialized]
+        private MaterialPtr _rightMaterialPtr;
+
+        [field: NonSerialized]
+        private MaterialPtr _leftMaterialPtr;
+
+        [field: NonSerialized]
+        private MaterialPtr _topMaterialPtr;
+
+        [field: NonSerialized]
+        private MaterialPtr _bottomMaterialPtr;
 
         private Vector2 _textureScale;
 
@@ -48,6 +67,7 @@ namespace Flex.Development.Instances
             _anchored = true;
             _collisions = true;
             _material = Properties.Material.GRASS;
+
             parent = ActiveScene.Context.ActiveWorld.World;
 
             Initialize();
@@ -94,8 +114,7 @@ namespace Flex.Development.Instances
 
         protected override void LoadPhysicsInstance()
         {
-            _shape = new MogreNewt.CollisionPrimitives.Box(PhysicsEngine.World, _sceneNode.GetScale(), 0);
-            Mogre.Vector3 scale = _sceneNode.GetScale();
+            _shape = new MogreNewt.CollisionPrimitives.Box(PhysicsEngine.World, new Mogre.Vector3(_size.x, _size.y, _size.z), 0);
 
             if (_rigidBody != null)
             {
@@ -112,7 +131,7 @@ namespace Flex.Development.Instances
                 Mogre.Vector3 intertia;
                 Mogre.Vector3 offset;
                 _shape.CalculateInertialMatrix(out intertia, out offset);
-                float mass = scale.x * scale.y * scale.z;
+                float mass = _size.x * _size.y * _size.z;
                 _rigidBody.SetMassMatrix(mass, intertia);
             }
 
@@ -125,7 +144,7 @@ namespace Flex.Development.Instances
 
         private void _rigidBody_ForceCallback(Body body, float timeStep, int threadIndex)
         {
-            position.setToPhysics(body.Position.x - (size.x / 2), body.Position.y - (size.y / 2), body.Position.z - (size.z / 2));
+            position.setToPhysics(body.Position.x - (_size.x / 2), body.Position.y - (_size.y / 2), body.Position.z - (_size.z / 2));
             rotation.LoadFromMatrix(body.Orientation.ToRotationMatrix());
         }
 
@@ -190,11 +209,13 @@ namespace Flex.Development.Instances
             {
                 if (_initialized)
                 {
-                    _sceneNode.SetScale(_size.x, _size.y, _size.z);
                     _sceneNode.SetPosition(position.x + (size.x / 2), position.y + (size.y / 2), position.z + (size.z / 2));
                     _rigidBody.SetPositionOrientation(new Mogre.Vector3(position.x + (size.x / 2), position.y + (size.y / 2), position.z + (size.z / 2)), _sceneNode.Orientation);
 
                     LoadPhysicsInstance();
+
+                    LoadMaterials();
+                    ReloadVisual();
 
                     if (_showingBoundingBox)
                     {
@@ -205,8 +226,7 @@ namespace Flex.Development.Instances
                         });
                     }
 
-                    Vector2 vector = _size.GetLargestValues();
-                    _materialPtr.GetTechnique(0).GetPass(0).GetTextureUnitState(0).SetTextureScale(_textureScale.x / vector.x, _textureScale.y / vector.y);
+                    ReloadGizmo();
                 }
             });
             NotifyPropertyChanged("Size");
@@ -216,12 +236,7 @@ namespace Flex.Development.Instances
         {
             Engine.QueueForRenderDispatcher(() =>
             {
-                if (_initialized)
-                {
-                    _materialPtr.SetAmbient(new ColourValue(_color.r / 255f, _color.g / 255f, _color.b / 255f, _color.transparency / 255f));
-                    _materialPtr.SetDiffuse(_color.r / 255f, _color.g / 255f, _color.b / 255f, _color.transparency / 255f);
-                    _materialPtr.SetSpecular(_color.r / 255f, _color.g / 255f, _color.b / 255f, _color.transparency / 255f);
-                }
+                LoadMaterials();
             });
             NotifyPropertyChanged("Color");
         }
@@ -235,6 +250,8 @@ namespace Flex.Development.Instances
 
             _sceneNode.SetPosition(position.x + (size.x / 2), position.y + (size.y / 2), position.z + (size.z / 2));
             _rigidBody.SetPositionOrientation(new Mogre.Vector3(position.x + (size.x / 2), position.y + (size.y / 2), position.z + (size.z / 2)), _sceneNode.Orientation);
+
+            RotationPropertyChanged(null, new PropertyChangedEventArgs("XYZ"));
         }
 
         [ScriptMember(ScriptAccess.None)]
@@ -299,23 +316,9 @@ namespace Flex.Development.Instances
             {
                 if (_material == value) return;
                 _material = value;
-                _textureScale = _material.TextureScaling();
 
-                _materialPtr = _material.GetMaterial();
-
-                if (_initialized)
-                {
-                    _entity.SetMaterial(_materialPtr);
-
-                    _entity.GetSubEntity(0).SetMaterial(_materialPtr);
-
-                    Vector2 vector = _size.GetLargestValues();
-                    _materialPtr.GetTechnique(0).GetPass(0).GetTextureUnitState(0).SetTextureScale(_textureScale.x / vector.x, _textureScale.y / vector.y);
-
-                    _materialPtr.SetAmbient(new ColourValue(_color.r / 255f, _color.g / 255f, _color.b / 255f, _color.transparency / 255f));
-                    _materialPtr.SetDiffuse(_color.r / 255f, _color.g / 255f, _color.b / 255f, _color.transparency / 255f);
-                    _materialPtr.SetSpecular(_color.r / 255f, _color.g / 255f, _color.b / 255f, _color.transparency / 255f);
-                }
+                LoadMaterials(true);
+                ReloadVisual();
 
                 NotifyPropertyChanged("Material");
             }
@@ -417,25 +420,133 @@ namespace Flex.Development.Instances
             }
         }
 
-        protected override void InitializeVisual()
+        protected override void ReloadGizmo()
         {
-            _sceneNode = Engine.Renderer.CreateEntity(out _entity, "box.mesh", this);
-            _sceneNode.SetPosition(_position.x + (_size.x / 2), _position.y + (_size.y / 2), _position.z + (_size.z / 2));
-            _sceneNode.SetScale(_size.x, _size.y, _size.z);
+            if (_gizmoVisual != null)
+            {
+                _gizmoVisual.XA?.SetPosition((_size.x / 2) - 1, 0, 0);
+                _gizmoVisual.YA?.SetPosition(0, (_size.y / 2) - 1, 0);
+                _gizmoVisual.ZA?.SetPosition(0, 0, (_size.z / 2) - 1);
+
+                if (_gizmoVisual.IsTwoSided)
+                {
+                    _gizmoVisual.XB?.SetPosition(-(_size.x / 2) + 1, 0, 0);
+                    _gizmoVisual.YB?.SetPosition(0, -(_size.y / 2) + 1, 0);
+                    _gizmoVisual.ZB?.SetPosition(0, 0, -(_size.z / 2) + 1);
+                }
+            }
+        }
+
+        private void ReloadVisual()
+        {
+            if (_entity != null)
+            {
+                _sceneNode.DetachObject(_entity);
+            }
+            MeshPtr mesh = MeshGenerator.GenerateCube(
+                _size.x,
+                _size.y,
+                _size.z,
+                _UUID.ToString(),
+                _frontMaterialPtr,
+                _backMaterialPtr,
+                _leftMaterialPtr,
+                _rightMaterialPtr,
+                _topMaterialPtr,
+                _bottomMaterialPtr);
+
+            _entity = Engine.Renderer.CreateEntity(mesh, this);
+
+            if (_initialized)
+            {
+                _sceneNode.AttachObject(_entity);
+            }
+
+            LoadMaterials();
+        }
+
+        private void LoadMaterials(bool forceUpdate = false)
+        {
+            if (_baseMaterialPtr == null || forceUpdate)
+            {
+                _baseMaterialPtr = _material.GetMaterial().Clone(_UUID + "/DynamicMesh/" + Guid.NewGuid());
+            }
+            if (_frontMaterialPtr == null || forceUpdate)
+            {
+                _frontMaterialPtr = _baseMaterialPtr.Clone(_baseMaterialPtr.Name + "/Front");
+            }
+            if (_backMaterialPtr == null || forceUpdate)
+            {
+                _backMaterialPtr = _baseMaterialPtr.Clone(_baseMaterialPtr.Name + "/Back");
+            }
+            if (_leftMaterialPtr == null || forceUpdate)
+            {
+                _leftMaterialPtr = _baseMaterialPtr.Clone(_baseMaterialPtr.Name + "/Left");
+            }
+            if (_rightMaterialPtr == null || forceUpdate)
+            {
+                _rightMaterialPtr = _baseMaterialPtr.Clone(_baseMaterialPtr.Name + "/Right");
+            }
+            if (_topMaterialPtr == null || forceUpdate)
+            {
+                _topMaterialPtr = _baseMaterialPtr.Clone(_baseMaterialPtr.Name + "/Top");
+            }
+            if (_bottomMaterialPtr == null || forceUpdate)
+            {
+                _bottomMaterialPtr = _baseMaterialPtr.Clone(_baseMaterialPtr.Name + "/Bottom");
+            }
 
             _textureScale = _material.TextureScaling();
-            _materialPtr = _material.GetMaterial();
 
-            _entity.SetMaterial(_materialPtr);
+            _frontMaterialPtr.SetAmbient(new ColourValue(_color.r / 255f, _color.g / 255f, _color.b / 255f, _color.transparency / 255f));
+            //_frontMaterialPtr.SetDiffuse(_color.r / 255f, _color.g / 255f, _color.b / 255f, _color.transparency / 255f);
+            //_frontMaterialPtr.SetSpecular(_color.r / 255f, _color.g / 255f, _color.b / 255f, _color.transparency / 255f);
+            _frontMaterialPtr.GetTechnique(0).GetPass(0).GetTextureUnitState(0).SetTextureScale(_textureScale.x / size.x, _textureScale.y / size.y);
 
-            _entity.GetSubEntity(0).SetMaterial(_materialPtr);
+            _backMaterialPtr.SetAmbient(new ColourValue(_color.r / 255f, _color.g / 255f, _color.b / 255f, _color.transparency / 255f));
+            //_backMaterialPtr.SetDiffuse(_color.r / 255f, _color.g / 255f, _color.b / 255f, _color.transparency / 255f);
+            //_backMaterialPtr.SetSpecular(_color.r / 255f, _color.g / 255f, _color.b / 255f, _color.transparency / 255f);
+            _backMaterialPtr.GetTechnique(0).GetPass(0).GetTextureUnitState(0).SetTextureScale(_textureScale.x / size.x, _textureScale.y / size.y);
 
-            Vector2 vector = _size.GetLargestValues();
-            _materialPtr.GetTechnique(0).GetPass(0).GetTextureUnitState(0).SetTextureScale(_textureScale.x / vector.x, _textureScale.y / vector.y);
+            _leftMaterialPtr.SetAmbient(new ColourValue(_color.r / 255f, _color.g / 255f, _color.b / 255f, _color.transparency / 255f));
+            //_leftMaterialPtr.SetDiffuse(_color.r / 255f, _color.g / 255f, _color.b / 255f, _color.transparency / 255f);
+            //_leftMaterialPtr.SetSpecular(_color.r / 255f, _color.g / 255f, _color.b / 255f, _color.transparency / 255f);
+            _leftMaterialPtr.GetTechnique(0).GetPass(0).GetTextureUnitState(0).SetTextureScale(_textureScale.x / size.y, _textureScale.y / size.z);
 
-            _materialPtr.SetAmbient(new ColourValue(_color.r / 255f, _color.g / 255f, _color.b / 255f, _color.transparency / 255f));
-            _materialPtr.SetDiffuse(_color.r / 255f, _color.g / 255f, _color.b / 255f, _color.transparency / 255f);
-            _materialPtr.SetSpecular(_color.r / 255f, _color.g / 255f, _color.b / 255f, _color.transparency / 255f);
+            _rightMaterialPtr.SetAmbient(new ColourValue(_color.r / 255f, _color.g / 255f, _color.b / 255f, _color.transparency / 255f));
+            //_rightMaterialPtr.SetDiffuse(_color.r / 255f, _color.g / 255f, _color.b / 255f, _color.transparency / 255f);
+            //_rightMaterialPtr.SetSpecular(_color.r / 255f, _color.g / 255f, _color.b / 255f, _color.transparency / 255f);
+            _rightMaterialPtr.GetTechnique(0).GetPass(0).GetTextureUnitState(0).SetTextureScale(_textureScale.x / size.y, _textureScale.y / size.z);
+
+            _topMaterialPtr.SetAmbient(new ColourValue(_color.r / 255f, _color.g / 255f, _color.b / 255f, _color.transparency / 255f));
+            //_topMaterialPtr.SetDiffuse(_color.r / 255f, _color.g / 255f, _color.b / 255f, _color.transparency / 255f);
+            //_topMaterialPtr.SetSpecular(_color.r / 255f, _color.g / 255f, _color.b / 255f, _color.transparency / 255f);
+            _topMaterialPtr.GetTechnique(0).GetPass(0).GetTextureUnitState(0).SetTextureScale(_textureScale.x / size.x, _textureScale.y / size.z);
+
+            _bottomMaterialPtr.SetAmbient(new ColourValue(_color.r / 255f, _color.g / 255f, _color.b / 255f, _color.transparency / 255f));
+            //_bottomMaterialPtr.SetDiffuse(_color.r / 255f, _color.g / 255f, _color.b / 255f, _color.transparency / 255f);
+            //_bottomMaterialPtr.SetSpecular(_color.r / 255f, _color.g / 255f, _color.b / 255f, _color.transparency / 255f);
+            _bottomMaterialPtr.GetTechnique(0).GetPass(0).GetTextureUnitState(0).SetTextureScale(_textureScale.x / size.x, _textureScale.y / size.z);
+        }
+
+        protected override void InitializeVisual()
+        {
+            LoadMaterials();
+
+            MeshPtr mesh = MeshGenerator.GenerateCube(
+                _size.x,
+                _size.y,
+                _size.z,
+                _UUID.ToString(),
+                _frontMaterialPtr,
+                _backMaterialPtr,
+                _leftMaterialPtr,
+                _rightMaterialPtr,
+                _topMaterialPtr,
+                _bottomMaterialPtr);
+
+            _sceneNode = Engine.Renderer.CreateEntity(out _entity, mesh, this);
+            _sceneNode.SetPosition(position.x + (size.x / 2), position.y + (size.y / 2), position.z + (size.z / 2));
         }
     }
 }

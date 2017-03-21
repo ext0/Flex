@@ -90,36 +90,36 @@ namespace Flex.Development.Instances.Properties
     {
         public static MaterialPtr GetMaterial(this Material material)
         {
-            Random random = new Random();
             switch (material)
             {
                 case Material.GRASS:
-                    return ((MaterialPtr)MaterialManager.Singleton.GetByName("Part/Grass")).Clone("RuntimeMaterial/" + random.Next());
+                    return ((MaterialPtr)MaterialManager.Singleton.GetByName("Part/Grass"));
                 case Material.WOOD_PLANKS:
-                    return ((MaterialPtr)MaterialManager.Singleton.GetByName("Part/WoodPlanks")).Clone("RuntimeMaterial/" + random.Next());
+                    return ((MaterialPtr)MaterialManager.Singleton.GetByName("Part/WoodPlanks"));
                 case Material.DIRT:
-                    return ((MaterialPtr)MaterialManager.Singleton.GetByName("Part/Dirt")).Clone("RuntimeMaterial/" + random.Next());
+                    return ((MaterialPtr)MaterialManager.Singleton.GetByName("Part/Dirt"));
                 case Material.CONCRETE:
-                    return ((MaterialPtr)MaterialManager.Singleton.GetByName("Part/Concrete")).Clone("RuntimeMaterial/" + random.Next());
+                    return ((MaterialPtr)MaterialManager.Singleton.GetByName("Part/Concrete"));
                 case Material.METAL:
-                    return ((MaterialPtr)MaterialManager.Singleton.GetByName("Part/Metal")).Clone("RuntimeMaterial/" + random.Next());
+                    return ((MaterialPtr)MaterialManager.Singleton.GetByName("Part/Metal"));
                 case Material.ROCK:
-                    return ((MaterialPtr)MaterialManager.Singleton.GetByName("Part/Rock")).Clone("RuntimeMaterial/" + random.Next());
+                    return ((MaterialPtr)MaterialManager.Singleton.GetByName("Part/Rock"));
                 case Material.WATER:
-                    return ((MaterialPtr)MaterialManager.Singleton.GetByName("Part/Water")).Clone("RuntimeMaterial/" + random.Next());
+                    return ((MaterialPtr)MaterialManager.Singleton.GetByName("Part/Water"));
                 case Material.BRICKS:
-                    return ((MaterialPtr)MaterialManager.Singleton.GetByName("Part/Bricks")).Clone("RuntimeMaterial/" + random.Next());
+                    return ((MaterialPtr)MaterialManager.Singleton.GetByName("Part/Bricks"));
                 case Material.SAND:
-                    return ((MaterialPtr)MaterialManager.Singleton.GetByName("Part/Sand")).Clone("RuntimeMaterial/" + random.Next());
+                    return ((MaterialPtr)MaterialManager.Singleton.GetByName("Part/Sand"));
                 case Material.COBBLESTONE:
-                    return ((MaterialPtr)MaterialManager.Singleton.GetByName("Part/Cobblestone")).Clone("RuntimeMaterial/" + random.Next());
+                    return ((MaterialPtr)MaterialManager.Singleton.GetByName("Part/Cobblestone"));
                 case Material.CORRODED_METAL:
-                    return ((MaterialPtr)MaterialManager.Singleton.GetByName("Part/CorrodedMetal")).Clone("RuntimeMaterial/" + random.Next());
+                    return ((MaterialPtr)MaterialManager.Singleton.GetByName("Part/CorrodedMetal"));
                 case Material.ICE:
-                    return ((MaterialPtr)MaterialManager.Singleton.GetByName("Part/Ice")).Clone("RuntimeMaterial/" + random.Next());
+                    return ((MaterialPtr)MaterialManager.Singleton.GetByName("Part/Ice"));
                 case Material.PLAIN:
+                    return ((MaterialPtr)MaterialManager.Singleton.GetByName("Part/Plain"));
                 default:
-                    return ((MaterialPtr)MaterialManager.Singleton.GetByName("Part/Plain")).Clone("RuntimeMaterial/" + random.Next());
+                    return ((MaterialPtr)MaterialManager.Singleton.GetByName("Part/Placeholder"));
             }
         }
 
@@ -134,7 +134,7 @@ namespace Flex.Development.Instances.Properties
                 case Material.DIRT:
                     return new Vector2(16, 16);
                 case Material.CONCRETE:
-                    return new Vector2(16, 16);
+                    return new Vector2(8, 8);
                 case Material.METAL:
                     return new Vector2(16, 16);
                 case Material.ROCK:

@@ -37,11 +37,11 @@ namespace Flex.Development.Instances
             _instances = new UISafeObservableCollection<Instance>();
             _allowedChildren = new List<Type>();
             _isRoot = true;
-            _ambient = new ColorProperty(219, 219, 219, 255);
+            _ambient = new ColorProperty(220, 220, 220, 255);
             _shadowColor = new ColorProperty(140, 140, 140, 255);
-            _diffuseColor = new ColorProperty(20, 20, 20);
+            _diffuseColor = new ColorProperty(0, 0, 0);
             _specularColor = new ColorProperty(0, 0, 0);
-            _sunDirection = new Properties.Vector3(0.02f, -.94f, -.74f);
+            _sunDirection = new Properties.Vector3(0.02f, -.94f, -.03f);
             _sunDirection.PropertyChanged += SunDirectionPropertyChanged;
 
             Initialize();
