@@ -430,13 +430,21 @@ namespace Flex.Development.Rendering.Modules
                     PositionedInstance oldInstance = Engine.SceneNodeStore.GetInstance(node);
                     if (oldInstance != null)
                     {
-                        oldInstance.IsSelected = false;
-                        oldInstance.IsBoundingBoxEnabled = false;
+                        SizedInstance oldSized = oldInstance as SizedInstance;
+                        if (oldSized != null)
+                        {
+                            oldSized.IsSelected = false;
+                            oldSized.IsBoundingBoxEnabled = false;
+                        }
                         oldInstance.RemoveGizmoVisual();
                         ClearSelectedNode();
                     }
-                    instance.IsBoundingBoxEnabled = true;
-                    instance.IsSelected = true;
+                    SizedInstance sized = instance as SizedInstance;
+                    if (sized != null)
+                    {
+                        sized.IsBoundingBoxEnabled = true;
+                        sized.IsSelected = true;
+                    }
                     SetSelectedNode(newNode);
 
                     instance.SetGizmoVisual(new GizmoVisual(_gizmoNode));
@@ -444,8 +452,13 @@ namespace Flex.Development.Rendering.Modules
             }
             else
             {
-                instance.IsBoundingBoxEnabled = true;
-                instance.IsSelected = true;
+                SizedInstance sized = instance as SizedInstance;
+                if (sized != null)
+                {
+                    sized.IsBoundingBoxEnabled = true;
+                    sized.IsSelected = true;
+                }
+
                 SetSelectedNode(newNode);
 
                 instance.SetGizmoVisual(new GizmoVisual(_gizmoNode));
@@ -461,7 +474,12 @@ namespace Flex.Development.Rendering.Modules
                     PositionedInstance instance = Engine.SceneNodeStore.GetInstance(newNode);
                     if (instance != null)
                     {
-                        instance.IsBoundingBoxEnabled = true;
+                        SizedInstance sized = instance as SizedInstance;
+                        if (sized != null)
+                        {
+                            sized.IsBoundingBoxEnabled = true;
+                        }
+
                         MarkAsHovered(newNode);
                     }
                 }
@@ -547,7 +565,7 @@ namespace Flex.Development.Rendering.Modules
 
                     if (itr != null)
                     {
-                        if (itr.MoveNext())
+                        while (itr.MoveNext())
                         {
                             RaySceneQueryResultEntry entry = itr.Current;
                             SceneNode parentNode = entry.movable.ParentSceneNode;
@@ -564,26 +582,28 @@ namespace Flex.Development.Rendering.Modules
                                 ActiveScene.SelectedInstance = instance;
 
                                 SetActiveSelectedNode(parentNode);
+                                return;
                             }
                         }
-                        else
+                        SceneNode node;
+                        if (ExistsSelectedNode(out node))
                         {
-                            SceneNode node;
-                            if (ExistsSelectedNode(out node))
+                            PositionedInstance oldInstance = Engine.SceneNodeStore.GetInstance(node);
+                            if (oldInstance != null)
                             {
-                                PositionedInstance oldInstance = Engine.SceneNodeStore.GetInstance(node);
-                                if (oldInstance != null)
+                                SizedInstance oldSized = oldInstance as SizedInstance;
+                                if (oldSized != null)
                                 {
-                                    oldInstance.IsSelected = false;
-                                    oldInstance.IsBoundingBoxEnabled = false;
+                                    oldSized.IsSelected = false;
+                                    oldSized.IsBoundingBoxEnabled = false;
                                 }
-
-                                ActiveScene.SelectedInstance = null;
-
-                                oldInstance.RemoveGizmoVisual();
-
-                                ClearSelectedNode();
                             }
+
+                            ActiveScene.SelectedInstance = null;
+
+                            oldInstance.RemoveGizmoVisual();
+
+                            ClearSelectedNode();
                         }
                     }
                 }
@@ -598,8 +618,15 @@ namespace Flex.Development.Rendering.Modules
             Ray mouseRay = Engine.Renderer.Camera.GetCameraToViewportRay((float)((x - 1) / width), (float)((y - 1) / height));
 
             RaySceneQuery mRaySceneQuery = Engine.Renderer.Scene.CreateRayQuery(mouseRay);
+            mRaySceneQuery.QueryTypeMask =
+                SceneManager.ENTITY_TYPE_MASK |
+                SceneManager.STATICGEOMETRY_TYPE_MASK |
+                SceneManager.USER_TYPE_MASK_LIMIT |
+                SceneManager.FRUSTUM_TYPE_MASK |
+                SceneManager.FX_TYPE_MASK |
+                SceneManager.LIGHT_TYPE_MASK |
+                SceneManager.WORLD_GEOMETRY_TYPE_MASK;
             mRaySceneQuery.SetSortByDistance(true, 16);
-            mRaySceneQuery.QueryTypeMask = SceneManager.ENTITY_TYPE_MASK;
 
             RaySceneQueryResult result = mRaySceneQuery.Execute();
             RaySceneQueryResult.Enumerator itr = (RaySceneQueryResult.Enumerator)(result.GetEnumerator());
@@ -625,8 +652,14 @@ namespace Flex.Development.Rendering.Modules
 
             mRaySceneQuery.SetSortByDistance(true, 16);
             mRaySceneQuery.QueryMask = (uint)QueryFlags.INSTANCE_ENTITY;
-            //mRaySceneQuery.QueryTypeMask = SceneManager.ENTITY_TYPE_MASK;
-
+            mRaySceneQuery.QueryTypeMask =
+                SceneManager.ENTITY_TYPE_MASK |
+                SceneManager.STATICGEOMETRY_TYPE_MASK |
+                SceneManager.USER_TYPE_MASK_LIMIT |
+                SceneManager.FRUSTUM_TYPE_MASK |
+                SceneManager.FX_TYPE_MASK |
+                SceneManager.LIGHT_TYPE_MASK |
+                SceneManager.WORLD_GEOMETRY_TYPE_MASK;
 
             RaySceneQueryResult result = mRaySceneQuery.Execute();
 
@@ -874,6 +907,12 @@ namespace Flex.Development.Rendering.Modules
                     while (itr.MoveNext())
                     {
                         RaySceneQueryResultEntry entry = itr.Current;
+
+                        if (entry.movable.QueryFlags != (uint)QueryFlags.IGNORE_ALL)
+                        {
+                            nothing = false;
+                        }
+
                         if (entry.movable.QueryFlags == (uint)QueryFlags.INSTANCE_ENTITY)
                         {
                             SceneNode parentNode = entry.movable.ParentSceneNode;
@@ -896,7 +935,11 @@ namespace Flex.Development.Rendering.Modules
                                             PositionedInstance oldInstance = Engine.SceneNodeStore.GetInstance(node);
                                             if (oldInstance != null)
                                             {
-                                                oldInstance.IsBoundingBoxEnabled = false;
+                                                SizedInstance oldSized = oldInstance as SizedInstance;
+                                                if (oldSized != null)
+                                                {
+                                                    oldSized.IsBoundingBoxEnabled = false;
+                                                }
                                             }
                                         }
                                     }
@@ -904,8 +947,8 @@ namespace Flex.Development.Rendering.Modules
                                 }
                                 AddToHoverNode(parentNode);
                             }
+                            break;
                         }
-                        nothing = false;
                     }
                     if (nothing)
                     {
@@ -923,7 +966,11 @@ namespace Flex.Development.Rendering.Modules
                                     PositionedInstance oldInstance = Engine.SceneNodeStore.GetInstance(node);
                                     if (oldInstance != null)
                                     {
-                                        oldInstance.IsBoundingBoxEnabled = false;
+                                        SizedInstance oldSized = oldInstance as SizedInstance;
+                                        if (oldSized != null)
+                                        {
+                                            oldSized.IsBoundingBoxEnabled = false;
+                                        }
                                     }
                                 }
                             }

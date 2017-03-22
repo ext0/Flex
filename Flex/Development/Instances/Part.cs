@@ -5,6 +5,7 @@ using Flex.Development.Instances.Properties;
 using Flex.Development.Physics;
 using Flex.Development.Rendering;
 using Flex.Development.Rendering.Manual;
+using Flex.Development.Rendering.Modules;
 using Flex.Misc.Tracker;
 using Flex.Misc.Utility;
 using Microsoft.ClearScript;
@@ -54,6 +55,7 @@ namespace Flex.Development.Instances
         [field: NonSerialized]
         private MaterialPtr _bottomMaterialPtr;
 
+        [field: NonSerialized]
         private Vector2 _textureScale;
 
         public Part() : base()
@@ -137,13 +139,19 @@ namespace Flex.Development.Instances
 
             _rigidBody.IsFreezed = anchored;
 
-            _rigidBody.IsGravityEnabled = true;
+            //_rigidBody.IsGravityEnabled = true;
 
             _rigidBody.ForceCallback += _rigidBody_ForceCallback;
         }
 
         private void _rigidBody_ForceCallback(Body body, float timeStep, int threadIndex)
         {
+            _rigidBody.AddForce(
+                new Mogre.Vector3(
+                    0,
+                    -9.8f * (_size.x * _size.y * _size.z) * 10f,
+                    0));
+
             position.setToPhysics(body.Position.x - (_size.x / 2), body.Position.y - (_size.y / 2), body.Position.z - (_size.z / 2));
             rotation.LoadFromMatrix(body.Orientation.ToRotationMatrix());
         }
@@ -166,8 +174,7 @@ namespace Flex.Development.Instances
                     {
                         Engine.QueueForNextRenderDispatcher(() =>
                         {
-                            AxisAlignedBox box = _entity.GetWorldBoundingBox();
-                            _wireBoundingBox.SetupBoundingBox(box);
+
                         });
                     }
                 }
@@ -194,8 +201,7 @@ namespace Flex.Development.Instances
                     {
                         Engine.QueueForNextRenderDispatcher(() =>
                         {
-                            AxisAlignedBox box = _entity.GetWorldBoundingBox();
-                            _wireBoundingBox.SetupBoundingBox(box);
+
                         });
                     }
                 }
@@ -221,8 +227,7 @@ namespace Flex.Development.Instances
                     {
                         Engine.QueueForNextRenderDispatcher(() =>
                         {
-                            AxisAlignedBox box = _entity.GetWorldBoundingBox();
-                            _wireBoundingBox.SetupBoundingBox(box);
+                            UpdateBoundingBox();
                         });
                     }
 
@@ -317,8 +322,11 @@ namespace Flex.Development.Instances
                 if (_material == value) return;
                 _material = value;
 
-                LoadMaterials(true);
-                ReloadVisual();
+                Engine.QueueForRenderDispatcher(() =>
+                {
+                    LoadMaterials(true);
+                    ReloadVisual();
+                });
 
                 NotifyPropertyChanged("Material");
             }
@@ -382,7 +390,7 @@ namespace Flex.Development.Instances
                 _position.PropertyChanged -= PositionPropertyChanged;
                 _position = value;
                 _position.PropertyChanged += PositionPropertyChanged;
-                PositionPropertyChanged(this, null);
+                PositionPropertyChanged(this, new PropertyChangedEventArgs("Position"));
             }
         }
 
@@ -399,7 +407,7 @@ namespace Flex.Development.Instances
                 _rotation.PropertyChanged -= RotationPropertyChanged;
                 _rotation = value;
                 _rotation.PropertyChanged += RotationPropertyChanged;
-                RotationPropertyChanged(this, null);
+                RotationPropertyChanged(this, new PropertyChangedEventArgs("Rotation"));
             }
         }
 
@@ -416,7 +424,7 @@ namespace Flex.Development.Instances
                 _size.PropertyChanged -= SizePropertyChanged;
                 _size = value;
                 _size.PropertyChanged += SizePropertyChanged;
-                SizePropertyChanged(this, null);
+                SizePropertyChanged(this, new PropertyChangedEventArgs("Size"));
             }
         }
 
@@ -424,43 +432,35 @@ namespace Flex.Development.Instances
         {
             if (_gizmoVisual != null)
             {
-                _gizmoVisual.XA?.SetPosition((_size.x / 2) - 1, 0, 0);
-                _gizmoVisual.YA?.SetPosition(0, (_size.y / 2) - 1, 0);
-                _gizmoVisual.ZA?.SetPosition(0, 0, (_size.z / 2) - 1);
+                AxisAlignedBox bounding = _movableObject.BoundingBox;
+
+                _gizmoVisual.XA?.SetPosition((bounding.Size.x / 2) - 1, 0, 0);
+                _gizmoVisual.YA?.SetPosition(0, (bounding.Size.y / 2) - 1, 0);
+                _gizmoVisual.ZA?.SetPosition(0, 0, (bounding.Size.z / 2) - 1);
 
                 if (_gizmoVisual.IsTwoSided)
                 {
-                    _gizmoVisual.XB?.SetPosition(-(_size.x / 2) + 1, 0, 0);
-                    _gizmoVisual.YB?.SetPosition(0, -(_size.y / 2) + 1, 0);
-                    _gizmoVisual.ZB?.SetPosition(0, 0, -(_size.z / 2) + 1);
+                    _gizmoVisual.XB?.SetPosition(-(bounding.Size.x / 2) + 1, 0, 0);
+                    _gizmoVisual.YB?.SetPosition(0, -(bounding.Size.y / 2) + 1, 0);
+                    _gizmoVisual.ZB?.SetPosition(0, 0, -(bounding.Size.z / 2) + 1);
                 }
             }
         }
 
         private void ReloadVisual()
         {
-            if (_entity != null)
-            {
-                _sceneNode.DetachObject(_entity);
-            }
-            MeshPtr mesh = MeshGenerator.GenerateCube(
+            MeshGenerator.UpdateCube(
+                (ManualObject)_movableObject,
                 _size.x,
                 _size.y,
                 _size.z,
-                _UUID.ToString(),
                 _frontMaterialPtr,
                 _backMaterialPtr,
                 _leftMaterialPtr,
                 _rightMaterialPtr,
                 _topMaterialPtr,
-                _bottomMaterialPtr);
-
-            _entity = Engine.Renderer.CreateEntity(mesh, this);
-
-            if (_initialized)
-            {
-                _sceneNode.AttachObject(_entity);
-            }
+                _bottomMaterialPtr,
+                Face.BACK | Face.BOTTOM | Face.FRONT | Face.LEFT | Face.RIGHT | Face.TOP);
 
             LoadMaterials();
         }
@@ -533,7 +533,7 @@ namespace Flex.Development.Instances
         {
             LoadMaterials();
 
-            MeshPtr mesh = MeshGenerator.GenerateCube(
+            _movableObject = MeshGenerator.GenerateCube(
                 _size.x,
                 _size.y,
                 _size.z,
@@ -545,7 +545,11 @@ namespace Flex.Development.Instances
                 _topMaterialPtr,
                 _bottomMaterialPtr);
 
-            _sceneNode = Engine.Renderer.CreateEntity(out _entity, mesh, this);
+            _movableObject.QueryFlags = (uint)QueryFlags.INSTANCE_ENTITY;
+            _movableObject.CastShadows = true;
+
+            _sceneNode = Engine.Renderer.CreateSceneNode(this);
+
             _sceneNode.SetPosition(position.x + (size.x / 2), position.y + (size.y / 2), position.z + (size.z / 2));
         }
     }

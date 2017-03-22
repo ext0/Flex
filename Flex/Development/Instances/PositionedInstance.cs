@@ -25,22 +25,10 @@ namespace Flex.Development.Instances
         protected SceneNode _sceneNode;
 
         [NonSerialized()]
-        protected SceneNode _boundingBox;
-
-        [NonSerialized()]
-        protected Entity _entity;
+        protected MovableObject _movableObject;
 
         [NonSerialized()]
         protected GizmoVisual _gizmoVisual;
-
-        [NonSerialized()]
-        protected WireBoundingBox _wireBoundingBox;
-
-        [NonSerialized()]
-        protected bool _showingBoundingBox;
-
-        [NonSerialized()]
-        private bool _isSelected;
 
         [NonSerialized()]
         private bool _visualizedFlag;
@@ -51,12 +39,7 @@ namespace Flex.Development.Instances
 
         protected PositionedInstance() : base()
         {
-            Engine.QueueForRenderDispatcher(() =>
-            {
-                _wireBoundingBox = new WireBoundingBox();
-                _showingBoundingBox = false;
-                _isSelected = false;
-            });
+
         }
 
         public void SetGizmoVisual(GizmoVisual visual)
@@ -75,99 +58,6 @@ namespace Flex.Development.Instances
             _gizmoVisual = null;
         }
 
-        private void SetSelected()
-        {
-            if (!_showingBoundingBox)
-            {
-                return;
-            }
-            _wireBoundingBox.SetMaterial("BoundingBox/BlueDark");
-        }
-
-        private void SetHover()
-        {
-            if (!_showingBoundingBox)
-            {
-                return;
-            }
-            _wireBoundingBox.SetMaterial("BoundingBox/BlueLight");
-        }
-
-        [Browsable(false)]
-        public bool IsSelected
-        {
-            get
-            {
-                return _isSelected;
-            }
-            set
-            {
-                if (value == _isSelected) return;
-
-                if (value)
-                {
-                    SetSelected();
-                }
-                else
-                {
-                    SetHover();
-                }
-
-                _isSelected = value;
-            }
-        }
-
-        [Browsable(false)]
-        public bool IsBoundingBoxEnabled
-        {
-            get
-            {
-                return _showingBoundingBox;
-            }
-            set
-            {
-                if (value == _showingBoundingBox) return;
-
-                if (value)
-                {
-                    ShowBoundingBox();
-                }
-                else
-                {
-                    HideBoundingBox();
-                }
-                _showingBoundingBox = value;
-
-            }
-        }
-
-        private void ShowBoundingBox()
-        {
-            if (_showingBoundingBox || _wireBoundingBox == null || _entity == null)
-            {
-                return;
-            }
-            _wireBoundingBox.SetupBoundingBox(_entity.GetWorldBoundingBox());
-            _boundingBox = Engine.Renderer.Scene.CreateSceneNode();
-            _boundingBox.AttachObject(_wireBoundingBox);
-            _sceneNode.AddChild(_boundingBox);
-            _showingBoundingBox = true;
-            _visualizedFlag = true;
-            SetHover();
-        }
-
-        private void HideBoundingBox()
-        {
-            if (!_showingBoundingBox || _wireBoundingBox == null || _entity == null || _boundingBox == null)
-            {
-                return;
-            }
-            _boundingBox.RemoveAndDestroyAllChildren();
-            Engine.Renderer.Scene.DestroySceneNode(_boundingBox);
-            _wireBoundingBox.DetachFromParent();
-            _showingBoundingBox = false;
-        }
-
         [Browsable(false)]
         public SceneNode SceneNode
         {
@@ -178,11 +68,11 @@ namespace Flex.Development.Instances
         }
 
         [Browsable(false)]
-        public Entity Entity
+        public MovableObject MovableObject
         {
             get
             {
-                return _entity;
+                return _movableObject;
             }
         }
 

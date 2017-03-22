@@ -195,6 +195,7 @@
     <Compile Include="Development\Execution\Data\Data\InstancePair.cs" />
     <Compile Include="Development\Execution\Data\KeyAction.cs" />
     <Compile Include="Development\Instances\Properties\Material.cs" />
+    <Compile Include="Development\Rendering\Manual\Face.cs" />
     <Compile Include="Development\Rendering\Modules\Enum\RenderEnums.cs" />
     <Compile Include="Development\Rendering\Modules\GizmoVisual.cs" />
     <Compile Include="Development\Rendering\Manual\MeshGenerator.cs" />

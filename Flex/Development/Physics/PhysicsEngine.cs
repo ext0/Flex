@@ -20,7 +20,7 @@ namespace Flex.Development.Physics
         static PhysicsEngine()
         {
             _physicsWorld = new MogreNewt.World();
-            _physicsWorld.SetThreadCount(4);
+            _physicsWorld.SetThreadCount(1);
             _physicsWorld.SetWorldSize(new Vector3(float.MinValue), new Vector3(float.MaxValue));
         }
 
@@ -36,7 +36,7 @@ namespace Flex.Development.Physics
         {
             if (ActiveScene.Running)
             {
-                _physicsWorld.Update(1f);
+                _physicsWorld.Update(1 / 60f);
             }
         }
     }

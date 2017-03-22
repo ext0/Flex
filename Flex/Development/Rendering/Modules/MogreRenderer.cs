@@ -104,19 +104,16 @@ namespace Flex.Development.Rendering.Modules
             }
         }
 
-        public SceneNode CreateEntity(out Entity entity, MeshPtr mesh, PositionedInstance instance)
+        public SceneNode CreateSceneNode(PositionedInstance instance)
         {
-            entity = _scene.CreateEntity(mesh.Name);
-            entity.CastShadows = true;
-            entity.QueryFlags = (uint)QueryFlags.INSTANCE_ENTITY;
             SceneNode node = _scene.CreateSceneNode();
-            node.AttachObject(entity);
+            node.AttachObject(instance.MovableObject);
             _scene.RootSceneNode.AddChild(node);
             Engine.SceneNodeStore.AddSceneNode(node, instance);
             return node;
         }
 
-        public Entity CreateEntity(MeshPtr mesh, PositionedInstance instance)
+        public Entity CreateEntity(MeshPtr mesh)
         {
             Entity entity = _scene.CreateEntity(mesh.Name);
             entity.CastShadows = true;
@@ -160,7 +157,7 @@ namespace Flex.Development.Rendering.Modules
                 return;
             }
             _root.RenderSystem._setViewport(_viewCamera.Viewport);
-            _root.RenderSystem.ClearFrameBuffer((uint)FrameBufferType.FBT_COLOUR | (uint)FrameBufferType.FBT_DEPTH | (uint)FrameBufferType.FBT_STENCIL);
+            _root.RenderSystem.ClearFrameBuffer((uint)FrameBufferType.FBT_COLOUR | (uint)FrameBufferType.FBT_DEPTH);
 
             _scene._renderScene(_viewCamera, _viewCamera.Viewport, true);
             _renderWindow.SwapBuffers(true);

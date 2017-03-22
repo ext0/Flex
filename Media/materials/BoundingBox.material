@@ -1,26 +1,10 @@
-material BoundingBox/BlueLight
+material BoundingBox/Blue
 {
 	technique
 	{
 		pass
 		{
-			ambient 0.345 0.592 1
-			diffuse 0.345 0.592 1
-			emissive 0.345 0.592 1
-		}
-	}
-}
 
-material BoundingBox/BlueDark
-{
-	technique
-	{
-		pass
-		{
-			ambient 0.145 0.292 1
-			diffuse 0.145 0.292 1
-			emissive 0.145 0.292 1
-			depth_bias 1000
 		}
 	}
 }

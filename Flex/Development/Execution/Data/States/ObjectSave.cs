@@ -65,14 +65,21 @@ namespace Flex.Development.Execution.Data.States
                             continue;
                         }
                         ScriptMemberAttribute scriptMemberAttribute = property.GetCustomAttribute<ScriptMemberAttribute>();
-                        if (!property.CanWrite || (scriptMemberAttribute != null && scriptMemberAttribute.Access.HasFlag(ScriptAccess.None | ScriptAccess.ReadOnly)))
+                        if (!property.CanWrite || (scriptMemberAttribute != null && (scriptMemberAttribute.Access.HasFlag(ScriptAccess.None) || scriptMemberAttribute.Access.HasFlag(ScriptAccess.ReadOnly))))
                         {
                             continue;
                         }
-                        Object oldValue = property.GetValue(_old);
-                        Object newValue = property.GetValue(_current);
-                        ObjectSave save = new ObjectSave(oldValue, newValue, property.PropertyType, property, _old);
-                        save.Reset();
+                        try
+                        {
+                            Object oldValue = property.GetValue(_old);
+                            Object newValue = property.GetValue(_current);
+                            ObjectSave save = new ObjectSave(oldValue, newValue, property.PropertyType, property, _old);
+                            save.Reset();
+                        }
+                        catch (TargetParameterCountException)
+                        {
+
+                        }
                     }
                 }
             }

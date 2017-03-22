@@ -25,13 +25,10 @@ namespace Flex.Development.Execution.Runtime
 
         private IOutput _output;
 
-        private List<CancellationTokenSource> _childrenThreads;
-
         public EngineJS()
         {
             _output = IoC.Get<IOutput>();
             _engine = new V8ScriptEngine(V8ScriptEngineFlags.None);
-            _childrenThreads = new List<CancellationTokenSource>();
         }
 
         private void print(dynamic obj)
@@ -48,39 +45,42 @@ namespace Flex.Development.Execution.Runtime
 
         private void delay(dynamic obj, double time)
         {
-            CancellationTokenSource token = new CancellationTokenSource();
-
-            lock (_childrenThreads)
-            {
-                _childrenThreads.Add(token);
-            }
-
             Thread thread = new Thread(new ThreadStart(() =>
             {
-                Thread currentThread = Thread.CurrentThread;
-                using (token.Token.Register(currentThread.Abort))
+                try
                 {
-                    try
+                    if (ActiveScene.Running)
                     {
                         Thread.Sleep((int)(time * 1000d));
+                    }
+                    else
+                    {
+                        return;
+                    }
+                    if (ActiveScene.Running)
+                    {
                         obj();
                     }
-                    catch (ThreadAbortException)
+                    else
                     {
-                        //Ignore
+                        return;
                     }
-                    catch (ScriptEngineException e)
-                    {
-                        _output.AppendLine(e.ErrorDetails);
-                    }
-                    catch (RuntimeBinderException e)
-                    {
-                        _output.AppendLine("[external error] " + e.Message);
-                    }
-                    catch (Exception e)
-                    {
-                        _output.AppendLine("[external error] " + e.Message);
-                    }
+                }
+                catch (ThreadAbortException)
+                {
+
+                }
+                catch (ScriptEngineException e)
+                {
+                    _output.AppendLine(e.ErrorDetails);
+                }
+                catch (RuntimeBinderException e)
+                {
+                    _output.AppendLine("[external error] " + e.Message);
+                }
+                catch (Exception e)
+                {
+                    _output.AppendLine("[external error] " + e.Message);
                 }
             }));
             thread.Start();
@@ -88,38 +88,30 @@ namespace Flex.Development.Execution.Runtime
 
         private void spawn(dynamic obj)
         {
-            CancellationTokenSource token = new CancellationTokenSource();
-
-            lock (_childrenThreads)
-            {
-                _childrenThreads.Add(token);
-            }
-
             Thread thread = new Thread(new ThreadStart(() =>
             {
-                Thread currentThread = Thread.CurrentThread;
-                using (token.Token.Register(currentThread.Abort))
+                try
                 {
-                    try
+                    if (ActiveScene.Running)
                     {
                         obj();
                     }
-                    catch (ThreadAbortException)
-                    {
-                        //Ignore
-                    }
-                    catch (ScriptEngineException e)
-                    {
-                        _output.AppendLine(e.ErrorDetails);
-                    }
-                    catch (RuntimeBinderException e)
-                    {
-                        _output.AppendLine("[external error] " + e.Message);
-                    }
-                    catch (Exception e)
-                    {
-                        _output.AppendLine("[external error] " + e.Message);
-                    }
+                }
+                catch (ThreadAbortException)
+                {
+
+                }
+                catch (ScriptEngineException e)
+                {
+                    _output.AppendLine(e.ErrorDetails);
+                }
+                catch (RuntimeBinderException e)
+                {
+                    _output.AppendLine("[external error] " + e.Message);
+                }
+                catch (Exception e)
+                {
+                    _output.AppendLine("[external error] " + e.Message);
                 }
             }));
             thread.Start();
@@ -127,38 +119,41 @@ namespace Flex.Development.Execution.Runtime
 
         private void loop(dynamic obj, double interval)
         {
-            CancellationTokenSource token = new CancellationTokenSource();
-
-            lock (_childrenThreads)
-            {
-                _childrenThreads.Add(token);
-            }
-
             Thread thread = new Thread(new ThreadStart(() =>
             {
-                Thread currentThread = Thread.CurrentThread;
-                using (token.Token.Register(currentThread.Abort))
+                try
                 {
-                    try
+                    while (true)
                     {
-                        while (true)
+                        if (ActiveScene.Running)
                         {
                             obj();
+                        }
+                        else
+                        {
+                            break;
+                        }
+                        if (ActiveScene.Running)
+                        {
                             Thread.Sleep((int)(interval * 1000d));
                         }
+                        else
+                        {
+                            break;
+                        }
                     }
-                    catch (ThreadAbortException)
-                    {
-                        //Ignore
-                    }
-                    catch (ScriptEngineException e)
-                    {
-                        _output.AppendLine(e.ErrorDetails);
-                    }
-                    catch (Exception e)
-                    {
-                        _output.AppendLine("[external error] " + e.Message);
-                    }
+                }
+                catch (ThreadAbortException)
+                {
+
+                }
+                catch (ScriptEngineException e)
+                {
+                    _output.AppendLine(e.ErrorDetails);
+                }
+                catch (Exception e)
+                {
+                    _output.AppendLine("[external error] " + e.Message);
                 }
             }));
             thread.Start();
@@ -166,38 +161,41 @@ namespace Flex.Development.Execution.Runtime
 
         private void forLoop(dynamic obj, int max, double interval)
         {
-            CancellationTokenSource token = new CancellationTokenSource();
-
-            lock (_childrenThreads)
-            {
-                _childrenThreads.Add(token);
-            }
-
             Thread thread = new Thread(new ThreadStart(() =>
             {
-                Thread currentThread = Thread.CurrentThread;
-                using (token.Token.Register(currentThread.Abort))
+                try
                 {
-                    try
+                    for (int i = 0; i < max; i++)
                     {
-                        for (int i = 0; i < max; i++)
+                        if (ActiveScene.Running)
                         {
                             obj(i);
+                        }
+                        else
+                        {
+                            break;
+                        }
+                        if (ActiveScene.Running)
+                        {
                             Thread.Sleep((int)(interval * 1000d));
                         }
+                        else
+                        {
+                            break;
+                        }
                     }
-                    catch (ThreadAbortException)
-                    {
-                        //Ignore
-                    }
-                    catch (ScriptEngineException e)
-                    {
-                        _output.AppendLine(e.ErrorDetails);
-                    }
-                    catch (Exception e)
-                    {
-                        _output.AppendLine("[external error] " + e.Message);
-                    }
+                }
+                catch (ThreadAbortException)
+                {
+
+                }
+                catch (ScriptEngineException e)
+                {
+                    _output.AppendLine(e.ErrorDetails);
+                }
+                catch (Exception e)
+                {
+                    _output.AppendLine("[external error] " + e.Message);
                 }
             }));
             thread.Start();
@@ -207,7 +205,10 @@ namespace Flex.Development.Execution.Runtime
         {
             ActiveScene.OnRenderStep += (sender, e) =>
             {
-                obj();
+                if (ActiveScene.Running)
+                {
+                    obj();
+                }
             };
         }
 
@@ -215,7 +216,10 @@ namespace Flex.Development.Execution.Runtime
         {
             ActiveScene.OnStep += (sender, e) =>
             {
-                obj();
+                if (ActiveScene.Running)
+                {
+                    obj();
+                }
             };
         }
 
@@ -225,11 +229,14 @@ namespace Flex.Development.Execution.Runtime
             {
                 try
                 {
-                    obj();
+                    if (ActiveScene.Running)
+                    {
+                        obj();
+                    }
                 }
                 catch (ThreadAbortException)
                 {
-                    //Ignore
+                    Thread.ResetAbort();
                 }
                 catch (ScriptEngineException e)
                 {
@@ -248,11 +255,14 @@ namespace Flex.Development.Execution.Runtime
             {
                 try
                 {
-                    obj();
+                    if (ActiveScene.Running)
+                    {
+                        obj();
+                    }
                 }
                 catch (ThreadAbortException)
                 {
-                    //Ignore
+                    Thread.ResetAbort();
                 }
                 catch (ScriptEngineException e)
                 {
@@ -271,11 +281,14 @@ namespace Flex.Development.Execution.Runtime
             {
                 try
                 {
-                    obj();
+                    if (ActiveScene.Running)
+                    {
+                        obj();
+                    }
                 }
                 catch (ThreadAbortException)
                 {
-                    //Ignore
+
                 }
                 catch (ScriptEngineException e)
                 {
@@ -358,14 +371,7 @@ namespace Flex.Development.Execution.Runtime
 
         public void KillChildrenThreads()
         {
-            lock (_childrenThreads)
-            {
-                foreach (CancellationTokenSource source in _childrenThreads)
-                {
-                    source.Cancel();
-                }
-                _childrenThreads.Clear();
-            }
+            //todo: stuff here
         }
     }
 }

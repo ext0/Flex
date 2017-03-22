@@ -9,6 +9,7 @@ namespace Flex.Development.Rendering.Modules
     public enum QueryFlags
     {
         INSTANCE_ENTITY = 1 << 0,
-        NON_INSTANCE_ENTITY = 1 << 1
+        NON_INSTANCE_ENTITY = 1 << 1,
+        IGNORE_ALL = 1 << 2
     }
 }

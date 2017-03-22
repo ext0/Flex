@@ -128,8 +128,9 @@ namespace Flex.Development.Rendering
                     {
                         _renderThread = Thread.CurrentThread;
                         Mogre.Timer timer = new Mogre.Timer();
-                        int attemptedFrameRate = 90;
+                        int attemptedFrameRate = 60;
                         bool physicsRender = true;
+
                         while (true)
                         {
                             while (_renderDispatcherActionQueue.Count != 0)
@@ -183,8 +184,15 @@ namespace Flex.Development.Rendering
 
             RaySceneQuery mRaySceneQuery = Engine.Renderer.Scene.CreateRayQuery(ray);
             mRaySceneQuery.SetSortByDistance(true, 64);
-            mRaySceneQuery.QueryTypeMask = SceneManager.ENTITY_TYPE_MASK;
             mRaySceneQuery.QueryMask = (uint)QueryFlags.INSTANCE_ENTITY;
+            mRaySceneQuery.QueryTypeMask =
+                SceneManager.ENTITY_TYPE_MASK |
+                SceneManager.STATICGEOMETRY_TYPE_MASK |
+                SceneManager.USER_TYPE_MASK_LIMIT |
+                SceneManager.FRUSTUM_TYPE_MASK |
+                SceneManager.FX_TYPE_MASK |
+                SceneManager.LIGHT_TYPE_MASK |
+                SceneManager.WORLD_GEOMETRY_TYPE_MASK;
 
             RaySceneQueryResult result = mRaySceneQuery.Execute();
             RaySceneQueryResult.Enumerator itr = (RaySceneQueryResult.Enumerator)(result.GetEnumerator());
